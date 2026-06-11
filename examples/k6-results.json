@@ -1,0 +1,17 @@
+{
+  "metrics": {
+    "http_req_duration": {
+      "avg": 243.5,
+      "min": 98.2,
+      "max": 1204.3,
+      "p(90)": 450.1,
+      "p(95)": 620.8
+    },
+    "http_req_failed": {
+      "rate": 0.02
+    },
+    "http_reqs": {
+      "count": 500
+    }
+  }
+}
