@@ -1,22 +1,8 @@
-<div align="center">
-
-<img src="./assets/logo.svg" alt="Grimoir logo" width="120">
-
 # GRIMOIR
 
-### Unified Test Reports
+## Unified Test Reports
 
 Consolidate all your test results into a single visual report
-
-<p>
-  <img src="./assets/screenshot-1.png" alt="Report overview" width="32%">
-  <img src="./assets/screenshot-2.png" alt="Report details" width="32%">
-  <img src="./assets/screenshot-3.png" alt="Interactive charts" width="32%">
-</p>
-
-</div>
-
----
 
 ## What is Grimoir?
 
@@ -32,11 +18,11 @@ Grimoir is an open source tool that consolidates the results of different types 
 
 ## 🛠️ Tech Stack
 
-| Category  | Technology |
-|-----------|-----------|
-| Runtime   | Node.js + TypeScript |
-| CLI       | Commander.js |
-| Report    | TailwindCSS + DaisyUI + Chart.js + Lucide Icons |
+Category | Technology
+-------- | ----------
+Runtime  | Node.js + TypeScript
+CLI      | Commander.js
+Report   | TailwindCSS + DaisyUI + Chart.js + Lucide Icons
 
 ## 📦 Installation
 
