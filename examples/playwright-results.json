@@ -1,0 +1,40 @@
+{
+  "suites": [
+    {
+      "title": "Login Tests",
+      "tests": [
+        {
+          "title": "should login with valid credentials",
+          "status": "passed",
+          "duration": 1200
+        },
+        {
+          "title": "should show error with invalid credentials",
+          "status": "passed",
+          "duration": 980
+        },
+        {
+          "title": "should redirect after login",
+          "status": "failed",
+          "duration": 1500,
+          "error": "Expected URL to be '/dashboard' but got '/login'"
+        }
+      ]
+    },
+    {
+      "title": "Dashboard Tests",
+      "tests": [
+        {
+          "title": "should display user name",
+          "status": "passed",
+          "duration": 750
+        },
+        {
+          "title": "should load widgets",
+          "status": "skipped",
+          "duration": 0
+        }
+      ]
+    }
+  ]
+}
