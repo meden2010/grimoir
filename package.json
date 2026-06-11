@@ -1,0 +1,43 @@
+{
+  "name": "grimoir",
+  "version": "0.1.0",
+  "description": "Unified test report tool that consolidates E2E, performance, API and unit test results into a single visual report",
+  "main": "dist/index.js",
+  "bin": {
+    "grimoir": "./dist/cli/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "ts-node src/cli/index.ts",
+    "test": "vitest",
+    "lint": "tsc --noEmit"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/meden2010/grimoir.git"
+  },
+  "keywords": [
+    "testing",
+    "qa",
+    "test-report",
+    "playwright",
+    "k6",
+    "unified-report"
+  ],
+  "author": "Saúl Sosa",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/meden2010/grimoir/issues"
+  },
+  "homepage": "https://github.com/meden2010/grimoir#readme",
+  "dependencies": {
+    "chalk": "^5.6.2",
+    "commander": "^15.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.3",
+    "ts-node": "^10.9.2",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.8"
+  }
+}
