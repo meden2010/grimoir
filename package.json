@@ -9,6 +9,7 @@
   "scripts": {
     "build": "tsc",
     "dev": "ts-node src/cli/index.ts",
+    "dev:watch": "tsx watch src/cli/index.ts",
     "test": "vitest",
     "lint": "tsc --noEmit"
   },
@@ -37,6 +38,7 @@
   "devDependencies": {
     "@types/node": "^25.9.3",
     "ts-node": "^10.9.2",
+    "tsx": "^4.22.4",
     "typescript": "^6.0.3",
     "vitest": "^4.1.8"
   }
