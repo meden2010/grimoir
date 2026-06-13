@@ -87,7 +87,7 @@ program
           console.log(`   👀 Watching: ${options.input}/`);
           console.log(`   Press Ctrl+C to stop\n`);
 
-          watch(options.input, (_event, filename) => {
+          watch(options.input, (_event: string, filename: string | null) => {
             if (filename && filename.endsWith('.json')) {
               try {
                 console.log(`\n🔄 Change detected in ${filename} — regenerating...`);

@@ -5,206 +5,407 @@ export function generateHTML(
   playwright: PlaywrightReport,
   k6: K6Report
 ): string {
+  const globalPassRate = Math.round(
+    ((playwright.stats.passed + k6.stats.successRate / 100 * (playwright.stats.total + k6.stats.totalRequests)) /
+    (playwright.stats.total + k6.stats.totalRequests)) * 100
+  );
+  const healthStatus = globalPassRate >= 95 ? 'HEALTHY' : globalPassRate >= 85 ? 'DEGRADED' : 'CRITICAL';
+  const healthColor = globalPassRate >= 95 ? 'bg-emerald-400' : globalPassRate >= 85 ? 'bg-amber-400' : 'bg-error';
+  const healthLabel = globalPassRate >= 95 ? 'All systems resonant — ready for release' :
+    globalPassRate >= 85 ? 'Some incantations need attention' : 'Multiple failures detected — investigate immediately';
+
+  const coverageTypes = 2; // playwright + k6
+  const totalCoverage = 4; // playwright, k6, api, unit (future)
+
   return `<!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html class="dark" lang="en">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Grimoir — Test Report</title>
-  <link href="https://cdn.jsdelivr.net/npm/daisyui@4.4.19/dist/full.min.css" rel="stylesheet"/>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            surface: "#15121b",
+            "surface-dim": "#15121b",
+            "surface-container-lowest": "#0f0d15",
+            "surface-container-low": "#1d1a23",
+            "surface-container": "#211e27",
+            "surface-container-high": "#2c2832",
+            "surface-bright": "#3b3742",
+            "on-surface": "#e7e0ed",
+            "on-surface-variant": "#cbc3d7",
+            primary: "#8B5CF6",
+            "on-primary": "#ffffff",
+            "primary-container": "#8B5CF6",
+            "on-primary-container": "#ffffff",
+            secondary: "#FBBF24",
+            "on-secondary": "#1a1a1a",
+            "secondary-container": "#FBBF24",
+            tertiary: "#B06B00",
+            error: "#ef4444",
+            "error-container": "#7f1d1d",
+            "on-error": "#ffffff",
+            "on-error-container": "#fecaca",
+            outline: "#7A7580",
+            "outline-variant": "#3d3a40",
+            background: "#15121b",
+            "on-background": "#e7e0ed",
+          },
+          borderRadius: { DEFAULT: "0.5rem", lg: "0.75rem", xl: "1rem", full: "9999px" },
+          spacing: { gutter: "16px", base: "8px", section: "48px" },
+          fontFamily: {
+            display: ["Playfair Display", "serif"],
+            body: ["Inter", "sans-serif"],
+            mono: ["JetBrains Mono", "monospace"],
+          },
+          fontSize: {
+            "display-lg": ["48px", { lineHeight: "1.2", letterSpacing: "-0.02em", fontWeight: "700" }],
+            "headline-lg": ["32px", { lineHeight: "1.3", fontWeight: "600" }],
+            "headline-md": ["24px", { lineHeight: "1.4", fontWeight: "500" }],
+            "body-lg": ["18px", { lineHeight: "1.6", fontWeight: "400" }],
+            "body-md": ["16px", { lineHeight: "1.5", fontWeight: "400" }],
+            "code-sm": ["13px", { lineHeight: "1.5", fontWeight: "400" }],
+            "label-caps": ["12px", { lineHeight: "1.2", letterSpacing: "0.1em", fontWeight: "600" }],
+          },
+        },
+      },
+    }
+  </script>
   <style>
-    .chart-wrap { position: relative; height: 420px; }
-    .chart-wrap canvas { max-height: 420px; }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .arcane-glow {
+      box-shadow: 0 0 15px rgba(139, 92, 246, 0.1);
+    }
+    .mystic-border {
+      border-image: linear-gradient(to right, #8B5CF6, #FBBF24) 1;
+    }
+    .chart-wrap { position: relative; height: 320px; }
+    .chart-wrap canvas { max-height: 320px; }
+    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #494454; border-radius: 10px; }
+    .tab-active { border-bottom: 2px solid #8B5CF6 !important; color: #8B5CF6 !important; }
   </style>
 </head>
-<body class="bg-base-300 min-h-screen p-8">
+<body class="bg-surface text-on-surface font-body font-body-md">
 
-  <div class="max-w-7xl mx-auto">
+  <!-- Main Content -->
+  <main class="max-w-[1440px] mx-auto px-gutter py-12">
 
     <!-- Header -->
-    <div class="flex items-center gap-4 mb-8">
-      <h1 class="text-5xl font-bold text-primary">📖 Grimoir</h1>
-      <span class="text-base-content/50 text-lg">— ${new Date().toLocaleString()}</span>
+    <div class="flex items-center justify-between mb-gutter">
+      <div>
+        <h1 class="font-display text-display-lg text-primary tracking-tight">Grimoir</h1>
+        <p class="font-label-caps text-outline text-[10px] uppercase mt-base">Unified Test Report — ${new Date().toLocaleString()}</p>
+      </div>
+      <div class="flex items-center gap-base">
+        <span class="material-symbols-outlined text-outline">download</span>
+        <span class="material-symbols-outlined text-outline">share</span>
+      </div>
     </div>
 
-    <!-- Tabs -->
-    <div role="tablist" class="tabs tabs-lifted tabs-lg mb-6">
-      <input type="radio" name="report-tabs" role="tab" class="tab" aria-label="📊 Overview" checked="checked"/>
-      <div role="tabpanel" class="tab-content bg-base-100 border-base-300 rounded-box p-8">
+    <!-- Tab Navigation -->
+    <nav class="flex items-center gap-gutter border-b border-outline-variant mb-section" id="tabNav">
+      <button class="font-label-caps text-sm pb-gutter tab-active" data-tab="overview">
+        <span class="material-symbols-outlined text-sm align-middle">auto_awesome</span> Overview
+      </button>
+      <button class="font-label-caps text-sm pb-gutter text-on-surface-variant hover:text-[#8B5CF6] transition-colors" data-tab="e2e">
+        <span class="material-symbols-outlined text-sm align-middle">bolt</span> E2E
+      </button>
+      <button class="font-label-caps text-sm pb-gutter text-on-surface-variant hover:text-[#8B5CF6] transition-colors" data-tab="perf">
+        <span class="material-symbols-outlined text-sm align-middle">insights</span> Performance
+      </button>
+    </nav>
 
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
-          <div class="stat bg-base-200 rounded-box p-6">
-            <div class="stat-title text-base">E2E Tests</div>
-            <div class="stat-value text-4xl text-primary">${playwright.stats.total}</div>
-            <div class="stat-desc text-base">${playwright.stats.passed} passed / ${playwright.stats.failed} failed / ${playwright.stats.skipped} skipped</div>
+    <!-- ==================== OVERVIEW TAB ==================== -->
+    <div id="tab-overview" class="flex flex-col gap-section">
+
+      <!-- Health Score Banner -->
+      <section class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter arcane-glow">
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-base">
+          <div class="flex items-center gap-gutter">
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 ${healthColor} rounded-full shadow-[0_0_8px_rgba(139,92,246,0.5)]"></span>
+              <span class="font-label-caps text-sm text-primary">${healthStatus}</span>
+            </div>
+            <div>
+              <p class="font-body-md text-on-surface-variant">${healthLabel}</p>
+              <p class="font-label-caps text-outline text-[10px] uppercase mt-1">Last invocation — ${new Date().toLocaleString()}</p>
+            </div>
           </div>
-          <div class="stat bg-base-200 rounded-box p-6">
-            <div class="stat-title text-base">k6 Success</div>
-            <div class="stat-value text-4xl text-success">${k6.stats.successRate}%</div>
-            <div class="stat-desc text-base">${k6.stats.totalRequests} total requests</div>
-          </div>
-          <div class="stat bg-base-200 rounded-box p-6">
-            <div class="stat-title text-base">E2E Duration</div>
-            <div class="stat-value text-4xl text-info">${playwright.stats.duration}ms</div>
-            <div class="stat-desc text-base">total execution time</div>
-          </div>
-          <div class="stat bg-base-200 rounded-box p-6">
-            <div class="stat-title text-base">API P95</div>
-            <div class="stat-value text-4xl text-warning">${k6.metrics.httpReqDuration.p95}ms</div>
-            <div class="stat-desc text-base">response time</div>
+          <div class="flex items-baseline gap-1">
+            <span class="font-display text-5xl text-primary">${globalPassRate}</span>
+            <span class="font-display text-3xl text-primary/60">%</span>
           </div>
         </div>
+      </section>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div class="card bg-base-200">
-            <div class="card-body p-8">
-              <h3 class="text-lg font-medium opacity-70 mb-4">E2E Results Distribution</h3>
-              <div class="chart-wrap"><canvas id="overviewPlaywrightChart"></canvas></div>
-            </div>
-          </div>
-          <div class="card bg-base-200">
-            <div class="card-body p-8">
-              <h3 class="text-lg font-medium opacity-70 mb-4">Performance Response Times</h3>
-              <div class="chart-wrap"><canvas id="overviewK6Chart"></canvas></div>
-            </div>
-          </div>
+      <!-- 4 KPI Cards -->
+      <section class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-gutter">
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter flex flex-col gap-2 hover:bg-surface-container transition-colors">
+          <span class="material-symbols-outlined text-primary">science</span>
+          <p class="font-label-caps text-outline text-[10px] uppercase">Total Spells</p>
+          <p class="font-display text-headline-lg text-on-surface">${playwright.stats.total + k6.stats.totalRequests}</p>
+          <p class="font-body-md text-on-surface-variant text-sm">Across ${coverageTypes} circles</p>
+        </div>
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter flex flex-col gap-2 hover:bg-surface-container transition-colors">
+          <span class="material-symbols-outlined text-emerald-400">check_circle</span>
+          <p class="font-label-caps text-outline text-[10px] uppercase">Pass Rate</p>
+          <p class="font-display text-headline-lg text-emerald-400">${globalPassRate}%</p>
+          <p class="font-body-md text-on-surface-variant text-sm">Global resonance</p>
+        </div>
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter flex flex-col gap-2 hover:bg-surface-container transition-colors">
+          <span class="material-symbols-outlined text-tertiary">timer</span>
+          <p class="font-label-caps text-outline text-[10px] uppercase">Duration</p>
+          <p class="font-display text-headline-lg text-on-surface">${playwright.stats.duration + k6.stats.duration}ms</p>
+          <p class="font-body-md text-on-surface-variant text-sm">E2E: ${playwright.stats.duration}ms · Perf: ${k6.stats.duration}ms</p>
+        </div>
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter flex flex-col gap-2 hover:bg-surface-container transition-colors">
+          <span class="material-symbols-outlined text-primary-container">layers</span>
+          <p class="font-label-caps text-outline text-[10px] uppercase">Coverage</p>
+          <p class="font-display text-headline-lg text-on-surface">${coverageTypes}/${totalCoverage}</p>
+          <p class="font-body-md text-on-surface-variant text-sm">E2E ✓ · Perf ✓ · API ✗ · Unit ✗</p>
+        </div>
+      </section>
+
+      <!-- Charts Row -->
+      <section class="grid grid-cols-1 md:grid-cols-2 gap-gutter">
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter">
+          <h3 class="font-label-caps text-on-surface-variant text-[11px] uppercase mb-base">E2E Distribution</h3>
+          <div class="chart-wrap"><canvas id="overviewE2eChart"></canvas></div>
+        </div>
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter">
+          <h3 class="font-label-caps text-on-surface-variant text-[11px] uppercase mb-base">Response Times</h3>
+          <div class="chart-wrap"><canvas id="overviewK6Chart"></canvas></div>
+        </div>
+      </section>
+
+      <!-- Quick Failures Table -->
+      <section class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden arcane-glow">
+        <div class="p-gutter border-b border-outline-variant">
+          <h3 class="font-label-caps text-on-surface-variant text-[11px] uppercase">Recent Failures</h3>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-surface-container-low/50 border-b border-outline-variant">
+                <th class="p-gutter font-label-caps text-on-surface-variant text-[10px] uppercase">Type</th>
+                <th class="p-gutter font-label-caps text-on-surface-variant text-[10px] uppercase">Test</th>
+                <th class="p-gutter font-label-caps text-on-surface-variant text-[10px] uppercase hidden md:table-cell">Error</th>
+                <th class="p-gutter font-label-caps text-on-surface-variant text-[10px] uppercase text-right">Duration</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-outline-variant/30">
+              ${playwright.suites.flatMap(suite => suite.tests
+                .filter(test => test.status === 'failed')
+                .map(test => `
+              <tr class="hover:bg-error/5 transition-colors group border-l-4 border-l-error">
+                <td class="p-gutter">
+                  <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-primary/10 text-primary text-[10px] font-bold rounded-full border border-primary/30">
+                    <span class="w-1 h-1 bg-primary rounded-full"></span> E2E
+                  </span>
+                </td>
+                <td class="p-gutter font-body-md text-on-surface font-semibold text-sm">${suite.title} — ${test.title}</td>
+                <td class="p-gutter font-mono text-sm text-error/80 hidden md:table-cell max-w-[300px] truncate">${test.error || 'Unknown error'}</td>
+                <td class="p-gutter font-mono text-sm text-on-surface-variant text-right">${test.duration}ms</td>
+              </tr>`)).join('')}
+              ${playwright.suites.flatMap(suite => suite.tests.filter(t => t.status === 'failed')).length === 0 ? `
+              <tr>
+                <td colspan="4" class="p-gutter text-center text-on-surface-variant font-body-md text-sm">
+                  <span class="material-symbols-outlined text-emerald-400 align-middle text-sm">check_circle</span>
+                  No failures detected — all spells harmonious
+                </td>
+              </tr>` : ''}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- ==================== E2E TAB ==================== -->
+    <div id="tab-e2e" class="hidden flex flex-col gap-gutter">
+
+      <!-- E2E Stats -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-base">
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-base text-center">
+          <p class="font-label-caps text-outline text-[10px] uppercase">Total</p>
+          <p class="font-display text-headline-md text-on-surface mt-1">${playwright.stats.total}</p>
+        </div>
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-base text-center">
+          <p class="font-label-caps text-outline text-[10px] uppercase">Passed</p>
+          <p class="font-display text-headline-md text-emerald-400 mt-1">${playwright.stats.passed}</p>
+        </div>
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-base text-center">
+          <p class="font-label-caps text-outline text-[10px] uppercase">Failed</p>
+          <p class="font-display text-headline-md text-error mt-1">${playwright.stats.failed}</p>
+        </div>
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-base text-center">
+          <p class="font-label-caps text-outline text-[10px] uppercase">Skipped</p>
+          <p class="font-display text-headline-md text-outline mt-1">${playwright.stats.skipped}</p>
+        </div>
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-base text-center">
+          <p class="font-label-caps text-outline text-[10px] uppercase">Duration</p>
+          <p class="font-display text-headline-md text-primary mt-1">${playwright.stats.duration}ms</p>
         </div>
       </div>
 
-      <!-- E2E Tab -->
-      <input type="radio" name="report-tabs" role="tab" class="tab" aria-label="🎭 E2E"/>
-      <div role="tabpanel" class="tab-content bg-base-100 border-base-300 rounded-box p-8">
-
-        <div class="stats stats-horizontal shadow w-full mb-8 flex-wrap">
-          <div class="stat">
-            <div class="stat-title text-base">Total</div>
-            <div class="stat-value text-3xl">${playwright.stats.total}</div>
-          </div>
-          <div class="stat">
-            <div class="stat-title text-base">Passed</div>
-            <div class="stat-value text-3xl text-success">${playwright.stats.passed}</div>
-          </div>
-          <div class="stat">
-            <div class="stat-title text-base">Failed</div>
-            <div class="stat-value text-3xl text-error">${playwright.stats.failed}</div>
-          </div>
-          <div class="stat">
-            <div class="stat-title text-base">Skipped</div>
-            <div class="stat-value text-3xl text-warning">${playwright.stats.skipped}</div>
-          </div>
-          <div class="stat">
-            <div class="stat-title text-base">Duration</div>
-            <div class="stat-value text-3xl text-info">${playwright.stats.duration}ms</div>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <!-- E2E Chart + Table -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-gutter">
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter">
+          <h3 class="font-label-caps text-on-surface-variant text-[11px] uppercase mb-base">Distribution</h3>
           <div class="chart-wrap"><canvas id="e2eChart"></canvas></div>
-          <div class="overflow-x-auto overflow-y-auto" style="max-height:420px">
-            <table class="table table-zebra">
+        </div>
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter overflow-hidden">
+          <h3 class="font-label-caps text-on-surface-variant text-[11px] uppercase mb-base">Test Details</h3>
+          <div class="overflow-y-auto custom-scrollbar" style="max-height:320px">
+            <table class="w-full text-left border-collapse text-sm">
               <thead>
-                <tr>
-                  <th>Suite</th>
-                  <th>Test</th>
-                  <th>Status</th>
-                  <th>Duration</th>
+                <tr class="border-b border-outline-variant">
+                  <th class="py-2 font-label-caps text-outline text-[10px] uppercase">Suite</th>
+                  <th class="py-2 font-label-caps text-outline text-[10px] uppercase">Test</th>
+                  <th class="py-2 font-label-caps text-outline text-[10px] uppercase">Status</th>
+                  <th class="py-2 font-label-caps text-outline text-[10px] uppercase text-right">Duration</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody class="divide-y divide-outline-variant/20">
                 ${playwright.suites.map(suite => suite.tests.map(test => `
-                <tr>
-                  <td class="font-medium">${suite.title}</td>
-                  <td>${test.title}</td>
-                  <td>
-                    <span class="badge ${test.status === 'passed' ? 'badge-success' : test.status === 'failed' ? 'badge-error' : 'badge-warning'}">
-                      ${test.status}
+                <tr class="hover:bg-surface-container transition-colors">
+                  <td class="py-2 font-body-md text-on-surface font-medium text-xs">${suite.title}</td>
+                  <td class="py-2 font-body-md text-on-surface text-xs">${test.title}</td>
+                  <td class="py-2">
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold rounded-full border ${test.status === 'passed' ? 'bg-primary/10 text-primary border-primary/30' : test.status === 'failed' ? 'bg-error/10 text-error border-error/30' : 'bg-surface-container text-outline border-outline-variant'}">
+                      <span class="w-1 h-1 rounded-full ${test.status === 'passed' ? 'bg-primary' : test.status === 'failed' ? 'bg-error' : 'bg-outline'}"></span>
+                      ${test.status.toUpperCase()}
                     </span>
                   </td>
-                  <td>${test.duration}ms</td>
+                  <td class="py-2 font-mono text-xs text-on-surface-variant text-right">${test.duration}ms</td>
                 </tr>`).join('')).join('')}
               </tbody>
             </table>
           </div>
         </div>
       </div>
+    </div>
 
-      <!-- Performance Tab -->
-      <input type="radio" name="report-tabs" role="tab" class="tab" aria-label="⚡ Performance"/>
-      <div role="tabpanel" class="tab-content bg-base-100 border-base-300 rounded-box p-8">
+    <!-- ==================== PERFORMANCE TAB ==================== -->
+    <div id="tab-perf" class="hidden flex flex-col gap-gutter">
 
-        <div class="stats stats-horizontal shadow w-full mb-8 flex-wrap">
-          <div class="stat">
-            <div class="stat-title text-base">Requests</div>
-            <div class="stat-value text-3xl">${k6.stats.totalRequests}</div>
-          </div>
-          <div class="stat">
-            <div class="stat-title text-base">Success</div>
-            <div class="stat-value text-3xl text-success">${k6.stats.successRate}%</div>
-          </div>
-          <div class="stat">
-            <div class="stat-title text-base">Failed</div>
-            <div class="stat-value text-3xl text-error">${k6.stats.failedRequests}</div>
-          </div>
-          <div class="stat">
-            <div class="stat-title text-base">Avg</div>
-            <div class="stat-value text-3xl text-info">${k6.stats.duration}ms</div>
-          </div>
-          <div class="stat">
-            <div class="stat-title text-base">P95</div>
-            <div class="stat-value text-3xl text-warning">${k6.metrics.httpReqDuration.p95}ms</div>
-          </div>
+      <!-- Perf Stats -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-base">
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-base text-center">
+          <p class="font-label-caps text-outline text-[10px] uppercase">Requests</p>
+          <p class="font-display text-headline-md text-on-surface mt-1">${k6.stats.totalRequests}</p>
         </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div class="chart-wrap"><canvas id="perfChart"></canvas></div>
-          <div class="overflow-x-auto">
-            <table class="table table-zebra">
-              <thead>
-                <tr>
-                  <th>Metric</th>
-                  <th>Value</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr><td>Requests</td><td>${k6.metrics.httpReqs}</td></tr>
-                <tr><td>Failed Rate</td><td>${(k6.metrics.httpReqFailed * 100).toFixed(1)}%</td></tr>
-                <tr><td>Avg Response</td><td>${k6.metrics.httpReqDuration.avg}ms</td></tr>
-                <tr><td>Min Response</td><td>${k6.metrics.httpReqDuration.min}ms</td></tr>
-                <tr><td>Max Response</td><td>${k6.metrics.httpReqDuration.max}ms</td></tr>
-                <tr><td>P90</td><td>${k6.metrics.httpReqDuration.p90}ms</td></tr>
-                <tr><td>P95</td><td>${k6.metrics.httpReqDuration.p95}ms</td></tr>
-              </tbody>
-            </table>
-          </div>
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-base text-center">
+          <p class="font-label-caps text-outline text-[10px] uppercase">Success</p>
+          <p class="font-display text-headline-md text-emerald-400 mt-1">${k6.stats.successRate}%</p>
+        </div>
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-base text-center">
+          <p class="font-label-caps text-outline text-[10px] uppercase">Failed</p>
+          <p class="font-display text-headline-md text-error mt-1">${k6.stats.failedRequests}</p>
+        </div>
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-base text-center">
+          <p class="font-label-caps text-outline text-[10px] uppercase">Avg</p>
+          <p class="font-display text-headline-md text-primary mt-1">${k6.stats.duration}ms</p>
+        </div>
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-base text-center">
+          <p class="font-label-caps text-outline text-[10px] uppercase">P95</p>
+          <p class="font-display text-headline-md text-tertiary mt-1">${k6.metrics.httpReqDuration.p95}ms</p>
         </div>
       </div>
 
+      <!-- Perf Chart + Table -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-gutter">
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter">
+          <h3 class="font-label-caps text-on-surface-variant text-[11px] uppercase mb-base">Response Times</h3>
+          <div class="chart-wrap"><canvas id="perfChart"></canvas></div>
+        </div>
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter">
+          <h3 class="font-label-caps text-on-surface-variant text-[11px] uppercase mb-base">Metrics</h3>
+          <div class="space-y-base">
+            <div class="flex justify-between items-center py-1 border-b border-outline-variant/20">
+              <span class="font-body-md text-on-surface-variant text-sm">Requests</span>
+              <span class="font-mono text-sm text-on-surface">${k6.metrics.httpReqs}</span>
+            </div>
+            <div class="flex justify-between items-center py-1 border-b border-outline-variant/20">
+              <span class="font-body-md text-on-surface-variant text-sm">Failed Rate</span>
+              <span class="font-mono text-sm text-error">${(k6.metrics.httpReqFailed * 100).toFixed(1)}%</span>
+            </div>
+            <div class="flex justify-between items-center py-1 border-b border-outline-variant/20">
+              <span class="font-body-md text-on-surface-variant text-sm">Avg Response</span>
+              <span class="font-mono text-sm text-on-surface">${k6.metrics.httpReqDuration.avg}ms</span>
+            </div>
+            <div class="flex justify-between items-center py-1 border-b border-outline-variant/20">
+              <span class="font-body-md text-on-surface-variant text-sm">Min Response</span>
+              <span class="font-mono text-sm text-on-surface">${k6.metrics.httpReqDuration.min}ms</span>
+            </div>
+            <div class="flex justify-between items-center py-1 border-b border-outline-variant/20">
+              <span class="font-body-md text-on-surface-variant text-sm">Max Response</span>
+              <span class="font-mono text-sm text-on-surface">${k6.metrics.httpReqDuration.max}ms</span>
+            </div>
+            <div class="flex justify-between items-center py-1 border-b border-outline-variant/20">
+              <span class="font-body-md text-on-surface-variant text-sm">P90</span>
+              <span class="font-mono text-sm text-on-surface">${k6.metrics.httpReqDuration.p90}ms</span>
+            </div>
+            <div class="flex justify-between items-center py-1">
+              <span class="font-body-md text-on-surface-variant text-sm">P95</span>
+              <span class="font-mono text-sm text-tertiary font-semibold">${k6.metrics.httpReqDuration.p95}ms</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
-  </div>
+  </main>
 
+  <!-- Tab switching script -->
+  <script>
+    document.getElementById('tabNav').addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-tab]');
+      if (!btn) return;
+      const tab = btn.dataset.tab;
+      document.querySelectorAll('#tabNav button').forEach(b => b.classList.remove('tab-active'));
+      btn.classList.add('tab-active');
+      document.querySelectorAll('[id^="tab-"]').forEach(p => p.classList.add('hidden'));
+      document.getElementById('tab-' + tab).classList.remove('hidden');
+    });
+  </script>
+
+  <!-- Charts -->
   <script>
     const chartOptions = {
       responsive: true,
       maintainAspectRatio: false,
-      plugins: { legend: { position: 'bottom', labels: { boxWidth: 14, font: { size: 14 } } } }
+      plugins: { legend: { position: 'bottom', labels: { color: '#cbc3d7', boxWidth: 14, font: { size: 12, family: 'Inter' } } } }
     };
 
-    // Overview charts
-    new Chart(document.getElementById('overviewPlaywrightChart'), {
+    // Overview E2E chart
+    new Chart(document.getElementById('overviewE2eChart'), {
       type: 'doughnut',
       data: {
         labels: ['Passed', 'Failed', 'Skipped'],
         datasets: [{
           data: [${playwright.stats.passed}, ${playwright.stats.failed}, ${playwright.stats.skipped}],
-          backgroundColor: ['#36d399', '#f87272', '#fbbd23'],
+          backgroundColor: ['#8B5CF6', '#ef4444', '#7A7580'],
+          borderColor: '#0f0d15',
+          borderWidth: 2,
         }]
       },
       options: chartOptions
     });
 
+    // Overview K6 chart
     new Chart(document.getElementById('overviewK6Chart'), {
       type: 'bar',
       data: {
@@ -218,20 +419,23 @@ export function generateHTML(
             ${k6.metrics.httpReqDuration.p90},
             ${k6.metrics.httpReqDuration.p95}
           ],
-          backgroundColor: '#818cf8',
+          backgroundColor: '#FBBF24',
+          borderRadius: 4,
         }]
       },
-      options: chartOptions
+      options: { ...chartOptions, scales: { x: { ticks: { color: '#cbc3d7' } }, y: { ticks: { color: '#cbc3d7' } } } }
     });
 
-    // E2E chart
+    // E2E tab chart (same data, different canvas)
     new Chart(document.getElementById('e2eChart'), {
       type: 'doughnut',
       data: {
         labels: ['Passed', 'Failed', 'Skipped'],
         datasets: [{
           data: [${playwright.stats.passed}, ${playwright.stats.failed}, ${playwright.stats.skipped}],
-          backgroundColor: ['#36d399', '#f87272', '#fbbd23'],
+          backgroundColor: ['#8B5CF6', '#ef4444', '#7A7580'],
+          borderColor: '#0f0d15',
+          borderWidth: 2,
         }]
       },
       options: chartOptions
@@ -251,10 +455,11 @@ export function generateHTML(
             ${k6.metrics.httpReqDuration.p90},
             ${k6.metrics.httpReqDuration.p95}
           ],
-          backgroundColor: '#818cf8',
+          backgroundColor: '#FBBF24',
+          borderRadius: 4,
         }]
       },
-      options: chartOptions
+      options: { ...chartOptions, scales: { x: { ticks: { color: '#cbc3d7' } }, y: { ticks: { color: '#cbc3d7' } } } }
     });
   </script>
 
