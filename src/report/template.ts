@@ -2,13 +2,25 @@ import { PlaywrightReport } from '../parsers/playwright.parser';
 import { K6Report } from '../parsers/k6.parser';
 
 export const generateHTML = (playwright: PlaywrightReport, k6: K6Report): string => {
-  const totalPassed: number = playwright.stats.passed + (k6.stats.totalRequests - k6.stats.failedRequests);
-  const totalTests: number = playwright.stats.total + k6.stats.totalRequests;
-  const globalPassRate: number = totalTests > 0 ? Math.round((totalPassed / totalTests) * 100) : 0;
-  const healthStatus: string = globalPassRate >= 95 ? 'HEALTHY' : globalPassRate >= 85 ? 'DEGRADED' : 'CRITICAL';
-  const healthColor: string = globalPassRate >= 95 ? 'bg-emerald-400' : globalPassRate >= 85 ? 'bg-amber-400' : 'bg-error';
-  const healthLabel: string = globalPassRate >= 95 ? 'All systems resonant — ready for release' :
-    globalPassRate >= 85 ? 'Some incantations need attention' : 'Multiple failures detected — investigate immediately';
+  // Test-case metrics are based on Playwright E2E test results.
+  const totalTestCases: number = playwright.stats.total;
+  const passedTestCases: number = playwright.stats.passed;
+  const failedTestCases: number = playwright.stats.failed;
+  const skippedTestCases: number = playwright.stats.skipped;
+  const testCasePassRate: number = totalTestCases > 0 ? Math.round((passedTestCases / totalTestCases) * 100) : 0;
+
+  // k6 metrics are performance/load test data, counted separately as requests.
+  const totalRequests: number = k6.stats.totalRequests;
+  const failedRequests: number = k6.stats.failedRequests;
+  const requestSuccessRate: number = totalRequests > 0
+    ? Math.round(((totalRequests - failedRequests) / totalRequests) * 100)
+    : 0;
+
+  // Health score is driven by test-case pass rate.
+  const healthStatus: string = testCasePassRate >= 95 ? 'HEALTHY' : testCasePassRate >= 85 ? 'DEGRADED' : 'CRITICAL';
+  const healthColor: string = testCasePassRate >= 95 ? 'bg-emerald-400' : testCasePassRate >= 85 ? 'bg-amber-400' : 'bg-error';
+  const healthLabel: string = testCasePassRate >= 95 ? 'All systems operational — ready for release' :
+    testCasePassRate >= 85 ? 'Some tests need attention' : 'Multiple failures detected — investigate immediately';
 
   const coverageTypes: number = 2; // playwright + k6
   const totalCoverage: number = 4; // playwright, k6, api, unit (future)
@@ -136,41 +148,75 @@ export const generateHTML = (playwright: PlaywrightReport, k6: K6Report): string
             </div>
             <div>
               <p class="font-body-md text-on-surface-variant">${healthLabel}</p>
-              <p class="font-label-caps text-outline text-[10px] uppercase mt-1">Last invocation — ${new Date().toLocaleString()}</p>
+              <p class="font-label-caps text-outline text-[10px] uppercase mt-1">Last run — ${new Date().toLocaleString()}</p>
             </div>
           </div>
           <div class="flex items-baseline gap-1">
-            <span class="font-display text-5xl text-primary">${globalPassRate}</span>
+            <span class="font-display text-5xl text-primary">${testCasePassRate}</span>
             <span class="font-display text-3xl text-primary/60">%</span>
           </div>
         </div>
       </section>
 
-      <!-- 4 KPI Cards -->
-      <section class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-gutter">
-        <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter flex flex-col gap-2 hover:bg-surface-container transition-colors">
-          <span class="material-symbols-outlined text-primary">science</span>
-          <p class="font-label-caps text-outline text-[10px] uppercase">Total Spells</p>
-          <p class="font-display text-headline-lg text-on-surface">${playwright.stats.total + k6.stats.totalRequests}</p>
-          <p class="font-body-md text-on-surface-variant text-sm">Across ${coverageTypes} circles</p>
+      <!-- E2E Test Case KPIs -->
+      <section class="flex flex-col gap-base">
+        <h2 class="font-label-caps text-outline text-[10px] uppercase">Test Cases (E2E)</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-gutter">
+          <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter flex flex-col gap-2 hover:bg-surface-container transition-colors">
+            <span class="material-symbols-outlined text-primary">science</span>
+            <p class="font-label-caps text-outline text-[10px] uppercase">Total Test Cases</p>
+            <p class="font-display text-headline-lg text-on-surface">${totalTestCases}</p>
+            <p class="font-body-md text-on-surface-variant text-sm">${passedTestCases} passed · ${failedTestCases} failed · ${skippedTestCases} skipped</p>
+          </div>
+          <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter flex flex-col gap-2 hover:bg-surface-container transition-colors">
+            <span class="material-symbols-outlined text-emerald-400">check_circle</span>
+            <p class="font-label-caps text-outline text-[10px] uppercase">Pass Rate</p>
+            <p class="font-display text-headline-lg text-emerald-400">${testCasePassRate}%</p>
+            <p class="font-body-md text-on-surface-variant text-sm">Test case pass rate</p>
+          </div>
+          <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter flex flex-col gap-2 hover:bg-surface-container transition-colors">
+            <span class="material-symbols-outlined text-tertiary">timer</span>
+            <p class="font-label-caps text-outline text-[10px] uppercase">Duration</p>
+            <p class="font-display text-headline-lg text-on-surface">${playwright.stats.duration}ms</p>
+            <p class="font-body-md text-on-surface-variant text-sm">Total E2E execution time</p>
+          </div>
+          <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter flex flex-col gap-2 hover:bg-surface-container transition-colors">
+            <span class="material-symbols-outlined text-primary-container">layers</span>
+            <p class="font-label-caps text-outline text-[10px] uppercase">Coverage</p>
+            <p class="font-display text-headline-lg text-on-surface">${coverageTypes}/${totalCoverage}</p>
+            <p class="font-body-md text-on-surface-variant text-sm">E2E ✓ · Perf ✓ · API ✗ · Unit ✗</p>
+          </div>
         </div>
-        <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter flex flex-col gap-2 hover:bg-surface-container transition-colors">
-          <span class="material-symbols-outlined text-emerald-400">check_circle</span>
-          <p class="font-label-caps text-outline text-[10px] uppercase">Pass Rate</p>
-          <p class="font-display text-headline-lg text-emerald-400">${globalPassRate}%</p>
-          <p class="font-body-md text-on-surface-variant text-sm">Global resonance</p>
-        </div>
-        <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter flex flex-col gap-2 hover:bg-surface-container transition-colors">
-          <span class="material-symbols-outlined text-tertiary">timer</span>
-          <p class="font-label-caps text-outline text-[10px] uppercase">Duration</p>
-          <p class="font-display text-headline-lg text-on-surface">${playwright.stats.duration + k6.stats.duration}ms</p>
-          <p class="font-body-md text-on-surface-variant text-sm">E2E: ${playwright.stats.duration}ms · Perf: ${k6.stats.duration}ms</p>
-        </div>
-        <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter flex flex-col gap-2 hover:bg-surface-container transition-colors">
-          <span class="material-symbols-outlined text-primary-container">layers</span>
-          <p class="font-label-caps text-outline text-[10px] uppercase">Coverage</p>
-          <p class="font-display text-headline-lg text-on-surface">${coverageTypes}/${totalCoverage}</p>
-          <p class="font-body-md text-on-surface-variant text-sm">E2E ✓ · Perf ✓ · API ✗ · Unit ✗</p>
+      </section>
+
+      <!-- Performance Request KPIs -->
+      <section class="flex flex-col gap-base">
+        <h2 class="font-label-caps text-outline text-[10px] uppercase">Performance Requests</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-gutter">
+          <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter flex flex-col gap-2 hover:bg-surface-container transition-colors">
+            <span class="material-symbols-outlined text-secondary">insights</span>
+            <p class="font-label-caps text-outline text-[10px] uppercase">Total Requests</p>
+            <p class="font-display text-headline-lg text-on-surface">${totalRequests}</p>
+            <p class="font-body-md text-on-surface-variant text-sm">k6 requests executed</p>
+          </div>
+          <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter flex flex-col gap-2 hover:bg-surface-container transition-colors">
+            <span class="material-symbols-outlined text-emerald-400">check_circle</span>
+            <p class="font-label-caps text-outline text-[10px] uppercase">Request Success</p>
+            <p class="font-display text-headline-lg text-emerald-400">${requestSuccessRate}%</p>
+            <p class="font-body-md text-on-surface-variant text-sm">${totalRequests - failedRequests} succeeded · ${failedRequests} failed</p>
+          </div>
+          <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter flex flex-col gap-2 hover:bg-surface-container transition-colors">
+            <span class="material-symbols-outlined text-secondary">timer</span>
+            <p class="font-label-caps text-outline text-[10px] uppercase">Avg Response</p>
+            <p class="font-display text-headline-lg text-on-surface">${k6.stats.duration}ms</p>
+            <p class="font-body-md text-on-surface-variant text-sm">Average response time</p>
+          </div>
+          <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter flex flex-col gap-2 hover:bg-surface-container transition-colors">
+            <span class="material-symbols-outlined text-tertiary">speed</span>
+            <p class="font-label-caps text-outline text-[10px] uppercase">P95 Response</p>
+            <p class="font-display text-headline-lg text-on-surface">${k6.metrics.httpReqDuration.p95}ms</p>
+            <p class="font-body-md text-on-surface-variant text-sm">95th percentile latency</p>
+          </div>
         </div>
       </section>
 
@@ -219,7 +265,7 @@ export const generateHTML = (playwright: PlaywrightReport, k6: K6Report): string
               <tr>
                 <td colspan="4" class="p-gutter text-center text-on-surface-variant font-body-md text-sm">
                   <span class="material-symbols-outlined text-emerald-400 align-middle text-sm">check_circle</span>
-                  No failures detected — all spells harmonious
+                  No failures detected — all tests passed
                 </td>
               </tr>` : ''}
             </tbody>
