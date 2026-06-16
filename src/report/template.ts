@@ -1,21 +1,17 @@
 import { PlaywrightReport } from '../parsers/playwright.parser';
 import { K6Report } from '../parsers/k6.parser';
 
-export function generateHTML(
-  playwright: PlaywrightReport,
-  k6: K6Report
-): string {
-  const globalPassRate = Math.round(
-    ((playwright.stats.passed + k6.stats.successRate / 100 * (playwright.stats.total + k6.stats.totalRequests)) /
-    (playwright.stats.total + k6.stats.totalRequests)) * 100
-  );
-  const healthStatus = globalPassRate >= 95 ? 'HEALTHY' : globalPassRate >= 85 ? 'DEGRADED' : 'CRITICAL';
-  const healthColor = globalPassRate >= 95 ? 'bg-emerald-400' : globalPassRate >= 85 ? 'bg-amber-400' : 'bg-error';
-  const healthLabel = globalPassRate >= 95 ? 'All systems resonant — ready for release' :
+export const generateHTML = (playwright: PlaywrightReport, k6: K6Report): string => {
+  const totalPassed: number = playwright.stats.passed + (k6.stats.totalRequests - k6.stats.failedRequests);
+  const totalTests: number = playwright.stats.total + k6.stats.totalRequests;
+  const globalPassRate: number = totalTests > 0 ? Math.round((totalPassed / totalTests) * 100) : 0;
+  const healthStatus: string = globalPassRate >= 95 ? 'HEALTHY' : globalPassRate >= 85 ? 'DEGRADED' : 'CRITICAL';
+  const healthColor: string = globalPassRate >= 95 ? 'bg-emerald-400' : globalPassRate >= 85 ? 'bg-amber-400' : 'bg-error';
+  const healthLabel: string = globalPassRate >= 95 ? 'All systems resonant — ready for release' :
     globalPassRate >= 85 ? 'Some incantations need attention' : 'Multiple failures detected — investigate immediately';
 
-  const coverageTypes = 2; // playwright + k6
-  const totalCoverage = 4; // playwright, k6, api, unit (future)
+  const coverageTypes: number = 2; // playwright + k6
+  const totalCoverage: number = 4; // playwright, k6, api, unit (future)
 
   return `<!DOCTYPE html>
 <html class="dark" lang="en">
@@ -465,4 +461,4 @@ export function generateHTML(
 
 </body>
 </html>`;
-}
+};

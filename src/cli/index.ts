@@ -4,22 +4,35 @@ import { Command } from 'commander';
 import { readFileSync, writeFileSync, mkdirSync, watch } from 'fs';
 import { join } from 'path';
 import { createServer, IncomingMessage, ServerResponse } from 'http';
-import { parsePlaywright } from '../parsers/playwright.parser';
-import { parseK6 } from '../parsers/k6.parser';
+import { parsePlaywright, PlaywrightReport } from '../parsers/playwright.parser';
+import { parseK6, K6Report } from '../parsers/k6.parser';
 import { generateHTML } from '../report/template';
+
+interface GenerateOptions {
+  input: string;
+  output: string;
+  port: string;
+  serve: boolean;
+  watch: boolean;
+}
+
+interface ServeOptions {
+  file: string;
+  port: string;
+}
 
 const program = new Command();
 
-function buildReport(inputPath: string, outputPath: string): string {
-  const playwrightPath = join(inputPath, 'playwright-results.json');
-  const playwrightRaw = JSON.parse(readFileSync(playwrightPath, 'utf-8'));
-  const playwrightReport = parsePlaywright(playwrightRaw);
+const buildReport = (inputPath: string, outputPath: string): string => {
+  const playwrightPath: string = join(inputPath, 'playwright-results.json');
+  const playwrightRaw: Record<string, unknown> = JSON.parse(readFileSync(playwrightPath, 'utf-8')) as Record<string, unknown>;
+  const playwrightReport: PlaywrightReport = parsePlaywright(playwrightRaw);
 
-  const k6Path = join(inputPath, 'k6-results.json');
-  const k6Raw = JSON.parse(readFileSync(k6Path, 'utf-8'));
-  const k6Report = parseK6(k6Raw);
+  const k6Path: string = join(inputPath, 'k6-results.json');
+  const k6Raw: Record<string, unknown> = JSON.parse(readFileSync(k6Path, 'utf-8')) as Record<string, unknown>;
+  const k6Report: K6Report = parseK6(k6Raw);
 
-  const html = generateHTML(playwrightReport, k6Report);
+  const html: string = generateHTML(playwrightReport, k6Report);
 
   mkdirSync(outputPath, { recursive: true });
   writeFileSync(join(outputPath, 'grimoir-report.html'), html, 'utf-8');
@@ -39,7 +52,7 @@ function buildReport(inputPath: string, outputPath: string): string {
   console.log(`   P95:           ${k6Report.metrics.httpReqDuration.p95}ms`);
 
   return html;
-}
+};
 
 program
   .name('grimoir')
@@ -54,7 +67,7 @@ program
   .option('-p, --port <number>', 'Port to serve the report', '8080')
   .option('--no-serve', 'Do not start the report server')
   .option('-w, --watch', 'Watch input folder and regenerate on changes')
-  .action((options) => {
+  .action((options: GenerateOptions): void => {
     console.log(`📖 Grimoir - Generating report...`);
 
     buildReport(options.input, options.output);
@@ -63,12 +76,12 @@ program
 
     // Start local server
     if (options.serve) {
-      const port = parseInt(options.port, 10);
-      const reportFile = join(options.output, 'grimoir-report.html');
+      const port: number = parseInt(options.port, 10);
+      const reportFile: string = join(options.output, 'grimoir-report.html');
 
-      const requestHandler = (_req: IncomingMessage, res: ServerResponse) => {
+      const requestHandler = (_req: IncomingMessage, res: ServerResponse): void => {
         try {
-          const content = readFileSync(reportFile, 'utf-8');
+          const content: string = readFileSync(reportFile, 'utf-8');
           res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
           res.end(content);
         } catch {
@@ -87,7 +100,7 @@ program
           console.log(`   👀 Watching: ${options.input}/`);
           console.log(`   Press Ctrl+C to stop\n`);
 
-          watch(options.input, (_event: string, filename: string | null) => {
+          watch(options.input, (_event: string, filename: string | null): void => {
             if (filename && filename.endsWith('.json')) {
               try {
                 console.log(`\n🔄 Change detected in ${filename} — regenerating...`);
@@ -109,11 +122,11 @@ program
   .description('Serve an existing report')
   .requiredOption('-f, --file <path>', 'Path to the report HTML file')
   .option('-p, --port <number>', 'Port to serve the report', '8080')
-  .action((options) => {
-    const html = readFileSync(options.file, 'utf-8');
-    const port = parseInt(options.port, 10);
+  .action((options: ServeOptions): void => {
+    const html: string = readFileSync(options.file, 'utf-8');
+    const port: number = parseInt(options.port, 10);
 
-    const server = createServer((_req, res) => {
+    const server = createServer((_req: IncomingMessage, res: ServerResponse): void => {
       res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
       res.end(html);
     });
