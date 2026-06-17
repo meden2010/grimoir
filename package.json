@@ -8,6 +8,7 @@
   },
   "scripts": {
     "build": "tsc",
+    "postbuild": "copyfiles -u 1 src/**/*.html dist/",
     "dev": "ts-node src/cli/index.ts",
     "dev:watch": "tsx watch src/cli/index.ts",
     "test": "vitest",
@@ -37,6 +38,7 @@
   },
   "devDependencies": {
     "@types/node": "^25.9.3",
+    "copyfiles": "^2.4.1",
     "ts-node": "^10.9.2",
     "tsx": "^4.22.4",
     "typescript": "^6.0.3",
