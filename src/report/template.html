@@ -87,7 +87,7 @@
     <div class="flex items-center justify-between mb-gutter">
       <div>
         <h1 class="font-display text-display-lg text-primary tracking-tight">Grimoir</h1>
-        <p class="font-label-caps text-outline text-[10px] uppercase mt-base">Unified Test Report — {{generatedAt}}</p>
+        <p class="font-label-caps text-outline text-[10px] uppercase mt-base">Unified Test Report — __GENERATED_AT__</p>
       </div>
       <div class="flex items-center gap-base">
         <span class="material-symbols-outlined text-outline">download</span>
@@ -116,16 +116,16 @@
         <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-base">
           <div class="flex items-center gap-gutter">
             <div class="flex items-center gap-2">
-              <span class="w-3 h-3 {{healthColor}} rounded-full shadow-[0_0_8px_rgba(139,92,246,0.5)]"></span>
-              <span class="font-label-caps text-sm text-primary">{{healthStatus}}</span>
+              <span class="w-3 h-3 __HEALTH_COLOR__ rounded-full shadow-[0_0_8px_rgba(139,92,246,0.5)]"></span>
+              <span class="font-label-caps text-sm text-primary">__HEALTH_STATUS__</span>
             </div>
             <div>
-              <p class="font-body-md text-on-surface-variant">{{healthLabel}}</p>
-              <p class="font-label-caps text-outline text-[10px] uppercase mt-1">Last run — {{generatedAt}}</p>
+              <p class="font-body-md text-on-surface-variant">__HEALTH_LABEL__</p>
+              <p class="font-label-caps text-outline text-[10px] uppercase mt-1">Last run — __GENERATED_AT__</p>
             </div>
           </div>
           <div class="flex items-baseline gap-1">
-            <span class="font-display text-5xl text-primary">{{testCasePassRate}}</span>
+            <span class="font-display text-5xl text-primary">__TEST_CASE_PASS_RATE__</span>
             <span class="font-display text-3xl text-primary/60">%</span>
           </div>
         </div>
@@ -138,25 +138,25 @@
           <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter flex flex-col gap-2 hover:bg-surface-container transition-colors">
             <span class="material-symbols-outlined text-primary">science</span>
             <p class="font-label-caps text-outline text-[10px] uppercase">Total Test Cases</p>
-            <p class="font-display text-headline-lg text-on-surface">{{totalTestCases}}</p>
-            <p class="font-body-md text-on-surface-variant text-sm">{{passedTestCases}} passed · {{failedTestCases}} failed · {{skippedTestCases}} skipped</p>
+            <p class="font-display text-headline-lg text-on-surface">__TOTAL_TEST_CASES__</p>
+            <p class="font-body-md text-on-surface-variant text-sm">__PASSED_TEST_CASES__ passed · __FAILED_TEST_CASES__ failed · __SKIPPED_TEST_CASES__ skipped</p>
           </div>
           <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter flex flex-col gap-2 hover:bg-surface-container transition-colors">
             <span class="material-symbols-outlined text-emerald-400">check_circle</span>
             <p class="font-label-caps text-outline text-[10px] uppercase">Pass Rate</p>
-            <p class="font-display text-headline-lg text-emerald-400">{{testCasePassRate}}%</p>
+            <p class="font-display text-headline-lg text-emerald-400">__TEST_CASE_PASS_RATE__%</p>
             <p class="font-body-md text-on-surface-variant text-sm">Test case pass rate</p>
           </div>
           <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter flex flex-col gap-2 hover:bg-surface-container transition-colors">
             <span class="material-symbols-outlined text-tertiary">timer</span>
             <p class="font-label-caps text-outline text-[10px] uppercase">Duration</p>
-            <p class="font-display text-headline-lg text-on-surface">{{playwrightDuration}}ms</p>
+            <p class="font-display text-headline-lg text-on-surface">__PLAYWRIGHT_DURATION__ms</p>
             <p class="font-body-md text-on-surface-variant text-sm">Total E2E execution time</p>
           </div>
           <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter flex flex-col gap-2 hover:bg-surface-container transition-colors">
             <span class="material-symbols-outlined text-primary-container">layers</span>
             <p class="font-label-caps text-outline text-[10px] uppercase">Coverage</p>
-            <p class="font-display text-headline-lg text-on-surface">{{coverageTypes}}/{{totalCoverage}}</p>
+            <p class="font-display text-headline-lg text-on-surface">__COVERAGE_TYPES__/__TOTAL_COVERAGE__</p>
             <p class="font-body-md text-on-surface-variant text-sm">E2E ✓ · Perf ✓ · API ✗ · Unit ✗</p>
           </div>
         </div>
@@ -169,25 +169,25 @@
           <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter flex flex-col gap-2 hover:bg-surface-container transition-colors">
             <span class="material-symbols-outlined text-secondary">insights</span>
             <p class="font-label-caps text-outline text-[10px] uppercase">Total Requests</p>
-            <p class="font-display text-headline-lg text-on-surface">{{totalRequests}}</p>
+            <p class="font-display text-headline-lg text-on-surface">__TOTAL_REQUESTS__</p>
             <p class="font-body-md text-on-surface-variant text-sm">k6 requests executed</p>
           </div>
           <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter flex flex-col gap-2 hover:bg-surface-container transition-colors">
             <span class="material-symbols-outlined text-emerald-400">check_circle</span>
             <p class="font-label-caps text-outline text-[10px] uppercase">Request Success</p>
-            <p class="font-display text-headline-lg text-emerald-400">{{requestSuccessRate}}%</p>
-            <p class="font-body-md text-on-surface-variant text-sm">{{successfulRequests}} succeeded · {{failedRequests}} failed</p>
+            <p class="font-display text-headline-lg text-emerald-400">__REQUEST_SUCCESS_RATE__%</p>
+            <p class="font-body-md text-on-surface-variant text-sm">__SUCCESSFUL_REQUESTS__ succeeded · __FAILED_REQUESTS__ failed</p>
           </div>
           <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter flex flex-col gap-2 hover:bg-surface-container transition-colors">
             <span class="material-symbols-outlined text-secondary">timer</span>
             <p class="font-label-caps text-outline text-[10px] uppercase">Avg Response</p>
-            <p class="font-display text-headline-lg text-on-surface">{{k6AvgDuration}}ms</p>
+            <p class="font-display text-headline-lg text-on-surface">__K6_AVG_DURATION__ms</p>
             <p class="font-body-md text-on-surface-variant text-sm">Average response time</p>
           </div>
           <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter flex flex-col gap-2 hover:bg-surface-container transition-colors">
             <span class="material-symbols-outlined text-tertiary">speed</span>
             <p class="font-label-caps text-outline text-[10px] uppercase">P95 Response</p>
-            <p class="font-display text-headline-lg text-on-surface">{{k6P95}}ms</p>
+            <p class="font-display text-headline-lg text-on-surface">__K6_P95__ms</p>
             <p class="font-body-md text-on-surface-variant text-sm">95th percentile latency</p>
           </div>
         </div>
@@ -221,8 +221,8 @@
               </tr>
             </thead>
             <tbody class="divide-y divide-outline-variant/30">
-              {{failedTestRows}}
-              {{noFailuresRow}}
+              __FAILED_TEST_ROWS__
+              __NO_FAILURES_ROW__
             </tbody>
           </table>
         </div>
@@ -237,23 +237,23 @@
       <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-base">
         <div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-base text-center">
           <p class="font-label-caps text-outline text-[10px] uppercase">Total</p>
-          <p class="font-display text-headline-md text-on-surface mt-1">{{playwrightTotal}}</p>
+          <p class="font-display text-headline-md text-on-surface mt-1">__PLAYWRIGHT_TOTAL__</p>
         </div>
         <div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-base text-center">
           <p class="font-label-caps text-outline text-[10px] uppercase">Passed</p>
-          <p class="font-display text-headline-md text-emerald-400 mt-1">{{playwrightPassed}}</p>
+          <p class="font-display text-headline-md text-emerald-400 mt-1">__PLAYWRIGHT_PASSED__</p>
         </div>
         <div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-base text-center">
           <p class="font-label-caps text-outline text-[10px] uppercase">Failed</p>
-          <p class="font-display text-headline-md text-error mt-1">{{playwrightFailed}}</p>
+          <p class="font-display text-headline-md text-error mt-1">__PLAYWRIGHT_FAILED__</p>
         </div>
         <div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-base text-center">
           <p class="font-label-caps text-outline text-[10px] uppercase">Skipped</p>
-          <p class="font-display text-headline-md text-outline mt-1">{{playwrightSkipped}}</p>
+          <p class="font-display text-headline-md text-outline mt-1">__PLAYWRIGHT_SKIPPED__</p>
         </div>
         <div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-base text-center">
           <p class="font-label-caps text-outline text-[10px] uppercase">Duration</p>
-          <p class="font-display text-headline-md text-primary mt-1">{{playwrightDuration}}ms</p>
+          <p class="font-display text-headline-md text-primary mt-1">__PLAYWRIGHT_DURATION__ms</p>
         </div>
       </div>
 
@@ -276,7 +276,7 @@
                 </tr>
               </thead>
               <tbody class="divide-y divide-outline-variant/20">
-                {{e2eTestRows}}
+                __E2E_TEST_ROWS__
               </tbody>
             </table>
           </div>
@@ -291,23 +291,23 @@
       <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-base">
         <div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-base text-center">
           <p class="font-label-caps text-outline text-[10px] uppercase">Requests</p>
-          <p class="font-display text-headline-md text-on-surface mt-1">{{k6TotalRequests}}</p>
+          <p class="font-display text-headline-md text-on-surface mt-1">__K6_TOTAL_REQUESTS__</p>
         </div>
         <div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-base text-center">
           <p class="font-label-caps text-outline text-[10px] uppercase">Success</p>
-          <p class="font-display text-headline-md text-emerald-400 mt-1">{{k6SuccessRate}}%</p>
+          <p class="font-display text-headline-md text-emerald-400 mt-1">__K6_SUCCESS_RATE__%</p>
         </div>
         <div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-base text-center">
           <p class="font-label-caps text-outline text-[10px] uppercase">Failed</p>
-          <p class="font-display text-headline-md text-error mt-1">{{k6FailedRequests}}</p>
+          <p class="font-display text-headline-md text-error mt-1">__K6_FAILED_REQUESTS__</p>
         </div>
         <div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-base text-center">
           <p class="font-label-caps text-outline text-[10px] uppercase">Avg</p>
-          <p class="font-display text-headline-md text-primary mt-1">{{k6AvgDuration}}ms</p>
+          <p class="font-display text-headline-md text-primary mt-1">__K6_AVG_DURATION__ms</p>
         </div>
         <div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-base text-center">
           <p class="font-label-caps text-outline text-[10px] uppercase">P95</p>
-          <p class="font-display text-headline-md text-tertiary mt-1">{{k6P95}}ms</p>
+          <p class="font-display text-headline-md text-tertiary mt-1">__K6_P95__ms</p>
         </div>
       </div>
 
@@ -320,7 +320,7 @@
         <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter">
           <h3 class="font-label-caps text-on-surface-variant text-[11px] uppercase mb-base">Metrics</h3>
           <div class="space-y-base">
-            {{k6MetricsList}}
+            __K6_METRICS_LIST__
           </div>
         </div>
       </div>
@@ -356,7 +356,7 @@
       data: {
         labels: ['Passed', 'Failed', 'Skipped'],
         datasets: [{
-          data: [{{playwrightPassed}}, {{playwrightFailed}}, {{playwrightSkipped}}],
+          data: [__PLAYWRIGHT_PASSED__, __PLAYWRIGHT_FAILED__, __PLAYWRIGHT_SKIPPED__],
           backgroundColor: ['#8B5CF6', '#ef4444', '#7A7580'],
           borderColor: '#0f0d15',
           borderWidth: 2,
@@ -373,11 +373,11 @@
         datasets: [{
           label: 'Response Time (ms)',
           data: [
-            {{k6Avg}},
-            {{k6Min}},
-            {{k6Max}},
-            {{k6P90}},
-            {{k6P95}}
+            __K6_AVG__,
+            __K6_MIN__,
+            __K6_MAX__,
+            __K6_P90__,
+            __K6_P95__
           ],
           backgroundColor: '#FBBF24',
           borderRadius: 4,
@@ -392,7 +392,7 @@
       data: {
         labels: ['Passed', 'Failed', 'Skipped'],
         datasets: [{
-          data: [{{playwrightPassed}}, {{playwrightFailed}}, {{playwrightSkipped}}],
+          data: [__PLAYWRIGHT_PASSED__, __PLAYWRIGHT_FAILED__, __PLAYWRIGHT_SKIPPED__],
           backgroundColor: ['#8B5CF6', '#ef4444', '#7A7580'],
           borderColor: '#0f0d15',
           borderWidth: 2,
@@ -409,11 +409,11 @@
         datasets: [{
           label: 'Response Time (ms)',
           data: [
-            {{k6Avg}},
-            {{k6Min}},
-            {{k6Max}},
-            {{k6P90}},
-            {{k6P95}}
+            __K6_AVG__,
+            __K6_MIN__,
+            __K6_MAX__,
+            __K6_P90__,
+            __K6_P95__
           ],
           backgroundColor: '#FBBF24',
           borderRadius: 4,

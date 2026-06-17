@@ -14,7 +14,7 @@ const loadTemplate = (): string => {
 
 const replacePlaceholders = (template: string, placeholders: Placeholders): string => {
   return Object.entries(placeholders).reduce((result, [key, value]) => {
-    const pattern = new RegExp(`\\{\\{${key}\\}\\}`, 'g');
+    const pattern = new RegExp(`__${key.toUpperCase()}__`, 'g');
     return result.replace(pattern, String(value));
   }, template);
 };
