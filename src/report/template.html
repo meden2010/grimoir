@@ -8,6 +8,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3/lib/anime.min.js"></script>
   <script id="tailwind-config">
     tailwind.config = {
       darkMode: "class",
@@ -41,7 +42,7 @@
             "on-background": "#e7e0ed",
           },
           borderRadius: { DEFAULT: "0.5rem", lg: "0.75rem", xl: "1rem", full: "9999px" },
-          spacing: { gutter: "16px", base: "8px", section: "48px" },
+          spacing: { gutter: "16px", base: "8px", section: "25px" },
           fontFamily: {
             display: ["Playfair Display", "serif"],
             body: ["Inter", "sans-serif"],
@@ -64,9 +65,6 @@
     .material-symbols-outlined {
       font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
     }
-    .arcane-glow {
-      box-shadow: 0 0 15px rgba(139, 92, 246, 0.1);
-    }
     .mystic-border {
       border-image: linear-gradient(to right, #8B5CF6, #FBBF24) 1;
     }
@@ -75,140 +73,253 @@
     .custom-scrollbar::-webkit-scrollbar { width: 4px; }
     .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background: #494454; border-radius: 10px; }
-    .tab-active { border-bottom: 2px solid #8B5CF6 !important; color: #8B5CF6 !important; }
+    #tabNav button {
+      position: relative;
+      transition: color 0.2s ease;
+    }
+    #tabNav button::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      width: 0;
+      height: 2px;
+      background: #8B5CF6;
+      transition: width 0.25s ease-out, left 0.25s ease-out;
+    }
+    #tabNav button.tab-active {
+      color: #8B5CF6 !important;
+    }
+    #tabNav button.tab-active::after {
+      left: 0;
+      width: 100%;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 6px rgba(52, 211, 153, 0.6); }
+      50% { box-shadow: 0 0 12px rgba(52, 211, 153, 0.9); }
+    }
+    @keyframes countUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .animate-fade-in { animation: fadeIn 0.6s ease-out both; }
+    .animate-fade-in-up { animation: fadeInUp 0.7s ease-out both; }
+    .animate-pulse-glow { animation: pulseGlow 2s ease-in-out infinite; }
+    .animate-count { animation: countUp 0.5s ease-out both; }
+
+    .delay-100 { animation-delay: 0.1s; }
+    .delay-200 { animation-delay: 0.2s; }
+    .delay-300 { animation-delay: 0.3s; }
+    .delay-400 { animation-delay: 0.4s; }
+    .delay-500 { animation-delay: 0.5s; }
+    .delay-600 { animation-delay: 0.6s; }
+    .delay-700 { animation-delay: 0.7s; }
+
+    .card-hover {
+      will-change: transform;
+      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+                  box-shadow 0.25s ease,
+                  border-color 0.25s ease;
+    }
+    .card-hover:hover {
+      transform: translateY(-4px) scale(1.02);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55);
+      border-color: rgba(139, 92, 246, 0.5);
+    }
+
+    .modal-backdrop {
+      opacity: 0;
+      transition: opacity 0.2s ease-out;
+    }
+    .modal-backdrop.open {
+      opacity: 1;
+    }
+    .modal-content {
+      opacity: 0;
+      transform: scale(0.95);
+      transition: opacity 0.2s ease-out, transform 0.2s ease-out;
+    }
+    .modal-backdrop.open .modal-content {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .collapsible-content {
+      overflow: visible;
+    }
+    .collapsible-content.animating {
+      overflow: hidden;
+    }
+
+    .tab-panel {
+      transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                  transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .tab-panel.hidden-panel {
+      opacity: 0;
+      transform: translateY(-12px);
+      pointer-events: none;
+    }
+    .tab-panel.active-panel {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .tab-panel.entering-panel {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+
+    /* Custom main scrollbar */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #0f0d15; }
+    ::-webkit-scrollbar-thumb {
+      background: #494454;
+      border-radius: 10px;
+      transition: background 0.2s ease, width 0.2s ease;
+    }
+    ::-webkit-scrollbar-thumb:hover { background: #8B5CF6; }
+
+    /* Scroll progress indicator */
+    #scrollProgress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 3px;
+      background: linear-gradient(to right, #8B5CF6, #FBBF24);
+      width: 0%;
+      z-index: 100;
+      box-shadow: 0 0 10px rgba(139, 92, 246, 0.6);
+    }
   </style>
 </head>
 <body class="bg-surface text-on-surface font-body font-body-md">
+
+  <!-- Scroll Progress Indicator -->
+  <div id="scrollProgress" aria-hidden="true"></div>
 
   <!-- Main Content -->
   <main class="max-w-[1440px] mx-auto px-gutter py-12">
 
     <!-- Header -->
-    <div class="flex items-center justify-between mb-gutter">
+    <div class="flex items-center justify-between mb-gutter animate-fade-in">
       <div>
-        <h1 class="font-display text-display-lg text-primary tracking-tight">Grimoir</h1>
+        <h1 class="font-display text-display-lg text-primary tracking-tight text-balance" id="grimoireTitle">Grimoir</h1>
         <p class="font-label-caps text-outline text-[10px] uppercase mt-base">Unified Test Report — __GENERATED_AT__</p>
       </div>
-      <div class="flex items-center gap-base">
-        <span class="material-symbols-outlined text-outline">download</span>
-        <span class="material-symbols-outlined text-outline">share</span>
+        <div class="flex items-center gap-base">
+        <button class="material-symbols-outlined text-outline hover:text-primary transition-colors" aria-label="Download report">download</button>
+        <button class="material-symbols-outlined text-outline hover:text-primary transition-colors" aria-label="Share report">share</button>
       </div>
     </div>
 
     <!-- Tab Navigation -->
-    <nav class="flex items-center gap-gutter border-b border-outline-variant mb-section" id="tabNav">
+    <nav class="flex items-center gap-gutter border-b border-outline-variant mb-section animate-fade-in delay-100" id="tabNav">
       <button class="font-label-caps text-sm pb-gutter tab-active" data-tab="overview">
         <span class="material-symbols-outlined text-sm align-middle">auto_awesome</span> Overview
       </button>
-      <button class="font-label-caps text-sm pb-gutter text-on-surface-variant hover:text-[#8B5CF6] transition-colors" data-tab="e2e">
-        <span class="material-symbols-outlined text-sm align-middle">bolt</span> E2E
+      <button class="font-label-caps text-sm pb-gutter text-on-surface-variant hover:text-[#8B5CF6] transition-colors __AUTOMATED_TAB_VISIBLE__" data-tab="automated">
+        <span class="material-symbols-outlined text-sm align-middle">bolt</span> Automated
       </button>
-      <button class="font-label-caps text-sm pb-gutter text-on-surface-variant hover:text-[#8B5CF6] transition-colors" data-tab="perf">
+      <button class="font-label-caps text-sm pb-gutter text-on-surface-variant hover:text-[#8B5CF6] transition-colors __PERFORMANCE_TAB_VISIBLE__" data-tab="perf">
         <span class="material-symbols-outlined text-sm align-middle">insights</span> Performance
       </button>
     </nav>
 
     <!-- ==================== OVERVIEW TAB ==================== -->
-    <div id="tab-overview" class="flex flex-col gap-section">
+    <div id="tab-overview" class="tab-panel active-panel flex flex-col gap-section">
 
-      <!-- Health Score Banner -->
-      <section class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter arcane-glow">
-        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-base">
-          <div class="flex items-center gap-gutter">
-            <div class="flex items-center gap-2">
-              <span class="w-3 h-3 __HEALTH_COLOR__ rounded-full shadow-[0_0_8px_rgba(139,92,246,0.5)]"></span>
-              <span class="font-label-caps text-sm text-primary">__HEALTH_STATUS__</span>
+      <!-- Execution Overview -->
+      <section class="flex flex-col gap-base animate-fade-in-up delay-200">
+        <h2 class="font-label-caps text-outline text-sm uppercase mb-2">Execution Overview</h2>
+
+        <div class="flex flex-col md:flex-row items-stretch gap-base">
+          <div class="flex-1 bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter shadow-sm flex flex-col justify-center card-hover animate-fade-in-up delay-200">
+            <div class="flex items-center gap-2 mb-1">
+              <span class="material-symbols-outlined text-primary text-lg">analytics</span>
+              <span class="font-label-caps text-outline text-[10px] uppercase">Total Execution</span>
             </div>
-            <div>
-              <p class="font-body-md text-on-surface-variant">__HEALTH_LABEL__</p>
-              <p class="font-label-caps text-outline text-[10px] uppercase mt-1">Last run — __GENERATED_AT__</p>
-            </div>
+            <span class="font-display text-4xl text-on-surface tabular-nums counter" data-target="__TOTAL_EXECUTION__">0</span>
+            <p class="font-body-md text-on-surface-variant text-sm mt-2">
+              __TOTAL_AUTOMATED_CASES__ automated cases · __TOTAL_PERFORMANCE_SCENARIOS__ performance scenarios
+            </p>
           </div>
-          <div class="flex items-baseline gap-1">
-            <span class="font-display text-5xl text-primary">__TEST_CASE_PASS_RATE__</span>
-            <span class="font-display text-3xl text-primary/60">%</span>
+          <div class="flex-1 bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-base card-hover animate-fade-in-up delay-300">
+            <div class="flex items-center gap-gutter">
+              <div class="flex items-center gap-2">
+                <span class="w-3 h-3 __HEALTH_COLOR__ rounded-full"></span>
+                <span class="font-label-caps text-sm text-primary">__HEALTH_STATUS__</span>
+              </div>
+              <div>
+                <p class="font-body-md text-on-surface-variant">__HEALTH_LABEL__</p>
+                <p class="font-label-caps text-outline text-[10px] uppercase mt-1">Overall execution success rate — Last run __GENERATED_AT__</p>
+              </div>
+            </div>
+            <div class="flex items-baseline gap-1">
+              <span class="font-display text-5xl text-primary tabular-nums counter" data-target="__EXECUTION_SUCCESS_RATE__">0</span>
+              <span class="font-display text-3xl text-primary/60">%</span>
+            </div>
           </div>
         </div>
-      </section>
 
-      <!-- E2E Test Case KPIs -->
-      <section class="flex flex-col gap-base">
-        <h2 class="font-label-caps text-outline text-[10px] uppercase">Test Cases (E2E)</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-gutter">
-          <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter flex flex-col gap-2 hover:bg-surface-container transition-colors">
-            <span class="material-symbols-outlined text-primary">science</span>
-            <p class="font-label-caps text-outline text-[10px] uppercase">Total Test Cases</p>
-            <p class="font-display text-headline-lg text-on-surface">__TOTAL_TEST_CASES__</p>
-            <p class="font-body-md text-on-surface-variant text-sm">__PASSED_TEST_CASES__ passed · __FAILED_TEST_CASES__ failed · __SKIPPED_TEST_CASES__ skipped</p>
+        <!-- Coverage -->
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-3 shadow-sm animate-fade-in-up delay-300">
+          <div class="flex items-center justify-between mb-2">
+            <span class="font-label-caps text-outline text-[10px] uppercase">Coverage</span>
+            <span class="font-label-caps text-primary text-[10px] uppercase">__COVERAGE_TYPES__/__TOTAL_COVERAGE__ active</span>
           </div>
-          <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter flex flex-col gap-2 hover:bg-surface-container transition-colors">
-            <span class="material-symbols-outlined text-emerald-400">check_circle</span>
-            <p class="font-label-caps text-outline text-[10px] uppercase">Pass Rate</p>
-            <p class="font-display text-headline-lg text-emerald-400">__TEST_CASE_PASS_RATE__%</p>
-            <p class="font-body-md text-on-surface-variant text-sm">Test case pass rate</p>
-          </div>
-          <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter flex flex-col gap-2 hover:bg-surface-container transition-colors">
-            <span class="material-symbols-outlined text-tertiary">timer</span>
-            <p class="font-label-caps text-outline text-[10px] uppercase">Duration</p>
-            <p class="font-display text-headline-lg text-on-surface">__PLAYWRIGHT_DURATION__ms</p>
-            <p class="font-body-md text-on-surface-variant text-sm">Total E2E execution time</p>
-          </div>
-          <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter flex flex-col gap-2 hover:bg-surface-container transition-colors">
-            <span class="material-symbols-outlined text-primary-container">layers</span>
-            <p class="font-label-caps text-outline text-[10px] uppercase">Coverage</p>
-            <p class="font-display text-headline-lg text-on-surface">__COVERAGE_TYPES__/__TOTAL_COVERAGE__</p>
-            <p class="font-body-md text-on-surface-variant text-sm">E2E ✓ · Perf ✓ · API ✗ · Unit ✗</p>
-          </div>
-        </div>
-      </section>
-
-      <!-- Performance Request KPIs -->
-      <section class="flex flex-col gap-base">
-        <h2 class="font-label-caps text-outline text-[10px] uppercase">Performance Requests</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-gutter">
-          <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter flex flex-col gap-2 hover:bg-surface-container transition-colors">
-            <span class="material-symbols-outlined text-secondary">insights</span>
-            <p class="font-label-caps text-outline text-[10px] uppercase">Total Requests</p>
-            <p class="font-display text-headline-lg text-on-surface">__TOTAL_REQUESTS__</p>
-            <p class="font-body-md text-on-surface-variant text-sm">k6 requests executed</p>
-          </div>
-          <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter flex flex-col gap-2 hover:bg-surface-container transition-colors">
-            <span class="material-symbols-outlined text-emerald-400">check_circle</span>
-            <p class="font-label-caps text-outline text-[10px] uppercase">Request Success</p>
-            <p class="font-display text-headline-lg text-emerald-400">__REQUEST_SUCCESS_RATE__%</p>
-            <p class="font-body-md text-on-surface-variant text-sm">__SUCCESSFUL_REQUESTS__ succeeded · __FAILED_REQUESTS__ failed</p>
-          </div>
-          <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter flex flex-col gap-2 hover:bg-surface-container transition-colors">
-            <span class="material-symbols-outlined text-secondary">timer</span>
-            <p class="font-label-caps text-outline text-[10px] uppercase">Avg Response</p>
-            <p class="font-display text-headline-lg text-on-surface">__K6_AVG_DURATION__ms</p>
-            <p class="font-body-md text-on-surface-variant text-sm">Average response time</p>
-          </div>
-          <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter flex flex-col gap-2 hover:bg-surface-container transition-colors">
-            <span class="material-symbols-outlined text-tertiary">speed</span>
-            <p class="font-label-caps text-outline text-[10px] uppercase">P95 Response</p>
-            <p class="font-display text-headline-lg text-on-surface">__K6_P95__ms</p>
-            <p class="font-body-md text-on-surface-variant text-sm">95th percentile latency</p>
+          <div class="flex flex-wrap gap-2">
+            <div class="flex items-center gap-1.5 px-2.5 py-1.5 bg-surface-container rounded-md border border-outline-variant/30">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.6)] animate-pulse-glow" aria-hidden="true"></span>
+              <span class="font-body-md text-on-surface text-xs font-medium">Automated</span>
+            </div>
+            <div class="flex items-center gap-1.5 px-2.5 py-1.5 bg-surface-container rounded-md border border-outline-variant/30">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.6)] animate-pulse-glow" aria-hidden="true"></span>
+              <span class="font-body-md text-on-surface text-xs font-medium">Performance</span>
+            </div>
+            <div class="flex items-center gap-1.5 px-2.5 py-1.5 bg-surface-container rounded-md border border-outline-variant/30">
+              <span class="w-2 h-2 rounded-full bg-surface-bright border border-outline-variant" aria-hidden="true"></span>
+              <span class="font-body-md text-outline text-xs font-medium">API</span>
+            </div>
+            <div class="flex items-center gap-1.5 px-2.5 py-1.5 bg-surface-container rounded-md border border-outline-variant/30">
+              <span class="w-2 h-2 rounded-full bg-surface-bright border border-outline-variant" aria-hidden="true"></span>
+              <span class="font-body-md text-outline text-xs font-medium">Unit</span>
+            </div>
           </div>
         </div>
       </section>
 
       <!-- Charts Row -->
-      <section class="grid grid-cols-1 md:grid-cols-2 gap-gutter">
-        <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter">
-          <h3 class="font-label-caps text-on-surface-variant text-[11px] uppercase mb-base">E2E Distribution</h3>
-          <div class="chart-wrap"><canvas id="overviewE2eChart"></canvas></div>
+      <section class="grid grid-cols-1 md:grid-cols-2 gap-gutter animate-fade-in-up delay-400">
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter card-hover">
+          <h3 class="font-label-caps text-on-surface-variant text-[11px] uppercase mb-base">Execution Status</h3>
+          <div class="chart-wrap"><canvas id="overviewStatusChart"></canvas></div>
         </div>
-        <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter">
-          <h3 class="font-label-caps text-on-surface-variant text-[11px] uppercase mb-base">Response Times</h3>
-          <div class="chart-wrap"><canvas id="overviewK6Chart"></canvas></div>
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter card-hover">
+          <h3 class="font-label-caps text-on-surface-variant text-[11px] uppercase mb-base">Execution Duration by Type</h3>
+          <div class="chart-wrap"><canvas id="overviewDurationChart"></canvas></div>
         </div>
       </section>
 
-      <!-- Quick Failures Table -->
-      <section class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden arcane-glow">
-        <div class="p-gutter border-b border-outline-variant">
-          <h3 class="font-label-caps text-on-surface-variant text-[11px] uppercase">Recent Failures</h3>
+      <!-- Failures Table -->
+      <section class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-sm animate-fade-in-up delay-500">
+        <div class="p-gutter border-b border-outline-variant flex items-center justify-between">
+          <h3 class="font-label-caps text-on-surface-variant text-[11px] uppercase">Failures</h3>
+          <div id="failuresPagination" class="flex items-center gap-2 hidden">
+            <button type="button" id="failuresPrev" class="px-2 py-1 rounded bg-surface-container text-outline hover:text-primary transition-colors text-xs font-label-caps disabled:opacity-40 disabled:cursor-not-allowed">Previous</button>
+            <span id="failuresPageInfo" class="text-xs text-on-surface-variant font-mono"></span>
+            <button type="button" id="failuresNext" class="px-2 py-1 rounded bg-surface-container text-outline hover:text-primary transition-colors text-xs font-label-caps disabled:opacity-40 disabled:cursor-not-allowed">Next</button>
+          </div>
         </div>
         <div class="overflow-x-auto">
           <table class="w-full text-left border-collapse">
@@ -220,50 +331,134 @@
                 <th class="p-gutter font-label-caps text-on-surface-variant text-[10px] uppercase text-right">Duration</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-outline-variant/30">
-              __FAILED_TEST_ROWS__
-              __NO_FAILURES_ROW__
+            <tbody id="failuresTableBody" class="divide-y divide-outline-variant/30">
+              __FAILURE_ROWS__
             </tbody>
           </table>
         </div>
       </section>
 
-    </div>
-
-    <!-- ==================== E2E TAB ==================== -->
-    <div id="tab-e2e" class="hidden flex flex-col gap-gutter">
-
-      <!-- E2E Stats -->
-      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-base">
-        <div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-base text-center">
-          <p class="font-label-caps text-outline text-[10px] uppercase">Total</p>
-          <p class="font-display text-headline-md text-on-surface mt-1">__PLAYWRIGHT_TOTAL__</p>
-        </div>
-        <div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-base text-center">
-          <p class="font-label-caps text-outline text-[10px] uppercase">Passed</p>
-          <p class="font-display text-headline-md text-emerald-400 mt-1">__PLAYWRIGHT_PASSED__</p>
-        </div>
-        <div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-base text-center">
-          <p class="font-label-caps text-outline text-[10px] uppercase">Failed</p>
-          <p class="font-display text-headline-md text-error mt-1">__PLAYWRIGHT_FAILED__</p>
-        </div>
-        <div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-base text-center">
-          <p class="font-label-caps text-outline text-[10px] uppercase">Skipped</p>
-          <p class="font-display text-headline-md text-outline mt-1">__PLAYWRIGHT_SKIPPED__</p>
-        </div>
-        <div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-base text-center">
-          <p class="font-label-caps text-outline text-[10px] uppercase">Duration</p>
-          <p class="font-display text-headline-md text-primary mt-1">__PLAYWRIGHT_DURATION__ms</p>
+      <!-- Error Detail Modal -->
+      <div id="errorModal" class="modal-backdrop fixed inset-0 z-50 hidden items-center justify-center bg-black/60 backdrop-blur-sm p-gutter">
+        <div class="modal-content bg-surface-container-lowest border border-outline-variant rounded-xl shadow-2xl max-w-2xl w-full max-h-[80vh] flex flex-col">
+          <div class="p-gutter border-b border-outline-variant flex items-center justify-between">
+            <h3 class="font-label-caps text-on-surface-variant text-[11px] uppercase">Error Detail</h3>
+            <button type="button" id="closeErrorModal" class="material-symbols-outlined text-outline hover:text-primary transition-colors" aria-label="Close">close</button>
+          </div>
+          <div class="p-gutter overflow-y-auto custom-scrollbar">
+            <pre id="errorModalContent" class="font-mono text-sm text-error/90 whitespace-pre-wrap break-words"></pre>
+          </div>
         </div>
       </div>
 
-      <!-- E2E Chart + Table -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-gutter">
-        <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter">
-          <h3 class="font-label-caps text-on-surface-variant text-[11px] uppercase mb-base">Distribution</h3>
-          <div class="chart-wrap"><canvas id="e2eChart"></canvas></div>
+      <!-- Automated Cases KPIs -->
+      <section class="flex flex-col gap-base collapsible-section __AUTOMATED_CASES_VISIBLE__ animate-fade-in-up delay-500" data-expanded="true">
+        <div class="bg-surface-container border border-outline-variant rounded-xl p-gutter">
+          <h2 class="font-label-caps text-outline text-sm uppercase mb-2 collapsible-header cursor-pointer select-none flex items-center justify-between hover:text-primary transition-colors">
+            <span>Automated Cases</span>
+            <span class="material-symbols-outlined toggle-icon text-xl transition-transform">expand_more</span>
+          </h2>
+          <div class="collapsible-content grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-gutter items-stretch">
+          <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter flex flex-col h-full card-hover">
+            <span class="material-symbols-outlined text-primary">science</span>
+            <p class="font-label-caps text-outline text-[10px] uppercase mt-2">Total</p>
+            <p class="font-display text-headline-lg text-on-surface tabular-nums mt-1 counter" data-target="__TOTAL_TEST_CASES__">0</p>
+            <p class="font-body-md text-on-surface-variant text-sm mt-auto">__PASSED_TEST_CASES__ passed · __FAILED_TEST_CASES__ failed · __SKIPPED_TEST_CASES__ skipped</p>
+          </div>
+          <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter flex flex-col h-full card-hover">
+            <span class="material-symbols-outlined text-emerald-400">check_circle</span>
+            <p class="font-label-caps text-outline text-[10px] uppercase mt-2">Pass Rate</p>
+            <p class="font-display text-headline-lg text-emerald-400 tabular-nums mt-1"><span class="counter" data-target="__TEST_CASE_PASS_RATE__">0</span>%</p>
+            <p class="font-body-md text-on-surface-variant text-sm mt-auto">Automated cases pass rate</p>
+          </div>
+          <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter flex flex-col h-full card-hover">
+            <span class="material-symbols-outlined text-error">error</span>
+            <p class="font-label-caps text-outline text-[10px] uppercase mt-2">Failure Rate</p>
+            <p class="font-display text-headline-lg text-error tabular-nums mt-1"><span class="counter" data-target="__FAILURE_RATE__">0</span>%</p>
+            <p class="font-body-md text-on-surface-variant text-sm mt-auto">Automated cases failure rate</p>
+          </div>
+          <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter flex flex-col h-full card-hover">
+            <span class="material-symbols-outlined text-tertiary">timer</span>
+            <p class="font-label-caps text-outline text-[10px] uppercase mt-2">Duration</p>
+            <p class="font-display text-headline-lg text-on-surface tabular-nums mt-1">__PLAYWRIGHT_DURATION_MINUTES__ min</p>
+            <p class="font-body-md text-on-surface-variant text-sm mt-auto">Execution time</p>
+          </div>
         </div>
-        <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter overflow-hidden">
+      </div>
+    </section>
+
+    <!-- Performance Request KPIs -->
+      <section class="flex flex-col gap-base collapsible-section __PERFORMANCE_REQUESTS_VISIBLE__ animate-fade-in-up delay-600" data-expanded="true">
+        <div class="bg-surface-container border border-outline-variant rounded-xl p-gutter">
+          <h2 class="font-label-caps text-outline text-sm uppercase mb-2 collapsible-header cursor-pointer select-none flex items-center justify-between hover:text-primary transition-colors">
+            <span>Performance Requests</span>
+            <span class="material-symbols-outlined toggle-icon text-xl transition-transform">expand_more</span>
+          </h2>
+          <div class="collapsible-content grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-gutter items-stretch">
+          <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter flex flex-col h-full card-hover">
+            <span class="material-symbols-outlined text-secondary">route</span>
+            <p class="font-label-caps text-outline text-[10px] uppercase mt-2">Scenarios</p>
+            <p class="font-display text-headline-lg text-on-surface tabular-nums mt-1 counter" data-target="__TOTAL_PERFORMANCE_SCENARIOS__">0</p>
+            <p class="font-body-md text-on-surface-variant text-sm mt-auto">__PASSED_PERFORMANCE_SCENARIOS__ passed · __FAILED_PERFORMANCE_SCENARIOS__ failed</p>
+          </div>
+          <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter flex flex-col h-full card-hover">
+            <span class="material-symbols-outlined text-secondary">insights</span>
+            <p class="font-label-caps text-outline text-[10px] uppercase mt-2">Requests</p>
+            <p class="font-display text-headline-lg text-on-surface tabular-nums mt-1 counter" data-target="__TOTAL_REQUESTS__">0</p>
+            <p class="font-body-md text-on-surface-variant text-sm mt-auto">k6 requests executed</p>
+          </div>
+          <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter flex flex-col h-full card-hover">
+            <span class="material-symbols-outlined text-emerald-400">check_circle</span>
+            <p class="font-label-caps text-outline text-[10px] uppercase mt-2">Request Success</p>
+            <p class="font-display text-headline-lg text-emerald-400 tabular-nums mt-1"><span class="counter" data-target="__REQUEST_SUCCESS_RATE__">0</span>%</p>
+            <p class="font-body-md text-on-surface-variant text-sm mt-auto">__SUCCESSFUL_REQUESTS__ succeeded · __FAILED_REQUESTS__ failed</p>
+          </div>
+          <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter flex flex-col h-full card-hover">
+            <span class="material-symbols-outlined text-error">error</span>
+            <p class="font-label-caps text-outline text-[10px] uppercase mt-2">Request Failure</p>
+            <p class="font-display text-headline-lg text-error tabular-nums mt-1"><span class="counter" data-target="__REQUEST_FAILURE_RATE__">0</span>%</p>
+            <p class="font-body-md text-on-surface-variant text-sm mt-auto">__FAILED_REQUESTS__ failed requests</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    </div>
+
+    <!-- ==================== Automated TAB ==================== -->
+    <div id="tab-automated" class="tab-panel hidden-panel hidden flex flex-col gap-gutter">
+
+      <!-- Automated Stats -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-base">
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-base text-center card-hover animate-fade-in-up delay-100">
+          <p class="font-label-caps text-outline text-[10px] uppercase">Total</p>
+          <p class="font-display text-headline-md text-on-surface mt-1 counter" data-target="__PLAYWRIGHT_TOTAL__">0</p>
+        </div>
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-base text-center card-hover animate-fade-in-up delay-200">
+          <p class="font-label-caps text-outline text-[10px] uppercase">Passed</p>
+          <p class="font-display text-headline-md text-emerald-400 mt-1 counter" data-target="__PLAYWRIGHT_PASSED__">0</p>
+        </div>
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-base text-center card-hover animate-fade-in-up delay-300">
+          <p class="font-label-caps text-outline text-[10px] uppercase">Failed</p>
+          <p class="font-display text-headline-md text-error mt-1 counter" data-target="__PLAYWRIGHT_FAILED__">0</p>
+        </div>
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-base text-center card-hover animate-fade-in-up delay-400">
+          <p class="font-label-caps text-outline text-[10px] uppercase">Skipped</p>
+          <p class="font-display text-headline-md text-outline mt-1 counter" data-target="__PLAYWRIGHT_SKIPPED__">0</p>
+        </div>
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-base text-center card-hover animate-fade-in-up delay-500">
+          <p class="font-label-caps text-outline text-[10px] uppercase">Duration</p>
+          <p class="font-display text-headline-md text-primary mt-1"><span class="counter" data-target="__PLAYWRIGHT_DURATION__">0</span>ms</p>
+        </div>
+      </div>
+
+      <!-- Automated Chart + Table -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-gutter animate-fade-in-up delay-300">
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter card-hover">
+          <h3 class="font-label-caps text-on-surface-variant text-[11px] uppercase mb-base">Distribution</h3>
+          <div class="chart-wrap"><canvas id="automatedChart"></canvas></div>
+        </div>
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter overflow-hidden card-hover">
           <h3 class="font-label-caps text-on-surface-variant text-[11px] uppercase mb-base">Test Details</h3>
           <div class="overflow-y-auto custom-scrollbar" style="max-height:320px">
             <table class="w-full text-left border-collapse text-sm">
@@ -276,7 +471,7 @@
                 </tr>
               </thead>
               <tbody class="divide-y divide-outline-variant/20">
-                __E2E_TEST_ROWS__
+                __AUTOMATED_TEST_ROWS__
               </tbody>
             </table>
           </div>
@@ -285,39 +480,39 @@
     </div>
 
     <!-- ==================== PERFORMANCE TAB ==================== -->
-    <div id="tab-perf" class="hidden flex flex-col gap-gutter">
+    <div id="tab-perf" class="tab-panel hidden-panel hidden flex flex-col gap-gutter">
 
       <!-- Perf Stats -->
       <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-base">
-        <div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-base text-center">
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-base text-center card-hover animate-fade-in-up delay-100">
           <p class="font-label-caps text-outline text-[10px] uppercase">Requests</p>
-          <p class="font-display text-headline-md text-on-surface mt-1">__K6_TOTAL_REQUESTS__</p>
+          <p class="font-display text-headline-md text-on-surface mt-1 counter" data-target="__K6_TOTAL_REQUESTS__">0</p>
         </div>
-        <div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-base text-center">
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-base text-center card-hover animate-fade-in-up delay-200">
           <p class="font-label-caps text-outline text-[10px] uppercase">Success</p>
-          <p class="font-display text-headline-md text-emerald-400 mt-1">__K6_SUCCESS_RATE__%</p>
+          <p class="font-display text-headline-md text-emerald-400 mt-1"><span class="counter" data-target="__K6_SUCCESS_RATE__">0</span>%</p>
         </div>
-        <div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-base text-center">
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-base text-center card-hover animate-fade-in-up delay-300">
           <p class="font-label-caps text-outline text-[10px] uppercase">Failed</p>
-          <p class="font-display text-headline-md text-error mt-1">__K6_FAILED_REQUESTS__</p>
+          <p class="font-display text-headline-md text-error mt-1 counter" data-target="__K6_FAILED_REQUESTS__">0</p>
         </div>
-        <div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-base text-center">
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-base text-center card-hover animate-fade-in-up delay-400">
           <p class="font-label-caps text-outline text-[10px] uppercase">Avg</p>
-          <p class="font-display text-headline-md text-primary mt-1">__K6_AVG_DURATION__ms</p>
+          <p class="font-display text-headline-md text-primary mt-1"><span class="counter" data-target="__K6_AVG_DURATION__">0</span>ms</p>
         </div>
-        <div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-base text-center">
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-base text-center card-hover animate-fade-in-up delay-500">
           <p class="font-label-caps text-outline text-[10px] uppercase">P95</p>
-          <p class="font-display text-headline-md text-tertiary mt-1">__K6_P95__ms</p>
+          <p class="font-display text-headline-md text-tertiary mt-1"><span class="counter" data-target="__K6_P95__">0</span>ms</p>
         </div>
       </div>
 
       <!-- Perf Chart + Table -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-gutter">
-        <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-gutter animate-fade-in-up delay-300">
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter card-hover">
           <h3 class="font-label-caps text-on-surface-variant text-[11px] uppercase mb-base">Response Times</h3>
           <div class="chart-wrap"><canvas id="perfChart"></canvas></div>
         </div>
-        <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter">
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter card-hover">
           <h3 class="font-label-caps text-on-surface-variant text-[11px] uppercase mb-base">Metrics</h3>
           <div class="space-y-base">
             __K6_METRICS_LIST__
@@ -330,15 +525,67 @@
 
   <!-- Tab switching script -->
   <script>
-    document.getElementById('tabNav').addEventListener('click', (e) => {
-      const btn = e.target.closest('button[data-tab]');
-      if (!btn) return;
-      const tab = btn.dataset.tab;
-      document.querySelectorAll('#tabNav button').forEach(b => b.classList.remove('tab-active'));
-      btn.classList.add('tab-active');
-      document.querySelectorAll('[id^="tab-"]').forEach(p => p.classList.add('hidden'));
-      document.getElementById('tab-' + tab).classList.remove('hidden');
-    });
+    (function() {
+      const tabNav = document.getElementById('tabNav');
+      let isTransitioning = false;
+
+      function showPanel(panel) {
+        panel.classList.remove('hidden');
+        panel.classList.add('entering-panel');
+        void panel.offsetWidth;
+        requestAnimationFrame(() => {
+          panel.classList.remove('entering-panel');
+          panel.classList.add('active-panel');
+        });
+
+        // Initialize charts lazily when their tab becomes visible
+        if (panel.id === 'tab-automated') initAutomatedChart();
+        if (panel.id === 'tab-perf') initPerfChart();
+      }
+
+      tabNav.addEventListener('click', (e) => {
+        const btn = e.target.closest('button[data-tab]');
+        if (!btn || isTransitioning) return;
+
+        const tab = btn.dataset.tab;
+        const targetPanel = document.getElementById('tab-' + tab);
+        const currentPanel = document.querySelector('.tab-panel.active-panel');
+
+        if (!targetPanel || targetPanel === currentPanel) return;
+
+        isTransitioning = true;
+        document.querySelectorAll('#tabNav button').forEach(b => b.classList.remove('tab-active'));
+        btn.classList.add('tab-active');
+
+        if (currentPanel) {
+          const onTransitionEnd = (event) => {
+            if (event.propertyName !== 'opacity') return;
+            currentPanel.removeEventListener('transitionend', onTransitionEnd);
+            currentPanel.classList.add('hidden');
+            currentPanel.classList.remove('hidden-panel');
+            showPanel(targetPanel);
+            setTimeout(() => { isTransitioning = false; }, 300);
+          };
+          currentPanel.addEventListener('transitionend', onTransitionEnd);
+          currentPanel.classList.remove('active-panel');
+          currentPanel.classList.add('hidden-panel');
+
+          // Fallback if transitionend doesn't fire
+          setTimeout(() => {
+            if (currentPanel.classList.contains('hidden-panel')) {
+              currentPanel.removeEventListener('transitionend', onTransitionEnd);
+              currentPanel.classList.add('hidden');
+              currentPanel.classList.remove('hidden-panel');
+              showPanel(targetPanel);
+              setTimeout(() => { isTransitioning = false; }, 300);
+            }
+          }, 350);
+        } else {
+          showPanel(targetPanel);
+          setTimeout(() => { isTransitioning = false; }, 300);
+        }
+      });
+    })();
   </script>
 
   <!-- Charts -->
@@ -346,17 +593,27 @@
     const chartOptions = {
       responsive: true,
       maintainAspectRatio: false,
+      animation: {
+        duration: 1000,
+        easing: 'easeOutQuart',
+      },
+      plugins: { legend: { position: 'bottom', labels: { color: '#cbc3d7', boxWidth: 14, font: { size: 12, family: 'Inter' } } } }
+    };
+
+    const tabChartOptions = {
+      responsive: true,
+      maintainAspectRatio: false,
       animation: false,
       plugins: { legend: { position: 'bottom', labels: { color: '#cbc3d7', boxWidth: 14, font: { size: 12, family: 'Inter' } } } }
     };
 
-    // Overview E2E chart
-    new Chart(document.getElementById('overviewE2eChart'), {
+    // Overview execution status chart
+    new Chart(document.getElementById('overviewStatusChart'), {
       type: 'doughnut',
       data: {
         labels: ['Passed', 'Failed', 'Skipped'],
         datasets: [{
-          data: [__PLAYWRIGHT_PASSED__, __PLAYWRIGHT_FAILED__, __PLAYWRIGHT_SKIPPED__],
+          data: JSON.parse('__OVERALL_STATUS_ARRAY__'),
           backgroundColor: ['#8B5CF6', '#ef4444', '#7A7580'],
           borderColor: '#0f0d15',
           borderWidth: 2,
@@ -365,62 +622,337 @@
       options: chartOptions
     });
 
-    // Overview K6 chart
-    new Chart(document.getElementById('overviewK6Chart'), {
+    // Overview execution duration by type chart
+    new Chart(document.getElementById('overviewDurationChart'), {
       type: 'bar',
       data: {
-        labels: ['Avg', 'Min', 'Max', 'P90', 'P95'],
+        labels: JSON.parse('__DURATION_LABELS__'),
         datasets: [{
-          label: 'Response Time (ms)',
-          data: [
-            __K6_AVG__,
-            __K6_MIN__,
-            __K6_MAX__,
-            __K6_P90__,
-            __K6_P95__
-          ],
-          backgroundColor: '#FBBF24',
+          label: '',
+          data: JSON.parse('__DURATION_DATA__'),
+          backgroundColor: JSON.parse('__DURATION_COLORS__'),
           borderRadius: 4,
+          barPercentage: 0.45,
+          categoryPercentage: 0.7,
         }]
       },
-      options: { ...chartOptions, scales: { x: { ticks: { color: '#cbc3d7' } }, y: { ticks: { color: '#cbc3d7' } } } }
+      options: {
+        ...chartOptions,
+        plugins: {
+          ...chartOptions.plugins,
+          legend: { display: false },
+          tooltip: {
+            ...chartOptions.plugins?.tooltip,
+            callbacks: {
+              label: (context) => `${context.label}: ${context.raw} min`,
+            },
+          },
+        },
+        scales: { x: { ticks: { color: '#cbc3d7' } }, y: { ticks: { color: '#cbc3d7' } } }
+      }
     });
 
-    // E2E tab chart (same data, different canvas)
-    new Chart(document.getElementById('e2eChart'), {
-      type: 'doughnut',
-      data: {
-        labels: ['Passed', 'Failed', 'Skipped'],
-        datasets: [{
-          data: [__PLAYWRIGHT_PASSED__, __PLAYWRIGHT_FAILED__, __PLAYWRIGHT_SKIPPED__],
-          backgroundColor: ['#8B5CF6', '#ef4444', '#7A7580'],
-          borderColor: '#0f0d15',
-          borderWidth: 2,
-        }]
-      },
-      options: chartOptions
-    });
+    // Lazy chart initializers for secondary tabs
+    const tabCharts = {
+      automated: null,
+      perf: null
+    };
 
-    // Performance chart
-    new Chart(document.getElementById('perfChart'), {
-      type: 'bar',
-      data: {
-        labels: ['Avg', 'Min', 'Max', 'P90', 'P95'],
-        datasets: [{
-          label: 'Response Time (ms)',
-          data: [
-            __K6_AVG__,
-            __K6_MIN__,
-            __K6_MAX__,
-            __K6_P90__,
-            __K6_P95__
-          ],
-          backgroundColor: '#FBBF24',
-          borderRadius: 4,
-        }]
-      },
-      options: { ...chartOptions, scales: { x: { ticks: { color: '#cbc3d7' } }, y: { ticks: { color: '#cbc3d7' } } } }
-    });
+    function initAutomatedChart() {
+      if (tabCharts.automated) return;
+      const ctx = document.getElementById('automatedChart');
+      if (!ctx) return;
+      tabCharts.automated = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Passed', 'Failed', 'Skipped'],
+          datasets: [{
+            data: JSON.parse('__PLAYWRIGHT_DATA_ARRAY__'),
+            backgroundColor: ['#8B5CF6', '#ef4444', '#7A7580'],
+            borderColor: '#0f0d15',
+            borderWidth: 2,
+          }]
+        },
+        options: tabChartOptions
+      });
+    }
+
+    function initPerfChart() {
+      if (tabCharts.perf) return;
+      const ctx = document.getElementById('perfChart');
+      if (!ctx) return;
+      tabCharts.perf = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Avg', 'Min', 'Max', 'P90', 'P95'],
+          datasets: [{
+            label: 'Response Time (ms)',
+            data: JSON.parse('__K6_DATA_ARRAY__'),
+            backgroundColor: '#FBBF24',
+            borderRadius: 4,
+          }]
+        },
+        options: { ...tabChartOptions, scales: { x: { ticks: { color: '#cbc3d7' } }, y: { ticks: { color: '#cbc3d7' } } } }
+      });
+    }
+
+    // Collapsible sections with smooth height animation
+    (function() {
+      document.querySelectorAll('.collapsible-section').forEach(section => {
+        const header = section.querySelector('.collapsible-header');
+        const content = section.querySelector('.collapsible-content');
+        const icon = section.querySelector('.toggle-icon');
+        if (!header || !content) return;
+
+        header.addEventListener('click', () => {
+          const expanded = section.getAttribute('data-expanded') === 'true';
+          section.setAttribute('data-expanded', String(!expanded));
+
+          if (expanded) {
+            // Collapse
+            const naturalHeight = content.scrollHeight;
+            content.style.height = naturalHeight + 'px';
+            content.classList.add('animating');
+            if (typeof anime !== 'undefined') {
+              anime({
+                targets: content,
+                height: 0,
+                opacity: 0,
+                duration: 300,
+                easing: 'easeInOutQuad',
+                complete: () => {
+                  content.classList.add('hidden');
+                  content.classList.remove('animating');
+                  content.style.height = '';
+                }
+              });
+            } else {
+              content.classList.add('hidden');
+              content.classList.remove('animating');
+            }
+          } else {
+            // Expand
+            content.classList.remove('hidden');
+            content.classList.add('animating');
+            const naturalHeight = content.scrollHeight;
+            content.style.height = '0px';
+            content.style.opacity = '0';
+            if (typeof anime !== 'undefined') {
+              anime({
+                targets: content,
+                height: naturalHeight,
+                opacity: 1,
+                duration: 300,
+                easing: 'easeOutQuad',
+                complete: () => {
+                  content.classList.remove('animating');
+                  content.style.height = 'auto';
+                }
+              });
+            } else {
+              content.classList.remove('animating');
+              content.style.height = 'auto';
+              content.style.opacity = '1';
+            }
+          }
+
+          if (icon) icon.style.transform = expanded ? 'rotate(-90deg)' : 'rotate(0deg)';
+        });
+      });
+    })();
+
+    // Failures pagination and error modal
+    (function() {
+      const rowsPerPage = 5;
+      const tableBody = document.getElementById('failuresTableBody');
+      const pagination = document.getElementById('failuresPagination');
+      const prevBtn = document.getElementById('failuresPrev');
+      const nextBtn = document.getElementById('failuresNext');
+      const pageInfo = document.getElementById('failuresPageInfo');
+      const modal = document.getElementById('errorModal');
+      const modalContent = document.getElementById('errorModalContent');
+      const closeModal = document.getElementById('closeErrorModal');
+
+      if (!tableBody) return;
+
+      const rows = Array.from(tableBody.querySelectorAll('.failure-row'));
+      let currentPage = 1;
+      const totalPages = Math.ceil(rows.length / rowsPerPage) || 1;
+
+      function renderPage() {
+        const start = (currentPage - 1) * rowsPerPage;
+        const end = start + rowsPerPage;
+        rows.forEach((row, index) => {
+          row.classList.toggle('hidden', index < start || index >= end);
+        });
+        if (pageInfo) pageInfo.textContent = `${currentPage} / ${totalPages}`;
+        if (prevBtn) prevBtn.disabled = currentPage === 1;
+        if (nextBtn) nextBtn.disabled = currentPage === totalPages;
+      }
+
+      if (rows.length > rowsPerPage && pagination) {
+        pagination.classList.remove('hidden');
+        prevBtn.addEventListener('click', () => { if (currentPage > 1) { currentPage--; renderPage(); } });
+        nextBtn.addEventListener('click', () => { if (currentPage < totalPages) { currentPage++; renderPage(); } });
+        renderPage();
+      }
+
+      function openModal(error) {
+        if (!modalContent || !modal || !error) return;
+        modalContent.textContent = error;
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        void modal.offsetWidth;
+        modal.classList.add('open');
+      }
+
+      function closeModalFn() {
+        if (!modal) return;
+        modal.classList.remove('open');
+        setTimeout(() => {
+          modal.classList.add('hidden');
+          modal.classList.remove('flex');
+        }, 200);
+      }
+
+      tableBody.addEventListener('click', (e) => {
+        const btn = e.target.closest('.view-error-btn');
+        if (!btn) return;
+        const error = btn.getAttribute('data-error');
+        openModal(error);
+      });
+
+      if (closeModal && modal) {
+        closeModal.addEventListener('click', closeModalFn);
+        modal.addEventListener('click', (e) => {
+          if (e.target === modal) closeModalFn();
+        });
+      }
+    })();
+
+    // Counter animation for KPI numbers using anime.js spring with manual fallback
+    (function() {
+      const counters = document.querySelectorAll('.counter');
+
+      function animateCounterManual(counter, target, isFloat) {
+        const duration = 1200;
+        const startTime = performance.now();
+        function easeOutQuart(t) { return 1 - Math.pow(1 - t, 4); }
+        function update(currentTime) {
+          const progress = Math.min((currentTime - startTime) / duration, 1);
+          const current = target * easeOutQuart(progress);
+          counter.textContent = isFloat ? current.toFixed(2) : Math.round(current).toString();
+          if (progress < 1) requestAnimationFrame(update);
+        }
+        requestAnimationFrame(update);
+      }
+
+      counters.forEach(counter => {
+        const rawTarget = counter.getAttribute('data-target');
+        if (rawTarget === null || rawTarget === '') return;
+        const target = parseFloat(rawTarget);
+        if (Number.isNaN(target)) return;
+        const isFloat = target % 1 !== 0;
+
+        if (typeof anime !== 'undefined') {
+          const animObj = { value: 0 };
+          anime({
+            targets: animObj,
+            value: target,
+            round: isFloat ? 100 : 1,
+            easing: 'spring(1, 80, 12, 0)',
+            update: () => {
+              counter.textContent = isFloat ? animObj.value.toFixed(2) : animObj.value.toString();
+            }
+          });
+        } else {
+          animateCounterManual(counter, target, isFloat);
+        }
+      });
+    })();
+
+    // Scroll progress indicator
+    (function() {
+      const progressBar = document.getElementById('scrollProgress');
+      if (!progressBar) return;
+
+      function updateProgress() {
+        const scrollTop = window.scrollY || document.documentElement.scrollTop;
+        const docHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+        progressBar.style.width = progress + '%';
+      }
+
+      window.addEventListener('scroll', updateProgress, { passive: true });
+      window.addEventListener('resize', updateProgress);
+      updateProgress();
+    })();
+
+    // Title character animation
+    (function() {
+      const title = document.getElementById('grimoireTitle');
+      if (!title || typeof anime === 'undefined') return;
+
+      const text = title.textContent;
+      title.innerHTML = text
+        .split('')
+        .map(char => `<span class="inline-block" style="opacity:0">${char === ' ' ? '&nbsp;' : char}</span>`)
+        .join('');
+
+      anime({
+        targets: '#grimoireTitle span',
+        translateY: [20, 0],
+        opacity: [0, 1],
+        delay: anime.stagger(60, { start: 100 }),
+        easing: 'easeOutExpo',
+        duration: 800
+      });
+    })();
+
+    // anime.js stagger animations
+    (function() {
+      if (typeof anime === 'undefined') return;
+
+      // Stagger failure rows on initial load
+      anime({
+        targets: '.failure-row',
+        translateX: [-16, 0],
+        opacity: [0, 1],
+        delay: anime.stagger(60, { start: 600 }),
+        easing: 'easeOutExpo',
+        duration: 700
+      });
+
+      // Stagger coverage chips
+      anime({
+        targets: '#tab-overview .bg-surface-container.rounded-md',
+        scale: [0.9, 1],
+        opacity: [0, 1],
+        delay: anime.stagger(60, { start: 400 }),
+        easing: 'easeOutBack',
+        duration: 500
+      });
+
+      // Stagger automated test rows
+      anime({
+        targets: '.automated-row',
+        translateY: [12, 0],
+        opacity: [0, 1],
+        delay: anime.stagger(50, { start: 500 }),
+        easing: 'easeOutExpo',
+        duration: 600
+      });
+
+      // Stagger performance metric rows
+      anime({
+        targets: '.perf-metric-row',
+        translateX: [16, 0],
+        opacity: [0, 1],
+        delay: anime.stagger(60, { start: 500 }),
+        easing: 'easeOutExpo',
+        duration: 600
+      });
+    })();
   </script>
 
 </body>

@@ -14,53 +14,95 @@ const loadTemplate = (): string => {
 
 const replacePlaceholders = (template: string, placeholders: Placeholders): string => {
   return Object.entries(placeholders).reduce((result, [key, value]) => {
-    const pattern = new RegExp(`__${key.toUpperCase()}__`, 'g');
+    const snakeKey = key.replace(/([A-Z])/g, '_$1').toUpperCase();
+    const pattern = new RegExp(`__${snakeKey}__`, 'g');
     return result.replace(pattern, String(value));
   }, template);
 };
 
-const generateFailedTestRows = (playwright: PlaywrightReport): string => {
-  const failedTests = playwright.suites.flatMap(suite =>
-    suite.tests.filter(test => test.status === 'failed').map(test => ({
-      suite: suite.title,
-      test: test.title,
-      error: test.error || 'Unknown error',
-      duration: test.duration,
-    }))
+interface Failure {
+  type: 'Automated' | 'Performance';
+  suite: string;
+  test: string;
+  error: string;
+  duration: number;
+}
+
+const buildFailures = (playwright: PlaywrightReport, k6: K6Report): Failure[] => {
+  const automatedFailures = playwright.suites.flatMap(suite =>
+    suite.tests
+      .filter(test => test.status === 'failed')
+      .map(test => ({
+        type: 'Automated' as const,
+        suite: suite.title,
+        test: test.title,
+        error: test.error || 'Unknown error',
+        duration: test.duration,
+      }))
   );
 
-  if (failedTests.length === 0) {
-    return '';
-  }
+  const performanceFailures = Object.entries(k6.scenarios)
+    .filter(([, scenario]) => scenario.status === 'failed')
+    .map(([name]) => ({
+      type: 'Performance' as const,
+      suite: name,
+      test: name,
+      error: 'Performance scenario failed',
+      duration: 0,
+    }));
 
-  return failedTests.map(({ suite, test, error, duration }) => `
-              <tr class="hover:bg-error/5 transition-colors group border-l-4 border-l-error">
-                <td class="p-gutter">
-                  <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-primary/10 text-primary text-[10px] font-bold rounded-full border border-primary/30">
-                    <span class="w-1 h-1 bg-primary rounded-full"></span> E2E
-                  </span>
-                </td>
-                <td class="p-gutter font-body-md text-on-surface font-semibold text-sm">${suite} — ${test}</td>
-                <td class="p-gutter font-mono text-sm text-error/80 hidden md:table-cell max-w-[300px] truncate">${error}</td>
-                <td class="p-gutter font-mono text-sm text-on-surface-variant text-right">${duration}ms</td>
-              </tr>`).join('');
+  return [...automatedFailures, ...performanceFailures];
 };
 
-const generateNoFailuresRow = (playwright: PlaywrightReport): string => {
-  const hasFailures = playwright.suites.some(suite =>
-    suite.tests.some(test => test.status === 'failed')
-  );
-
-  return hasFailures ? '' : `
+const generateFailureRows = (failures: Failure[]): string => {
+  if (failures.length === 0) {
+    return `
               <tr>
                 <td colspan="4" class="p-gutter text-center text-on-surface-variant font-body-md text-sm">
                   <span class="material-symbols-outlined text-emerald-400 align-middle text-sm">check_circle</span>
                   No failures detected — all tests passed
                 </td>
               </tr>`;
+  }
+
+  return failures.map(({ type, suite, test, error, duration }, index) => {
+    const typeColor = type === 'Automated'
+      ? 'bg-primary/10 text-primary border-primary/30'
+      : 'bg-secondary/10 text-secondary border-secondary/30';
+    const dotColor = type === 'Automated' ? 'bg-primary' : 'bg-secondary';
+    const durationText = duration > 0 ? `${duration}ms` : '—';
+
+    const typeLabel = type === 'Automated' ? 'Automated' : type;
+
+    return `
+              <tr class="hover:bg-error/5 transition-colors group border-l-4 border-l-error failure-row" data-index="${index}">
+                <td class="p-gutter">
+                  <span class="inline-flex items-center gap-1 px-2 py-0.5 ${typeColor} text-[10px] font-bold rounded-full border">
+                    <span class="w-1 h-1 ${dotColor} rounded-full"></span> ${typeLabel}
+                  </span>
+                </td>
+                <td class="p-gutter font-body-md text-on-surface font-semibold text-sm">${suite} — ${test}</td>
+                <td class="p-gutter max-w-[320px]">
+                  <div class="flex items-center gap-2 min-w-0">
+                    <span class="font-mono text-sm text-error/80 truncate">${error}</span>
+                    <button type="button" class="view-error-btn material-symbols-outlined text-outline hover:text-primary transition-colors text-sm shrink-0" data-error="${escapeHtml(error)}" aria-label="View full error">open_in_full</button>
+                  </div>
+                </td>
+                <td class="p-gutter font-mono text-sm text-on-surface-variant text-right">${durationText}</td>
+              </tr>`;
+  }).join('');
 };
 
-const generateE2ETestRows = (playwright: PlaywrightReport): string => {
+const escapeHtml = (unsafe: string): string => {
+  return unsafe
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+};
+
+const generateAutomatedTestRows = (playwright: PlaywrightReport): string => {
   return playwright.suites.flatMap(suite =>
     suite.tests.map(test => {
       const statusClass = test.status === 'passed'
@@ -75,7 +117,7 @@ const generateE2ETestRows = (playwright: PlaywrightReport): string => {
           : 'bg-outline';
 
       return `
-                <tr class="hover:bg-surface-container transition-colors">
+                <tr class="automated-row hover:bg-surface-container transition-colors">
                   <td class="py-2 font-body-md text-on-surface font-medium text-xs">${suite.title}</td>
                   <td class="py-2 font-body-md text-on-surface text-xs">${test.title}</td>
                   <td class="py-2">
@@ -102,19 +144,28 @@ const generateK6MetricsList = (k6: K6Report): string => {
   ];
 
   return metrics.map((metric, index) => `
-            <div class="flex justify-between items-center py-1 ${index < metrics.length - 1 ? 'border-b border-outline-variant/20' : ''}">
+            <div class="perf-metric-row flex justify-between items-center py-1 ${index < metrics.length - 1 ? 'border-b border-outline-variant/20' : ''}">
               <span class="font-body-md text-on-surface-variant text-sm">${metric.label}</span>
               <span class="font-mono text-sm ${metric.color}">${metric.value}</span>
             </div>`).join('');
 };
 
 export const generateHTML = (playwright: PlaywrightReport, k6: K6Report): string => {
-  // Test-case metrics are based on Playwright E2E test results.
+  // Test-case metrics are based on Playwright Automated test results.
   const totalTestCases: number = playwright.stats.total;
   const passedTestCases: number = playwright.stats.passed;
   const failedTestCases: number = playwright.stats.failed;
   const skippedTestCases: number = playwright.stats.skipped;
-  const testCasePassRate: number = totalTestCases > 0 ? Math.round((passedTestCases / totalTestCases) * 100) : 0;
+
+  // Total automated cases: currently Automated only; will aggregate API and Unit cases in the future.
+  const totalAutomatedCases: number = totalTestCases;
+  const passedAutomatedCases: number = passedTestCases;
+  const testCasePassRate: number = totalAutomatedCases > 0
+    ? Math.round((passedAutomatedCases / totalAutomatedCases) * 100)
+    : 0;
+  const failureRate: number = totalAutomatedCases > 0
+    ? Math.round((failedTestCases / totalAutomatedCases) * 100)
+    : 0;
 
   // k6 metrics are performance/load test data, counted separately as requests.
   const totalRequests: number = k6.stats.totalRequests;
@@ -123,15 +174,72 @@ export const generateHTML = (playwright: PlaywrightReport, k6: K6Report): string
     ? Math.round(((totalRequests - failedRequests) / totalRequests) * 100)
     : 0;
 
-  // Health score is driven by test-case pass rate.
-  const healthStatus: string = testCasePassRate >= 95 ? 'HEALTHY' : testCasePassRate >= 85 ? 'DEGRADED' : 'CRITICAL';
-  const healthColor: string = testCasePassRate >= 95 ? 'bg-emerald-400' : testCasePassRate >= 85 ? 'bg-amber-400' : 'bg-error';
-  const healthLabel: string = testCasePassRate >= 95 ? 'All systems operational — ready for release' :
-    testCasePassRate >= 85 ? 'Some tests need attention' : 'Multiple failures detected — investigate immediately';
+  // Overall execution success rate combines automated cases and performance scenarios.
+  const totalExecutionUnits: number = totalAutomatedCases + k6.stats.totalScenarios;
+  const passedExecutionUnits: number = passedAutomatedCases + k6.stats.passedScenarios;
+  const executionSuccessRate: number = totalExecutionUnits > 0
+    ? Math.round((passedExecutionUnits / totalExecutionUnits) * 100)
+    : 0;
 
-  const coverageTypes: number = 2; // playwright + k6
+  // Health score is driven by the overall execution success rate.
+  const healthStatus: string = executionSuccessRate >= 95 ? 'HEALTHY' : executionSuccessRate >= 85 ? 'DEGRADED' : 'CRITICAL';
+  const healthColor: string = executionSuccessRate >= 95 ? 'bg-emerald-400' : executionSuccessRate >= 85 ? 'bg-amber-400' : 'bg-error';
+  const healthLabel: string = executionSuccessRate >= 95 ? 'All systems operational — ready for release' :
+    executionSuccessRate >= 85 ? 'Some tests need attention' : 'Multiple failures detected — investigate immediately';
+
+  const isAutomatedActive: boolean = playwright.stats.total > 0;
+  const isPerformanceActive: boolean = k6.stats.totalScenarios > 0 || k6.stats.totalRequests > 0;
+  const coverageTypes: number = Number(isAutomatedActive) + Number(isPerformanceActive);
   const totalCoverage: number = 4; // playwright, k6, api, unit (future)
+  const totalPerformanceScenarios: number = k6.stats.totalScenarios;
+  const passedPerformanceScenariosValue: number = k6.stats.passedScenarios;
+  const failedPerformanceScenarios: number = totalPerformanceScenarios - passedPerformanceScenariosValue;
+  const performanceFailureRate: number = totalPerformanceScenarios > 0
+    ? Math.round((failedPerformanceScenarios / totalPerformanceScenarios) * 100)
+    : 0;
+  const scenarioSuccessRate: number = totalPerformanceScenarios > 0
+    ? Math.round((passedPerformanceScenariosValue / totalPerformanceScenarios) * 100)
+    : 0;
+  const requestFailureRate: number = totalRequests > 0
+    ? Math.round((failedRequests / totalRequests) * 100)
+    : 0;
+  // Total execution units: automated cases + performance scenarios; will include API/unit counts in the future.
+  const totalExecution: number = totalAutomatedCases + totalPerformanceScenarios;
+  const playwrightDurationMinutes: number = Math.round((playwright.stats.duration / 60000) * 100) / 100;
   const generatedAt: string = new Date().toLocaleString();
+
+  const totalPassed: number = passedAutomatedCases + passedPerformanceScenariosValue;
+  const totalFailed: number = failedTestCases + failedPerformanceScenarios;
+  const totalSkipped: number = skippedTestCases;
+  const overallStatusArray: string = JSON.stringify([
+    totalPassed,
+    totalFailed,
+    totalSkipped,
+  ]);
+
+  const k6DurationMinutes: number = Math.round((k6.stats.duration / 60) * 100) / 100;
+  const durationTypes = [
+    { label: 'Automated', value: playwrightDurationMinutes, color: '#8B5CF6' },
+    { label: 'Performance', value: k6DurationMinutes, color: '#FBBF24' },
+    { label: 'API', value: 0, color: '#7A7580' },
+    { label: 'Unit', value: 0, color: '#3b3742' },
+  ].filter(type => type.value > 0);
+  const durationLabels: string = JSON.stringify(durationTypes.map(t => t.label));
+  const durationData: string = JSON.stringify(durationTypes.map(t => t.value));
+  const durationColors: string = JSON.stringify(durationTypes.map(t => t.color));
+
+  const playwrightDataArray: string = JSON.stringify([
+    playwright.stats.passed,
+    playwright.stats.failed,
+    playwright.stats.skipped,
+  ]);
+  const k6DataArray: string = JSON.stringify([
+    k6.metrics.httpReqDuration.avg,
+    k6.metrics.httpReqDuration.min,
+    k6.metrics.httpReqDuration.max,
+    k6.metrics.httpReqDuration.p90,
+    k6.metrics.httpReqDuration.p95,
+  ]);
 
   const template = loadTemplate();
 
@@ -141,11 +249,16 @@ export const generateHTML = (playwright: PlaywrightReport, k6: K6Report): string
     healthStatus,
     healthLabel,
     testCasePassRate,
+    failureRate,
+    executionSuccessRate,
+    totalAutomatedCases,
+    totalExecution,
     totalTestCases,
     passedTestCases,
     failedTestCases,
     skippedTestCases,
     playwrightDuration: playwright.stats.duration,
+    playwrightDurationMinutes,
     playwrightTotal: playwright.stats.total,
     playwrightPassed: playwright.stats.passed,
     playwrightFailed: playwright.stats.failed,
@@ -153,10 +266,16 @@ export const generateHTML = (playwright: PlaywrightReport, k6: K6Report): string
     coverageTypes,
     totalCoverage,
     totalRequests,
+    totalPerformanceScenarios,
+    passedPerformanceScenarios: k6.stats.passedScenarios,
+    failedPerformanceScenarios,
+    performanceFailureRate,
+    scenarioSuccessRate,
+    requestFailureRate,
     successfulRequests: totalRequests - failedRequests,
     failedRequests,
     requestSuccessRate,
-    k6AvgDuration: k6.stats.duration,
+    k6AvgDuration: k6.metrics.httpReqDuration.avg,
     k6TotalRequests: k6.stats.totalRequests,
     k6SuccessRate: k6.stats.successRate,
     k6FailedRequests: k6.stats.failedRequests,
@@ -165,9 +284,18 @@ export const generateHTML = (playwright: PlaywrightReport, k6: K6Report): string
     k6Min: k6.metrics.httpReqDuration.min,
     k6Max: k6.metrics.httpReqDuration.max,
     k6P90: k6.metrics.httpReqDuration.p90,
-    failedTestRows: generateFailedTestRows(playwright),
-    noFailuresRow: generateNoFailuresRow(playwright),
-    e2eTestRows: generateE2ETestRows(playwright),
+    overallStatusArray,
+    durationLabels,
+    durationData,
+    durationColors,
+    playwrightDataArray,
+    k6DataArray,
+    failureRows: generateFailureRows(buildFailures(playwright, k6)),
+    automatedTestRows: generateAutomatedTestRows(playwright),
     k6MetricsList: generateK6MetricsList(k6),
+    automatedCasesVisible: isAutomatedActive ? '' : 'hidden',
+    performanceRequestsVisible: isPerformanceActive ? '' : 'hidden',
+    automatedTabVisible: isAutomatedActive ? '' : 'hidden',
+    performanceTabVisible: isPerformanceActive ? '' : 'hidden',
   });
 };

@@ -48,7 +48,7 @@ const buildReport = (inputPath: string, outputPath: string): string => {
   console.log(`   Requests:      ${k6Report.stats.totalRequests}`);
   console.log(`   Failed:        ${k6Report.stats.failedRequests}`);
   console.log(`   Success Rate:  ${k6Report.stats.successRate}%`);
-  console.log(`   Avg Duration:  ${k6Report.stats.duration}ms`);
+  console.log(`   Avg Duration:  ${k6Report.metrics.httpReqDuration.avg}ms`);
   console.log(`   P95:           ${k6Report.metrics.httpReqDuration.p95}ms`);
 
   return html;
