@@ -12,6 +12,8 @@
     "dev": "ts-node src/cli/index.ts",
     "dev:watch": "tsx watch src/cli/index.ts",
     "test": "vitest",
+    "test:e2e": "playwright test",
+    "report": "grimoir generate --input ./test-results --output ./output",
     "lint": "tsc --noEmit"
   },
   "repository": {
@@ -37,6 +39,7 @@
     "commander": "^15.0.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.61.1",
     "@types/node": "^25.9.3",
     "copyfiles": "^2.4.1",
     "ts-node": "^10.9.2",

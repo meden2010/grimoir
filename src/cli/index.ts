@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { Command } from 'commander';
-import { readFileSync, writeFileSync, mkdirSync, watch } from 'fs';
+import { readFileSync, writeFileSync, mkdirSync, watch, existsSync } from 'fs';
 import { join } from 'path';
 import { createServer, IncomingMessage, ServerResponse } from 'http';
 import { parsePlaywright, PlaywrightReport } from '../parsers/playwright.parser';
@@ -29,8 +29,11 @@ const buildReport = (inputPath: string, outputPath: string): string => {
   const playwrightReport: PlaywrightReport = parsePlaywright(playwrightRaw);
 
   const k6Path: string = join(inputPath, 'k6-results.json');
-  const k6Raw: Record<string, unknown> = JSON.parse(readFileSync(k6Path, 'utf-8')) as Record<string, unknown>;
-  const k6Report: K6Report = parseK6(k6Raw);
+  let k6Report: K6Report | null = null;
+  if (existsSync(k6Path)) {
+    const k6Raw: Record<string, unknown> = JSON.parse(readFileSync(k6Path, 'utf-8')) as Record<string, unknown>;
+    k6Report = parseK6(k6Raw);
+  }
 
   const html: string = generateHTML(playwrightReport, k6Report);
 
@@ -44,12 +47,14 @@ const buildReport = (inputPath: string, outputPath: string): string => {
   console.log(`   Skipped: ${playwrightReport.stats.skipped}`);
   console.log(`   Duration: ${playwrightReport.stats.duration}ms`);
 
-  console.log(`\n✅ k6 Results:`);
-  console.log(`   Requests:      ${k6Report.stats.totalRequests}`);
-  console.log(`   Failed:        ${k6Report.stats.failedRequests}`);
-  console.log(`   Success Rate:  ${k6Report.stats.successRate}%`);
-  console.log(`   Avg Duration:  ${k6Report.metrics.httpReqDuration.avg}ms`);
-  console.log(`   P95:           ${k6Report.metrics.httpReqDuration.p95}ms`);
+  if (k6Report) {
+    console.log(`\n✅ k6 Results:`);
+    console.log(`   Requests:      ${k6Report.stats.totalRequests}`);
+    console.log(`   Failed:        ${k6Report.stats.failedRequests}`);
+    console.log(`   Success Rate:  ${k6Report.stats.successRate}%`);
+    console.log(`   Avg Duration:  ${k6Report.metrics.httpReqDuration.avg}ms`);
+    console.log(`   P95:           ${k6Report.metrics.httpReqDuration.p95}ms`);
+  }
 
   return html;
 };
