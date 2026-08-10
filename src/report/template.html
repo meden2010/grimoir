@@ -138,56 +138,179 @@
         width: 100%;
       }
 
-      /* Animations */
-      @keyframes fadeIn {
-        from {
-          opacity: 0;
+      /* Glassmorphism & Modern Glow Effects */
+
+      @keyframes float {
+        0% {
+          transform: translateY(0px);
         }
-        to {
-          opacity: 1;
+        50% {
+          transform: translateY(-8px);
+        }
+        100% {
+          transform: translateY(0px);
         }
       }
-      @keyframes fadeInUp {
+      .animate-float {
+        animation: float 6s ease-in-out infinite;
+      }
+      @keyframes spin-slow {
         from {
-          opacity: 0;
-          transform: translateY(20px);
+          transform: rotate(0deg);
         }
         to {
+          transform: rotate(360deg);
+        }
+      }
+      .animate-spin-slow {
+        animation: spin-slow 45s linear infinite;
+      }
+      .magic-circle {
+        position: relative;
+        width: 310px;
+        height: 310px;
+        border: 2px dashed rgba(139, 92, 246, 0.4);
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 0;
+        box-shadow:
+          0 0 30px rgba(139, 92, 246, 0.3),
+          inset 0 0 30px rgba(139, 92, 246, 0.3);
+      }
+      .magic-circle::before {
+        content: "";
+        position: absolute;
+        top: -12px;
+        left: -12px;
+        right: -12px;
+        bottom: -12px;
+        border: 1px solid rgba(196, 181, 253, 0.3);
+        border-radius: 50%;
+        box-shadow: 0 0 15px rgba(196, 181, 253, 0.15);
+      }
+      .magic-circle::after {
+        content: "";
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        right: 12px;
+        bottom: 12px;
+        border: 3px dotted rgba(196, 181, 253, 0.4);
+        border-radius: 50%;
+      }
+
+      .glass-panel {
+        background: rgba(21, 18, 27, 0.7);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+      .glass-card {
+        background: rgba(29, 26, 35, 0.6);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(139, 92, 246, 0.15);
+      }
+      .ambient-glow {
+        position: relative;
+      }
+      .ambient-glow::before {
+        content: "";
+        position: absolute;
+        inset: -1px;
+        border-radius: inherit;
+        padding: 1px;
+        background: linear-gradient(
+          135deg,
+          rgba(139, 92, 246, 0.4),
+          rgba(251, 191, 36, 0.2),
+          transparent
+        );
+        -webkit-mask:
+          linear-gradient(#fff 0 0) content-box,
+          linear-gradient(#fff 0 0);
+        mask:
+          linear-gradient(#fff 0 0) content-box,
+          linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        pointer-events: none;
+      }
+
+      /* Mystical Grimmoire Entry & Aura Animations */
+      @keyframes spellReveal {
+        0% {
+          opacity: 0;
+          transform: translateY(20px) scale(0.97) rotateX(-8deg);
+          filter: brightness(0.6) blur(4px);
+        }
+        50% {
+          filter: brightness(1.2) blur(0px);
+        }
+        100% {
           opacity: 1;
-          transform: translateY(0);
+          transform: translateY(0) scale(1) rotateX(0deg);
+          filter: brightness(1) blur(0px);
+        }
+      }
+      @keyframes runeAura {
+        0%,
+        100% {
+          border-color: rgba(139, 92, 246, 0.2);
+          box-shadow: 0 0 10px rgba(139, 92, 246, 0.05);
+        }
+        50% {
+          border-color: rgba(251, 191, 36, 0.4);
+          box-shadow: 0 0 20px rgba(139, 92, 246, 0.2);
         }
       }
       @keyframes pulseGlow {
         0%,
         100% {
-          box-shadow: 0 0 6px rgba(52, 211, 153, 0.6);
+          box-shadow: 0 0 8px rgba(52, 211, 153, 0.6);
         }
         50% {
-          box-shadow: 0 0 12px rgba(52, 211, 153, 0.9);
+          box-shadow: 0 0 16px rgba(52, 211, 153, 0.9);
         }
       }
-      @keyframes countUp {
-        from {
-          opacity: 0;
-          transform: translateY(8px);
+      @keyframes gradientShift {
+        0% {
+          background-position: 0% 50%;
         }
-        to {
-          opacity: 1;
-          transform: translateY(0);
+        50% {
+          background-position: 100% 50%;
         }
+        100% {
+          background-position: 0% 50%;
+        }
+      }
+
+      .title-grimoir {
+        background-size: 200% 200%;
+        transition:
+          transform 0.3s ease,
+          filter 0.3s ease;
+        display: inline-block;
+        cursor: default;
+      }
+      .title-grimoir:hover {
+        animation: gradientShift 2.5s ease infinite;
+        filter: drop-shadow(0 0 12px rgba(139, 92, 246, 0.6));
+        transform: scale(1.03);
       }
 
       .animate-fade-in {
         animation: fadeIn 0.6s ease-out both;
       }
       .animate-fade-in-up {
-        animation: fadeInUp 0.7s ease-out both;
+        animation: spellReveal 0.85s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+        perspective: 1000px;
       }
       .animate-pulse-glow {
         animation: pulseGlow 2s ease-in-out infinite;
       }
-      .animate-count {
-        animation: countUp 0.5s ease-out both;
+      .animate-float {
+        animation: floatSlow 6s ease-in-out infinite;
       }
 
       .delay-100 {
@@ -213,21 +336,25 @@
       }
 
       .card-hover {
-        will-change: transform;
+        will-change: transform, box-shadow;
+        position: relative;
         transition:
-          transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
-          box-shadow 0.25s ease,
-          border-color 0.25s ease;
+          transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+          box-shadow 0.3s ease,
+          border-color 0.3s ease,
+          background-color 0.3s ease;
       }
       .card-hover:hover {
-        transform: translateY(-4px) scale(1.02);
-        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55);
+        transform: translateY(-5px) scale(1.015);
+        box-shadow:
+          0 20px 45px -10px rgba(139, 92, 246, 0.25),
+          0 10px 20px -5px rgba(0, 0, 0, 0.6);
         border-color: rgba(139, 92, 246, 0.5);
       }
 
       .modal-backdrop {
         opacity: 0;
-        transition: opacity 0.2s ease-out;
+        transition: opacity 0.25s ease-out;
       }
       .modal-backdrop.open {
         opacity: 1;
@@ -270,39 +397,191 @@
         transform: translateY(12px);
       }
 
-      /* Custom main scrollbar */
+      /* Hide Main Window Scrollbar (Keep Scrolling & Top Progress Bar Active) */
+      html,
+      body {
+        scrollbar-width: none !important;
+        -ms-overflow-style: none !important;
+      }
+      html::-webkit-scrollbar,
+      body::-webkit-scrollbar,
       ::-webkit-scrollbar {
-        width: 8px;
-      }
-      ::-webkit-scrollbar-track {
-        background: #0f0d15;
-      }
-      ::-webkit-scrollbar-thumb {
-        background: #494454;
-        border-radius: 10px;
-        transition:
-          background 0.2s ease,
-          width 0.2s ease;
-      }
-      ::-webkit-scrollbar-thumb:hover {
-        background: #8b5cf6;
+        width: 0px !important;
+        height: 0px !important;
+        display: none !important;
       }
 
-      /* Scroll progress indicator */
-      #scrollProgress {
+      /* Book Spine Track */
+      #scrollTrack {
         position: fixed;
         top: 0;
         left: 0;
-        height: 3px;
-        background: linear-gradient(to right, #8b5cf6, #fbbf24);
-        width: 0%;
+        width: 5px; /* Más delgado */
+        height: 100vh;
+        background: linear-gradient(90deg, #050505 0%, #1a1a24 50%, #050505 100%);
+        border-right: 1px solid rgba(255, 255, 255, 0.05);
+        z-index: 99;
+        box-shadow: inset -2px 0 6px rgba(0,0,0,0.8);
+      }
+
+      /* Left Full-Height Vertical Scroll Progress Indicator */
+      #scrollProgress {
+        position: fixed;
+        top: 0; /* Anclado arriba para que crezca hacia abajo */
+        left: 0;
+        width: 5px; /* Más delgado */
+        height: 0%; /* Filled via JS */
+        border-radius: 6px; /* Puntas redondeadas */
+        background: linear-gradient(180deg, #8b5cf6, #fbbf24, #ec4899, #8b5cf6);
+        background-size: 100% 200vh; /* Fixed absolute size to prevent squishing */
+        animation: scrollBarFlowVertical 4s linear infinite;
         z-index: 100;
-        box-shadow: 0 0 10px rgba(139, 92, 246, 0.6);
+        box-shadow:
+          0 0 10px rgba(139, 92, 246, 0.5),
+          0 0 15px rgba(251, 191, 36, 0.3);
+        mix-blend-mode: screen; /* Blend magic with dark spine */
+      }
+      
+      @keyframes scrollBarFlowVertical {
+        from {
+          background-position: 0 0;
+        }
+        to {
+          background-position: 0 -200vh;
+        }
+      }
+
+      /* Grimoire Background Elements */
+      .grimoire-texture {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: -20;
+        opacity: 0.05;
+        mix-blend-mode: overlay;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+      }
+      .magic-circle {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        width: 90vh;
+        height: 90vh;
+        margin-top: -45vh;
+        margin-left: -45vh;
+        pointer-events: none;
+        z-index: -18;
+        opacity: 0.02;
+        animation: spin-slow 120s linear infinite;
+        fill: none;
+        stroke: #a78bfa;
+        stroke-width: 1.5;
+      }
+      @keyframes spin-slow {
+        100% { transform: rotate(360deg); }
+      }
+      .page-edge {
+        position: fixed;
+        top: 0;
+        right: 0;
+        width: 30px;
+        height: 100vh;
+        pointer-events: none;
+        z-index: 90;
+        background: linear-gradient(270deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%);
+        border-right: 1px solid rgba(255,255,255,0.03);
+        box-shadow: inset -5px 0 15px rgba(0,0,0,0.8);
+      }
+      .corner-ornament {
+        position: fixed;
+        width: 160px;
+        height: 160px;
+        pointer-events: none;
+        z-index: 95;
+        opacity: 0.08;
+        fill: #a78bfa;
+      }
+      .corner-tl { top: 0; left: 5px; }
+      .corner-tr { top: 0; right: 0; transform: scaleX(-1); }
+      .corner-bl { bottom: 0; left: 5px; transform: scaleY(-1); }
+      .corner-br { bottom: 0; right: 0; transform: scale(-1, -1); }
+      #magicDust {
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: -15;
       }
     </style>
   </head>
-  <body class="bg-surface text-on-surface font-body font-body-md">
-    <!-- Scroll Progress Indicator -->
+  <body
+    class="bg-surface text-on-surface font-body font-body-md relative overflow-x-hidden min-h-screen selection:bg-primary/30"
+  >
+    <!-- Grimoire Background Elements -->
+    <div class="grimoire-texture" aria-hidden="true"></div>
+    <svg class="magic-circle" viewBox="0 0 1000 1000" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <circle cx="500" cy="500" r="480" stroke-dasharray="10, 20" />
+      <circle cx="500" cy="500" r="460" />
+      <circle cx="500" cy="500" r="280" />
+      <!-- Hexagram -->
+      <polygon points="500,40 898,730 102,730" />
+      <polygon points="500,960 102,270 898,270" />
+      <!-- Inner Square -->
+      <rect x="302" y="302" width="396" height="396" transform="rotate(45 500 500)" />
+      <!-- Runes / Orbs -->
+      <circle cx="500" cy="40" r="25" />
+      <circle cx="898" cy="730" r="25" />
+      <circle cx="102" cy="730" r="25" />
+      <circle cx="500" cy="960" r="25" />
+      <circle cx="102" cy="270" r="25" />
+      <circle cx="898" cy="270" r="25" />
+    </svg>
+    <canvas id="magicDust" aria-hidden="true"></canvas>
+    
+    <!-- Binding & Corners -->
+    <div class="page-edge" aria-hidden="true"></div>
+    <svg class="corner-ornament corner-tl" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M0,0 L100,0 L100,2 C50,2 2,50 2,100 L0,100 Z" />
+      <path d="M10,10 L70,10 C40,15 15,40 10,70 Z" fill="none" stroke="currentColor" stroke-width="1.5" />
+      <circle cx="20" cy="20" r="3" />
+      <circle cx="35" cy="15" r="1.5" />
+      <circle cx="15" cy="35" r="1.5" />
+    </svg>
+    <svg class="corner-ornament corner-tr" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M0,0 L100,0 L100,2 C50,2 2,50 2,100 L0,100 Z" />
+      <path d="M10,10 L70,10 C40,15 15,40 10,70 Z" fill="none" stroke="currentColor" stroke-width="1.5" />
+      <circle cx="20" cy="20" r="3" />
+      <circle cx="35" cy="15" r="1.5" />
+      <circle cx="15" cy="35" r="1.5" />
+    </svg>
+    <svg class="corner-ornament corner-bl" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M0,0 L100,0 L100,2 C50,2 2,50 2,100 L0,100 Z" />
+      <path d="M10,10 L70,10 C40,15 15,40 10,70 Z" fill="none" stroke="currentColor" stroke-width="1.5" />
+      <circle cx="20" cy="20" r="3" />
+      <circle cx="35" cy="15" r="1.5" />
+      <circle cx="15" cy="35" r="1.5" />
+    </svg>
+    <svg class="corner-ornament corner-br" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M0,0 L100,0 L100,2 C50,2 2,50 2,100 L0,100 Z" />
+      <path d="M10,10 L70,10 C40,15 15,40 10,70 Z" fill="none" stroke="currentColor" stroke-width="1.5" />
+      <circle cx="20" cy="20" r="3" />
+      <circle cx="35" cy="15" r="1.5" />
+      <circle cx="15" cy="35" r="1.5" />
+    </svg>
+
+    <!-- Ambient Background Glows -->
+    <div
+      class="fixed top-[-10%] left-[-5%] w-[500px] h-[500px] bg-primary/10 rounded-full blur-[140px] pointer-events-none -z-10 animate-float"
+      aria-hidden="true"
+    ></div>
+    <div
+      class="fixed bottom-[-10%] right-[-5%] w-[600px] h-[600px] bg-secondary/10 rounded-full blur-[160px] pointer-events-none -z-10 animate-float delay-500"
+      aria-hidden="true"
+    ></div>
+
+    <!-- Lomo de Libro / Spine Track -->
+    <div id="scrollTrack" aria-hidden="true"></div>
     <div id="scrollProgress" aria-hidden="true"></div>
 
     <!-- Main Content -->
@@ -311,12 +590,17 @@
       <div class="flex items-center justify-between mb-gutter animate-fade-in">
         <div>
           <h1
-            class="font-display text-display-lg text-primary tracking-tight text-balance"
+            class="font-display text-display-lg bg-gradient-to-r from-primary via-amber-300 to-purple-500 bg-clip-text text-transparent tracking-tight text-balance font-bold title-grimoir"
             id="grimoireTitle"
           >
             Grimoir
           </h1>
-          <p class="font-label-caps text-outline text-[10px] uppercase mt-base">
+          <p
+            class="font-label-caps text-outline text-[10px] uppercase mt-base flex items-center gap-2"
+          >
+            <span
+              class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"
+            ></span>
             Unified Test Report — __GENERATED_AT__
           </p>
         </div>
@@ -383,25 +667,28 @@
 
           <div class="grid grid-cols-1 md:grid-cols-3 gap-base">
             <div
-              class="md:col-span-1 bg-surface-container-lowest border border-outline-variant rounded-xl p-4 shadow-sm card-hover animate-fade-in-up delay-200"
+              class="md:col-span-1 bg-surface-container-lowest border border-outline-variant rounded-xl p-6 shadow-sm card-hover animate-fade-in-up delay-200 flex flex-col items-center justify-center text-center"
             >
-              <div class="flex items-center gap-2 mb-2">
-                <span class="material-symbols-outlined text-primary text-base"
+              <div class="flex items-center justify-center gap-2 mb-2">
+                <span class="material-symbols-outlined text-primary text-xl"
                   >analytics</span
                 >
-                <span class="font-label-caps text-outline text-[10px] uppercase"
+                <span class="font-label-caps text-outline text-xs uppercase"
                   >Total Execution</span
                 >
               </div>
               <div
-                class="font-display text-3xl text-on-surface tabular-nums counter mb-2"
+                class="font-display text-5xl font-bold text-on-surface tabular-nums counter my-3"
                 data-target="__TOTAL_EXECUTION__"
               >
                 0
               </div>
-              <div class="flex gap-3">
+              <div
+                class="flex items-center justify-center gap-4 border-t border-outline-variant/30 pt-3 w-full"
+              >
                 <div>
-                  <span class="font-body-md text-on-surface-variant text-xs"
+                  <span
+                    class="font-body-md text-on-surface text-sm font-semibold"
                     >__TOTAL_AUTOMATED_CASES__</span
                   >
                   <span
@@ -409,8 +696,10 @@
                     >Automated</span
                   >
                 </div>
+                <div class="h-3 w-px bg-outline-variant/40"></div>
                 <div>
-                  <span class="font-body-md text-on-surface-variant text-xs"
+                  <span
+                    class="font-body-md text-on-surface text-sm font-semibold"
                     >__TOTAL_PERFORMANCE_SCENARIOS__</span
                   >
                   <span
@@ -421,20 +710,22 @@
               </div>
             </div>
             <div
-              class="md:col-span-2 bg-surface-container-lowest border border-outline-variant rounded-xl p-4 shadow-sm flex flex-col card-hover animate-fade-in-up delay-300"
+              class="md:col-span-2 bg-surface-container-lowest border border-outline-variant rounded-xl p-6 shadow-sm flex flex-col justify-between card-hover animate-fade-in-up delay-300"
             >
-              <div class="flex items-center gap-2 mb-3">
-                <span class="material-symbols-outlined text-primary text-base"
+              <div class="flex items-center gap-2 mb-2">
+                <span class="material-symbols-outlined text-primary text-xl"
                   >monitor_heart</span
                 >
-                <span class="font-label-caps text-outline text-[10px] uppercase"
+                <span class="font-label-caps text-outline text-xs uppercase"
                   >Health Score</span
                 >
               </div>
-              <div class="flex items-center justify-center gap-5">
+              <div
+                class="flex flex-col sm:flex-row items-center justify-center gap-6 my-auto"
+              >
                 <svg
                   viewBox="0 0 200 110"
-                  class="w-[250px] shrink-0"
+                  class="w-[220px] shrink-0"
                   aria-label="Health Score __HEALTH_SCORE__%"
                 >
                   <defs>
@@ -451,7 +742,20 @@
                         stdDeviation="4"
                         flood-color="__HEALTH_SCORE_COLOR_HEX__"
                         flood-opacity="0.5"
-                      />
+                      >
+                        <animate
+                          attributeName="stdDeviation"
+                          values="4; 10; 4"
+                          dur="2s"
+                          repeatCount="indefinite"
+                        />
+                        <animate
+                          attributeName="flood-opacity"
+                          values="0.4; 0.9; 0.4"
+                          dur="2s"
+                          repeatCount="indefinite"
+                        />
+                      </feDropShadow>
                     </filter>
                   </defs>
                   <path
@@ -477,36 +781,39 @@
                     x="100"
                     y="85"
                     text-anchor="middle"
-                    class="font-display text-3xl fill-on-surface tabular-nums counter"
+                    class="font-display text-4xl font-bold fill-on-surface tabular-nums counter"
                     data-target="__HEALTH_SCORE__"
                   >
                     0
                   </text>
                   <text
-                    x="128"
-                    y="78"
+                    x="132"
+                    y="76"
                     text-anchor="start"
-                    class="font-display text-base fill-outline/60"
+                    class="font-display text-base fill-outline/60 font-medium"
                   >
                     %
                   </text>
                 </svg>
-                <div class="flex flex-col">
-                  <div class="flex items-center gap-2 mb-1">
+                <div class="flex flex-col text-center sm:text-left">
+                  <div
+                    class="flex items-center justify-center sm:justify-start gap-2 mb-1"
+                  >
                     <span
-                      class="w-2.5 h-2.5 __HEALTH_COLOR__ rounded-full shrink-0"
+                      class="w-3 h-3 __HEALTH_COLOR__ rounded-full shrink-0 shadow-[0_0_8px_rgba(255,255,255,0.2)]"
                     ></span>
                     <span
-                      class="font-label-caps text-lg font-semibold"
+                      class="font-label-caps text-xl font-bold tracking-wide"
                       style="color: __HEALTH_SCORE_COLOR_HEX__"
                       >__HEALTH_STATUS__</span
                     >
                   </div>
-                  <span class="font-body-md text-on-surface-variant text-lg"
+                  <span
+                    class="font-body-md text-on-surface-variant text-sm font-medium"
                     >__HEALTH_LABEL__</span
                   >
                   <span
-                    class="font-label-caps text-outline text-[10px] uppercase mt-1"
+                    class="font-label-caps text-outline text-[11px] uppercase mt-2 font-mono"
                     >Last run __GENERATED_AT__</span
                   >
                 </div>
@@ -516,17 +823,23 @@
 
           <!-- Coverage -->
           <div
-            class="bg-surface-container-lowest border border-outline-variant rounded-xl p-3 shadow-sm animate-fade-in-up delay-300"
+            class="bg-surface-container-lowest border border-outline-variant rounded-xl p-4 shadow-sm animate-fade-in-up delay-300 flex flex-col gap-2"
           >
-            <div class="flex items-center justify-between mb-2">
-              <span class="font-label-caps text-outline text-[10px] uppercase"
-                >Coverage</span
-              >
-              <span class="font-label-caps text-primary text-[10px] uppercase"
-                >__COVERAGE_TYPES__/__TOTAL_COVERAGE__ active</span
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary text-sm"
+                  >widgets</span
+                >
+                <span class="font-label-caps text-outline text-xs uppercase"
+                  >Framework Coverage</span
+                >
+              </div>
+              <span
+                class="font-label-caps text-primary text-xs font-semibold uppercase"
+                >__COVERAGE_TYPES__ / __TOTAL_COVERAGE__ Active Suites</span
               >
             </div>
-            <div class="flex flex-wrap gap-2">__COVERAGE_CHIPS__</div>
+            <div class="flex flex-wrap gap-2.5 pt-1">__COVERAGE_CHIPS__</div>
           </div>
         </section>
 
@@ -542,8 +855,22 @@
             >
               Execution Status
             </h3>
-            <div class="chart-wrap">
-              <canvas id="overviewStatusChart"></canvas>
+            <div class="flex flex-col md:flex-row items-center gap-4">
+              <div
+                class="chart-wrap flex-1 min-w-[200px] animate-float flex justify-center items-center"
+              >
+                <!-- Explicit 320x320 square container to force exact alignment -->
+                <div class="relative w-[320px] h-[320px] flex-shrink-0">
+                  <div class="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
+                    <div class="magic-circle animate-spin-slow"></div>
+                  </div>
+                  <canvas id="overviewStatusChart" class="relative z-10 w-full h-full"></canvas>
+                </div>
+              </div>
+              <div
+                id="customPieLegend"
+                class="flex flex-col justify-center gap-3 w-full md:w-[160px] md:shrink-0"
+              ></div>
             </div>
           </div>
           <div
@@ -565,32 +892,58 @@
           class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-sm animate-fade-in-up delay-500"
         >
           <div
-            class="p-gutter border-b border-outline-variant flex items-center justify-between"
+            class="p-gutter border-b border-outline-variant flex flex-col sm:flex-row sm:items-center justify-between gap-3"
           >
-            <h3
-              class="font-label-caps text-on-surface-variant text-[11px] uppercase"
-            >
-              Failures
-            </h3>
-            <div id="failuresPagination" class="flex items-center gap-2 hidden">
-              <button
-                type="button"
-                id="failuresPrev"
-                class="px-2 py-1 rounded bg-surface-container text-outline hover:text-primary transition-colors text-xs font-label-caps disabled:opacity-40 disabled:cursor-not-allowed"
+            <div class="flex items-center gap-3">
+              <h3
+                class="font-label-caps text-on-surface-variant text-[11px] uppercase"
               >
-                Previous
-              </button>
+                Failures
+              </h3>
               <span
-                id="failuresPageInfo"
-                class="text-xs text-on-surface-variant font-mono"
-              ></span>
-              <button
-                type="button"
-                id="failuresNext"
-                class="px-2 py-1 rounded bg-surface-container text-outline hover:text-primary transition-colors text-xs font-label-caps disabled:opacity-40 disabled:cursor-not-allowed"
+                id="failuresCountBadge"
+                class="bg-error/10 text-error text-[10px] font-bold px-2 py-0.5 rounded-full border border-error/20 hidden"
+                >0</span
               >
-                Next
-              </button>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <div class="relative flex-1 sm:w-48">
+                <span
+                  class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-outline text-sm pointer-events-none"
+                  >search</span
+                >
+                <input
+                  type="text"
+                  id="failureSearch"
+                  placeholder="Filter failures..."
+                  class="w-full bg-surface-container border border-outline-variant/40 rounded-lg pl-8 pr-3 py-1 text-xs text-on-surface placeholder:text-outline focus:outline-none focus:border-primary focus:shadow-[0_0_12px_rgba(139,92,246,0.3)] transition-all"
+                />
+              </div>
+
+              <div
+                id="failuresPagination"
+                class="flex items-center gap-2 hidden shrink-0"
+              >
+                <button
+                  type="button"
+                  id="failuresPrev"
+                  class="px-2 py-1 rounded bg-surface-container text-outline hover:text-primary transition-colors text-xs font-label-caps disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  Previous
+                </button>
+                <span
+                  id="failuresPageInfo"
+                  class="text-xs text-on-surface-variant font-mono"
+                ></span>
+                <button
+                  type="button"
+                  id="failuresNext"
+                  class="px-2 py-1 rounded bg-surface-container text-outline hover:text-primary transition-colors text-xs font-label-caps disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  Next
+                </button>
+              </div>
             </div>
           </div>
           <div class="overflow-x-auto">
@@ -637,7 +990,7 @@
           class="modal-backdrop fixed inset-0 z-50 hidden items-center justify-center bg-black/60 backdrop-blur-sm p-gutter"
         >
           <div
-            class="modal-content bg-surface-container-lowest border border-outline-variant rounded-xl shadow-2xl max-w-2xl w-full max-h-[80vh] flex flex-col"
+            class="modal-content bg-surface-container-lowest border border-primary/30 rounded-xl shadow-[0_0_40px_rgba(139,92,246,0.15)] max-w-2xl w-full max-h-[80vh] flex flex-col"
           >
             <div
               class="p-gutter border-b border-outline-variant flex items-center justify-between"
@@ -954,61 +1307,156 @@
           </div>
         </div>
 
-        <!-- Automated Chart + Table -->
+        <!-- Automated Split Pane (Allure Style) -->
         <div
-          class="grid grid-cols-1 md:grid-cols-2 gap-gutter animate-fade-in-up delay-300"
+          class="flex flex-col lg:flex-row h-[calc(100vh-220px)] min-h-[500px] gap-gutter animate-fade-in-up delay-200"
+          id="automatedSplitPane"
         >
+          <!-- Left Pane: Tree Navigation -->
           <div
-            class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter card-hover"
+            class="lg:w-1/3 bg-surface-container-lowest border border-outline-variant rounded-xl flex flex-col overflow-hidden card-hover"
           >
-            <h3
-              class="font-label-caps text-on-surface-variant text-[11px] uppercase mb-base"
-            >
-              Distribution
-            </h3>
-            <div class="chart-wrap"><canvas id="automatedChart"></canvas></div>
-          </div>
-          <div
-            class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter overflow-hidden card-hover"
-          >
-            <h3
-              class="font-label-caps text-on-surface-variant text-[11px] uppercase mb-base"
-            >
-              Test Details
-            </h3>
+            <!-- Search & Filters Header -->
             <div
-              class="overflow-y-auto custom-scrollbar"
-              style="max-height: 320px"
+              class="p-3 border-b border-outline-variant/50 bg-surface-container/30"
             >
-              <table class="w-full text-left border-collapse text-sm">
-                <thead>
-                  <tr class="border-b border-outline-variant">
-                    <th
-                      class="py-2 font-label-caps text-outline text-[10px] uppercase"
+              <div class="relative mb-3">
+                <span
+                  class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-outline text-sm pointer-events-none"
+                  >search</span
+                >
+                <input
+                  type="text"
+                  id="automatedSearch"
+                  placeholder="Search suites or tests..."
+                  class="w-full bg-surface-container border border-outline-variant/40 rounded-lg pl-8 pr-3 py-1.5 text-xs text-on-surface placeholder:text-outline focus:outline-none focus:border-primary focus:shadow-[0_0_12px_rgba(139,92,246,0.3)] transition-all"
+                />
+              </div>
+              <div
+                class="flex items-center justify-between gap-1 overflow-x-auto pb-1 scrollbar-none"
+                id="automatedFilterButtons"
+              >
+                <button
+                  type="button"
+                  data-filter="all"
+                  class="auto-filter-btn active flex-1 py-1 rounded text-[10px] font-label-caps font-semibold border border-primary/40 bg-primary/20 text-primary transition-all whitespace-nowrap"
+                >
+                  All
+                </button>
+                <button
+                  type="button"
+                  data-filter="passed"
+                  class="auto-filter-btn flex-1 py-1 rounded text-[10px] font-label-caps font-semibold border border-outline-variant/40 bg-surface-container text-on-surface-variant hover:text-emerald-400 transition-all whitespace-nowrap"
+                >
+                  Pass
+                </button>
+                <button
+                  type="button"
+                  data-filter="failed"
+                  class="auto-filter-btn flex-1 py-1 rounded text-[10px] font-label-caps font-semibold border border-outline-variant/40 bg-surface-container text-on-surface-variant hover:text-error transition-all whitespace-nowrap"
+                >
+                  Fail
+                </button>
+                <button
+                  type="button"
+                  data-filter="skipped"
+                  class="auto-filter-btn flex-1 py-1 rounded text-[10px] font-label-caps font-semibold border border-outline-variant/40 bg-surface-container text-on-surface-variant hover:text-outline transition-all whitespace-nowrap"
+                >
+                  Skip
+                </button>
+              </div>
+            </div>
+
+            <!-- Tree Container -->
+            <div
+              class="flex-1 overflow-y-auto custom-scrollbar p-2"
+              id="automatedTreeContainer"
+            >
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+
+          <!-- Right Pane: Test Details -->
+          <div
+            class="lg:w-2/3 bg-surface-container-lowest border border-outline-variant rounded-xl flex flex-col overflow-hidden card-hover relative"
+            id="automatedDetailsContainer"
+          >
+            <!-- Empty State -->
+            <div
+              id="automatedEmptyState"
+              class="absolute inset-0 flex flex-col items-center justify-center text-outline bg-surface-container-lowest z-10 transition-opacity duration-300"
+            >
+              <span
+                class="material-symbols-outlined text-6xl opacity-30 mb-4 animate-pulse-glow"
+                >magic_button</span
+              >
+              <p class="font-label-caps text-sm">
+                Select a test to view details
+              </p>
+            </div>
+
+            <!-- Content State -->
+            <div
+              id="automatedContentState"
+              class="flex flex-col h-full w-full opacity-0 pointer-events-none transition-opacity duration-300"
+            >
+              <!-- Header -->
+              <div
+                class="p-4 border-b border-outline-variant/50 flex flex-col gap-2"
+              >
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <span
+                      id="detailStatusBadge"
+                      class="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold rounded-full border bg-primary/10 text-primary border-primary/30"
                     >
-                      Suite
-                    </th>
-                    <th
-                      class="py-2 font-label-caps text-outline text-[10px] uppercase"
+                      <span
+                        class="w-1.5 h-1.5 rounded-full bg-primary"
+                        id="detailStatusDot"
+                      ></span>
+                      <span id="detailStatusText" class="uppercase"
+                        >PASSED</span
+                      >
+                    </span>
+                    <span
+                      class="text-on-surface-variant font-mono text-xs"
+                      id="detailSuiteText"
+                      >suite_name.spec.ts</span
                     >
-                      Test
-                    </th>
-                    <th
-                      class="py-2 font-label-caps text-outline text-[10px] uppercase"
-                    >
-                      Status
-                    </th>
-                    <th
-                      class="py-2 font-label-caps text-outline text-[10px] uppercase text-right"
-                    >
-                      Duration
-                    </th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-outline-variant/20">
-                  __AUTOMATED_TEST_ROWS__
-                </tbody>
-              </table>
+                  </div>
+                  <div
+                    class="text-on-surface-variant font-mono text-xs flex items-center gap-1"
+                  >
+                    <span class="material-symbols-outlined text-sm">timer</span>
+                    <span id="detailDurationText">120ms</span>
+                  </div>
+                </div>
+                <h3
+                  class="font-display text-lg text-on-surface"
+                  id="detailTestName"
+                >
+                  Test Case Name
+                </h3>
+              </div>
+
+              <!-- Tabs for Body -->
+              <div
+                class="px-4 pt-2 border-b border-outline-variant/50 flex items-center gap-4"
+              >
+                <button
+                  class="px-2 py-1 text-sm font-label-caps text-primary border-b-2 border-primary"
+                >
+                  Execution
+                </button>
+              </div>
+
+              <!-- Body (Steps & Errors) -->
+              <div
+                class="flex-1 overflow-y-auto custom-scrollbar p-4 flex flex-col gap-3"
+                id="detailExecutionBody"
+              >
+                <!-- Injected via JS -->
+              </div>
             </div>
           </div>
         </div>
@@ -1114,7 +1562,7 @@
         let isTransitioning = false;
 
         function showPanel(panel) {
-          panel.classList.remove("hidden");
+          panel.classList.remove("hidden", "hidden-panel");
           panel.classList.add("entering-panel");
           void panel.offsetWidth;
           requestAnimationFrame(() => {
@@ -1123,7 +1571,7 @@
           });
 
           // Initialize charts lazily when their tab becomes visible
-          if (panel.id === "tab-automated") initAutomatedChart();
+          if (panel.id === "tab-automated") renderAutomatedTree();
           if (panel.id === "tab-perf") initPerfChart();
         }
 
@@ -1190,60 +1638,255 @@
 
     <!-- Charts -->
     <script>
+      const PLAYWRIGHT_SUITES = __PLAYWRIGHT_SUITES_JSON__;
+      const glowPlugin = {
+        id: "glow",
+        beforeDatasetsDraw: function (chart) {
+          const ctx = chart.ctx;
+          ctx.save();
+          ctx.shadowColor = "rgba(139, 92, 246, 0.4)";
+          ctx.shadowBlur = 15;
+          ctx.shadowOffsetX = 0;
+          ctx.shadowOffsetY = 0;
+        },
+        afterDatasetsDraw: function (chart) {
+          chart.ctx.restore();
+        },
+      };
+
+      const htmlLegendPlugin = {
+        id: "htmlLegend",
+        afterUpdate(chart) {
+          const ul = document.getElementById("customPieLegend");
+          if (!ul) return;
+          while (ul.firstChild) {
+            ul.firstChild.remove();
+          }
+
+          const items =
+            chart.options.plugins.legend.labels.generateLabels(chart);
+          const total = chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+
+          items.forEach((item) => {
+            const val = chart.data.datasets[0].data[item.index];
+            const pct = total > 0 ? Math.round((val / total) * 100) : 0;
+
+            const li = document.createElement("div");
+            li.className =
+              "flex items-center gap-3 cursor-pointer p-2 rounded hover:bg-surface-container transition-colors";
+            li.onclick = () => {
+              chart.toggleDataVisibility(item.index);
+              chart.update();
+            };
+
+            const box = document.createElement("div");
+            // Use solid colors instead of canvas gradients for the HTML legend
+            const solidColors = ["#a78bfa", "#f87171", "#94a3b8"];
+            const color = solidColors[item.index] || "#ffffff";
+            box.style.background = color;
+            box.className = "w-3 h-3 rounded-full shrink-0";
+
+            const textContainer = document.createElement("div");
+            textContainer.className = "flex items-baseline gap-2 flex-1";
+
+            const label = document.createElement("span");
+            label.className =
+              "text-xs text-on-surface-variant font-label-caps uppercase tracking-wider";
+            label.style.textDecoration = item.hidden ? "line-through" : "";
+            label.innerText = item.text;
+
+            textContainer.appendChild(label);
+            li.appendChild(box);
+            li.appendChild(textContainer);
+            ul.appendChild(li);
+          });
+        },
+      };
+
+      const dataLabelsPlugin = {
+        id: "dataLabels",
+        afterDatasetsDraw(chart) {
+          const ctx = chart.ctx;
+          const meta = chart.getDatasetMeta(0);
+          const total = chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+
+          meta.data.forEach((element, index) => {
+            // Hide label if the slice is very small or hidden to prevent overlap
+            if (element.hidden || element.circumference < Math.PI / 8) return;
+            const val = chart.data.datasets[0].data[index];
+            if (val === 0) return;
+
+            const centerPoint = element.tooltipPosition();
+            ctx.save();
+            ctx.font = "bold 22px 'Playfair Display', serif";
+            ctx.fillStyle = "#ffffff";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.shadowColor = "rgba(0,0,0,0.8)";
+            ctx.shadowBlur = 6;
+            ctx.fillText(val.toString(), centerPoint.x, centerPoint.y);
+            ctx.restore();
+          });
+        },
+      };
+
       const chartOptions = {
         responsive: true,
         maintainAspectRatio: false,
         animation: {
-          duration: 1000,
-          easing: "easeOutQuart",
+          duration: 1500,
+          easing: "easeOutElastic",
         },
         plugins: {
           legend: {
             position: "bottom",
             labels: {
               color: "#cbc3d7",
-              boxWidth: 14,
-              font: { size: 12, family: "Inter" },
+              usePointStyle: true,
+              padding: 20,
+              font: { size: 11, family: "Inter", weight: "500" },
             },
+          },
+          tooltip: {
+            backgroundColor: "rgba(15, 13, 21, 0.9)",
+            titleColor: "#cbc3d7",
+            bodyColor: "#e9e7ec",
+            borderColor: "rgba(203, 195, 215, 0.2)",
+            borderWidth: 1,
+            padding: 12,
+            usePointStyle: true,
           },
         },
       };
 
       const tabChartOptions = {
-        responsive: true,
-        maintainAspectRatio: false,
+        ...chartOptions,
         animation: false,
-        plugins: {
-          legend: {
-            position: "bottom",
-            labels: {
-              color: "#cbc3d7",
-              boxWidth: 14,
-              font: { size: 12, family: "Inter" },
-            },
-          },
-        },
       };
 
       // Overview execution status chart
-      new Chart(document.getElementById("overviewStatusChart"), {
-        type: "doughnut",
+      const ctxStatus = document
+        .getElementById("overviewStatusChart")
+        .getContext("2d");
+
+      const passedGrad = ctxStatus.createLinearGradient(0, 0, 300, 300);
+      passedGrad.addColorStop(0, "rgba(196, 181, 253, 1)");
+      passedGrad.addColorStop(1, "rgba(109, 40, 217, 1)");
+
+      const failedGrad = ctxStatus.createLinearGradient(0, 0, 300, 300);
+      failedGrad.addColorStop(0, "rgba(252, 165, 165, 1)");
+      failedGrad.addColorStop(1, "rgba(185, 28, 28, 1)");
+
+      const skippedGrad = ctxStatus.createLinearGradient(0, 0, 300, 300);
+      skippedGrad.addColorStop(0, "rgba(216, 212, 223, 1)");
+      skippedGrad.addColorStop(1, "rgba(71, 85, 105, 1)");
+
+      const overviewStatusChartInstance = new Chart(ctxStatus, {
+        type: "pie",
         data: {
           labels: ["Passed", "Failed", "Skipped"],
           datasets: [
             {
               data: __OVERALL_STATUS_ARRAY__,
-              backgroundColor: ["#8B5CF6", "#ef4444", "#7A7580"],
-              borderColor: "#0f0d15",
-              borderWidth: 2,
+              backgroundColor: [passedGrad, failedGrad, skippedGrad],
+              borderColor: "transparent",
+              borderWidth: 0,
+              hoverOffset: 20,
             },
           ],
         },
-        options: chartOptions,
+        options: {
+          ...chartOptions,
+          layout: { padding: 20 },
+          animation: {
+            duration: 2500,
+            easing: "easeOutQuart",
+            animateRotate: true,
+            animateScale: false,
+            onComplete: function (context) {
+              if (context.initial) {
+                context.chart.options.animation.duration = 1200;
+                // Force a relayout to fix any initial off-center rendering issues in Chart.js
+                setTimeout(() => {
+                  context.chart.update('none');
+                }, 50);
+              }
+            },
+          },
+          plugins: {
+            ...chartOptions.plugins,
+            legend: { display: false },
+          },
+          scales: {
+            x: { display: false },
+            y: { display: false },
+          },
+        },
+        plugins: [glowPlugin, htmlLegendPlugin, dataLabelsPlugin],
       });
 
+      // Force immediate relayout to fix Chart.js initial rendering bug
+      setTimeout(() => {
+        overviewStatusChartInstance.update('none');
+      }, 50);
+
       // Overview execution duration by type chart
-      new Chart(document.getElementById("overviewDurationChart"), {
+      const ctxDuration = document
+        .getElementById("overviewDurationChart")
+        .getContext("2d");
+      const durationGrad = ctxDuration.createLinearGradient(0, 0, 0, 400);
+      durationGrad.addColorStop(0, "rgba(167, 139, 250, 1)"); // Morado
+      durationGrad.addColorStop(1, "transparent");
+
+      const hoverGrad = ctxDuration.createLinearGradient(0, 0, 0, 400);
+      hoverGrad.addColorStop(0, "rgba(251, 191, 36, 1)"); // Amarillo / Dorado
+      hoverGrad.addColorStop(1, "transparent");
+
+      const barLabelsPlugin = {
+        id: "barLabels",
+        afterDatasetsDraw(chart) {
+          const ctx = chart.ctx;
+          const meta = chart.getDatasetMeta(0);
+          
+          meta.data.forEach((bar, index) => {
+            const val = chart.data.datasets[0].data[index];
+            if (!val) return;
+            
+            ctx.save();
+            ctx.font = "bold 10px 'JetBrains Mono', monospace";
+            const text = `${val}ms`;
+            const textWidth = ctx.measureText(text).width;
+            
+            const paddingX = 6;
+            const boxWidth = textWidth + paddingX * 2;
+            const boxHeight = 18;
+            const boxX = bar.x - boxWidth / 2;
+            const boxY = bar.y - boxHeight - 8; // Restored original offset
+            
+            // Draw glass capsule background
+            ctx.fillStyle = "rgba(15, 13, 21, 0.7)";
+            ctx.beginPath();
+            if (ctx.roundRect) {
+              ctx.roundRect(boxX, boxY, boxWidth, boxHeight, 9);
+            } else {
+              ctx.rect(boxX, boxY, boxWidth, boxHeight);
+            }
+            ctx.fill();
+            ctx.strokeStyle = "rgba(203, 195, 215, 0.2)";
+            ctx.lineWidth = 1;
+            ctx.stroke();
+
+            // Draw text
+            ctx.fillStyle = "#e9e7ec";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(text, bar.x, boxY + boxHeight / 2 + 1);
+            ctx.restore();
+          });
+        }
+      };
+
+      const overviewDurationChartInstance = new Chart(ctxDuration, {
         type: "bar",
         data: {
           labels: __DURATION_LABELS__,
@@ -1251,11 +1894,15 @@
             {
               label: "",
               data: __DURATION_DATA__,
-              backgroundColor: __DURATION_COLORS__,
-              borderRadius: 4,
-              barPercentage: 0.3,
+              backgroundColor: durationGrad,
+              borderRadius: 6,
+              barPercentage: 0.25,
               categoryPercentage: 0.5,
-              maxBarThickness: 60,
+              borderWidth: 0,
+              hoverBackgroundColor: hoverGrad,
+              animation: {
+                delay: (context) => context.dataIndex * 150,
+              },
             },
           ],
         },
@@ -1272,10 +1919,22 @@
             },
           },
           scales: {
-            x: { ticks: { color: "#cbc3d7" } },
-            y: { ticks: { color: "#cbc3d7" } },
+            x: {
+              grid: {
+                display: false,
+              },
+              ticks: { color: "#cbc3d7", font: { family: "JetBrains Mono" } },
+            },
+            y: {
+              grid: {
+                color: "rgba(255, 255, 255, 0.05)",
+                drawBorder: false,
+              },
+              ticks: { color: "#cbc3d7", font: { family: "'Playfair Display', serif" } },
+            },
           },
         },
+        plugins: [glowPlugin, barLabelsPlugin],
       });
 
       // Lazy chart initializers for secondary tabs
@@ -1284,26 +1943,7 @@
         perf: null,
       };
 
-      function initAutomatedChart() {
-        if (tabCharts.automated) return;
-        const ctx = document.getElementById("automatedChart");
-        if (!ctx) return;
-        tabCharts.automated = new Chart(ctx, {
-          type: "doughnut",
-          data: {
-            labels: ["Passed", "Failed", "Skipped"],
-            datasets: [
-              {
-                data: __PLAYWRIGHT_DATA_ARRAY__,
-                backgroundColor: ["#8B5CF6", "#ef4444", "#7A7580"],
-                borderColor: "#0f0d15",
-                borderWidth: 2,
-              },
-            ],
-          },
-          options: tabChartOptions,
-        });
-      }
+      // Removed initAutomatedChart as the chart was replaced by the split pane
 
       function initPerfChart() {
         if (tabCharts.perf) return;
@@ -1408,43 +2048,82 @@
         const prevBtn = document.getElementById("failuresPrev");
         const nextBtn = document.getElementById("failuresNext");
         const pageInfo = document.getElementById("failuresPageInfo");
+        const searchInput = document.getElementById("failureSearch");
+        const countBadge = document.getElementById("failuresCountBadge");
         const modal = document.getElementById("errorModal");
         const modalContent = document.getElementById("errorModalContent");
         const closeModal = document.getElementById("closeErrorModal");
 
         if (!tableBody) return;
 
-        const rows = Array.from(tableBody.querySelectorAll(".failure-row"));
+        const allRows = Array.from(tableBody.querySelectorAll(".failure-row"));
+        let filteredRows = [...allRows];
         let currentPage = 1;
-        const totalPages = Math.ceil(rows.length / rowsPerPage) || 1;
 
-        function renderPage() {
+        function updatePagination() {
+          const totalPages = Math.ceil(filteredRows.length / rowsPerPage) || 1;
+          if (currentPage > totalPages) currentPage = totalPages;
+          if (currentPage < 1) currentPage = 1;
+
+          if (countBadge) {
+            countBadge.textContent = String(filteredRows.length);
+            countBadge.classList.remove("hidden");
+          }
+
           const start = (currentPage - 1) * rowsPerPage;
           const end = start + rowsPerPage;
-          rows.forEach((row, index) => {
-            row.classList.toggle("hidden", index < start || index >= end);
+
+          allRows.forEach((row) => row.classList.add("hidden"));
+          filteredRows.forEach((row, index) => {
+            if (index >= start && index < end) {
+              row.classList.remove("hidden");
+            }
           });
+
+          if (pagination) {
+            pagination.classList.toggle(
+              "hidden",
+              filteredRows.length <= rowsPerPage,
+            );
+          }
           if (pageInfo) pageInfo.textContent = `${currentPage} / ${totalPages}`;
           if (prevBtn) prevBtn.disabled = currentPage === 1;
           if (nextBtn) nextBtn.disabled = currentPage === totalPages;
         }
 
-        if (rows.length > rowsPerPage && pagination) {
-          pagination.classList.remove("hidden");
+        if (searchInput) {
+          searchInput.addEventListener("input", (e) => {
+            const query = e.target.value.toLowerCase().trim();
+            filteredRows = allRows.filter((row) => {
+              const text = row.textContent.toLowerCase();
+              return text.includes(query);
+            });
+            currentPage = 1;
+            updatePagination();
+          });
+        }
+
+        if (prevBtn) {
           prevBtn.addEventListener("click", () => {
             if (currentPage > 1) {
               currentPage--;
-              renderPage();
+              updatePagination();
             }
           });
+        }
+
+        if (nextBtn) {
           nextBtn.addEventListener("click", () => {
+            const totalPages =
+              Math.ceil(filteredRows.length / rowsPerPage) || 1;
             if (currentPage < totalPages) {
               currentPage++;
-              renderPage();
+              updatePagination();
             }
           });
-          renderPage();
         }
+
+        updatePagination();
 
         function openModal(error) {
           if (!modalContent || !modal || !error) return;
@@ -1475,6 +2154,107 @@
           closeModal.addEventListener("click", closeModalFn);
           modal.addEventListener("click", (e) => {
             if (e.target === modal) closeModalFn();
+          });
+        }
+      })();
+
+      // Automated Cases Live Search and Status Filter Logic
+      (function () {
+        const searchInput = document.getElementById("automatedSearch");
+        const filterContainer = document.getElementById(
+          "automatedFilterButtons",
+        );
+        const tableBody = document.getElementById("automatedTableBody");
+        const visibleCountSpan = document.getElementById("autoVisibleCount");
+        const noResultsDiv = document.getElementById("noAutomatedResults");
+
+        if (!tableBody) return;
+
+        let activeFilter = "all";
+        let searchQuery = "";
+
+        function filterAutomatedTable() {
+          const rows = Array.from(
+            tableBody.querySelectorAll("tr.automated-row"),
+          );
+          let visibleCount = 0;
+
+          rows.forEach((row) => {
+            const suiteText = (row.cells[0]?.textContent || "").toLowerCase();
+            const testText = (row.cells[1]?.textContent || "").toLowerCase();
+            const statusText = (row.cells[2]?.textContent || "")
+              .toLowerCase()
+              .trim();
+
+            const matchesSearch =
+              !searchQuery ||
+              suiteText.includes(searchQuery) ||
+              testText.includes(searchQuery);
+
+            const matchesStatus =
+              activeFilter === "all" || statusText.includes(activeFilter);
+
+            if (matchesSearch && matchesStatus) {
+              row.classList.remove("hidden");
+              visibleCount++;
+            } else {
+              row.classList.add("hidden");
+            }
+          });
+
+          if (visibleCountSpan)
+            visibleCountSpan.textContent = visibleCount.toString();
+          if (noResultsDiv) {
+            if (visibleCount === 0 && rows.length > 0) {
+              noResultsDiv.classList.remove("hidden");
+            } else {
+              noResultsDiv.classList.add("hidden");
+            }
+          }
+        }
+
+        if (searchInput) {
+          searchInput.addEventListener("input", (e) => {
+            searchQuery = e.target.value.toLowerCase().trim();
+            filterAutomatedTable();
+          });
+        }
+
+        if (filterContainer) {
+          filterContainer.addEventListener("click", (e) => {
+            const btn = e.target.closest(".auto-filter-btn");
+            if (!btn) return;
+
+            filterContainer
+              .querySelectorAll(".auto-filter-btn")
+              .forEach((b) => {
+                b.classList.remove(
+                  "active",
+                  "bg-primary/20",
+                  "text-primary",
+                  "border-primary/40",
+                );
+                b.classList.add(
+                  "bg-surface-container",
+                  "text-on-surface-variant",
+                  "border-outline-variant/40",
+                );
+              });
+
+            btn.classList.add(
+              "active",
+              "bg-primary/20",
+              "text-primary",
+              "border-primary/40",
+            );
+            btn.classList.remove(
+              "bg-surface-container",
+              "text-on-surface-variant",
+              "border-outline-variant/40",
+            );
+
+            activeFilter = btn.getAttribute("data-filter") || "all";
+            filterAutomatedTable();
           });
         }
       })();
@@ -1577,8 +2357,8 @@
           const docHeight =
             document.documentElement.scrollHeight -
             document.documentElement.clientHeight;
-          const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
-          progressBar.style.width = progress + "%";
+          const ratio = docHeight > 0 ? scrollTop / docHeight : 0;
+          progressBar.style.height = `${(1 - ratio) * 100}%`;
         }
 
         window.addEventListener("scroll", updateProgress, { passive: true });
@@ -1653,6 +2433,355 @@
           easing: "easeOutExpo",
           duration: 600,
         });
+      })();
+      // === AUTOMATED SPLIT PANE LOGIC ===
+      function escapeHtml(unsafe) {
+        if (!unsafe) return "";
+        return String(unsafe)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      }
+
+      let allAutomatedTests = [];
+      let currentFilter = "all";
+      let currentSearch = "";
+
+      function normalizeStatusStr(s) {
+        if (!s) return "skipped";
+        const low = s.toLowerCase();
+        if (low === "expected" || low === "passed") return "passed";
+        if (low === "unexpected" || low === "failed") return "failed";
+        if (low === "flaky") return "passed";
+        return "skipped";
+      }
+
+      function buildFlatTestList(suites, parentPath = "") {
+        if (!suites) return;
+        suites.forEach((suite) => {
+          const path = parentPath
+            ? `${parentPath} > ${suite.title}`
+            : suite.title;
+
+          if (suite.specs) {
+            suite.specs.forEach((spec) => {
+              if (spec.tests) {
+                spec.tests.forEach((test) => {
+                  const result = test.results?.[0];
+                  allAutomatedTests.push({
+                    id: Math.random().toString(36).substr(2, 9),
+                    suitePath: path,
+                    name: spec.title,
+                    status: normalizeStatusStr(result?.status),
+                    duration: result?.duration || 0,
+                    error:
+                      result?.error?.message ||
+                      result?.errors?.[0]?.message ||
+                      null,
+                    steps: result?.steps || [],
+                  });
+                });
+              }
+            });
+          }
+
+          if (suite.suites) {
+            buildFlatTestList(suite.suites, path);
+          }
+        });
+      }
+
+      function renderAutomatedTree() {
+        if (allAutomatedTests.length === 0 && PLAYWRIGHT_SUITES) {
+          buildFlatTestList(PLAYWRIGHT_SUITES);
+        }
+
+        const container = document.getElementById("automatedTreeContainer");
+        if (!container) return;
+
+        const filtered = allAutomatedTests.filter((t) => {
+          if (currentFilter !== "all" && t.status !== currentFilter)
+            return false;
+          if (
+            currentSearch &&
+            !t.name.toLowerCase().includes(currentSearch.toLowerCase()) &&
+            !t.suitePath.toLowerCase().includes(currentSearch.toLowerCase())
+          )
+            return false;
+          return true;
+        });
+
+        // Group by suitePath
+        const grouped = {};
+        filtered.forEach((t) => {
+          if (!grouped[t.suitePath]) grouped[t.suitePath] = [];
+          grouped[t.suitePath].push(t);
+        });
+
+        if (filtered.length === 0) {
+          container.innerHTML =
+            '<div class="text-center p-4 text-outline text-xs">No tests found.</div>';
+          return;
+        }
+
+        let html = "";
+        for (const [suite, tests] of Object.entries(grouped)) {
+          html += `
+            <div class="mb-3">
+              <div class="font-label-caps text-xs text-on-surface-variant uppercase mb-1.5 flex items-center gap-1.5 cursor-pointer hover:text-primary hover:bg-surface-container rounded px-1.5 py-1 transition-colors select-none" onclick="const content = this.nextElementSibling; const icon = this.querySelector('.folder-icon'); const chevron = this.querySelector('.chevron-icon'); const isHidden = content.style.gridTemplateRows === '0fr'; content.style.gridTemplateRows = isHidden ? '1fr' : '0fr'; icon.textContent = isHidden ? 'menu_book' : 'book'; chevron.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(-90deg)';">
+                <span class="material-symbols-outlined text-[16px] chevron-icon transition-transform duration-300" style="transform: rotate(0deg);">expand_more</span>
+                <span class="material-symbols-outlined text-[16px] folder-icon text-primary transition-colors duration-300">menu_book</span>
+                <span class="font-bold tracking-wider">${escapeHtml(suite)}</span>
+              </div>
+              <div class="grid transition-[grid-template-rows] duration-300 ease-in-out" style="grid-template-rows: 1fr;">
+                <div class="overflow-hidden">
+                  <div class="flex flex-col gap-0.5 ml-4 border-l border-outline-variant/40 pl-2">
+          `;
+          tests.forEach((test) => {
+            const statusColor =
+              test.status === "passed"
+                ? "text-emerald-400"
+                : test.status === "failed"
+                  ? "text-error"
+                  : "text-outline";
+            const statusIcon =
+              test.status === "passed"
+                ? "check_circle"
+                : test.status === "failed"
+                  ? "cancel"
+                  : "radio_button_unchecked";
+            const bgHover =
+              test.status === "failed"
+                ? "hover:bg-error/10"
+                : "hover:bg-surface-container";
+            html += `
+                <div class="test-tree-item flex items-center gap-2 p-1.5 rounded cursor-pointer ${bgHover} transition-colors" data-id="${test.id}">
+                  <span class="material-symbols-outlined text-[14px] ${statusColor}">${statusIcon}</span>
+                  <span class="font-body text-xs text-on-surface truncate flex-1" title="${escapeHtml(test.name)}">${escapeHtml(test.name)}</span>
+                </div>
+            `;
+          });
+          html += `</div></div></div></div>`;
+        }
+
+        container.innerHTML = html;
+
+        // Attach click events
+        container.querySelectorAll(".test-tree-item").forEach((el) => {
+          el.addEventListener("click", (e) => {
+            document
+              .querySelectorAll(".test-tree-item")
+              .forEach((i) =>
+                i.classList.remove(
+                  "bg-primary/20",
+                  "border",
+                  "border-primary/30",
+                ),
+              );
+            const target = e.currentTarget;
+            target.classList.add(
+              "bg-primary/20",
+              "border",
+              "border-primary/30",
+            );
+            const testId = target.getAttribute("data-id");
+            const test = allAutomatedTests.find((t) => t.id === testId);
+            if (test) showTestDetails(test);
+          });
+        });
+      }
+
+      function showTestDetails(test) {
+        try {
+          document
+            .getElementById("automatedEmptyState")
+            .classList.add("opacity-0");
+          document
+            .getElementById("automatedEmptyState")
+            .classList.remove("z-10");
+          document
+            .getElementById("automatedContentState")
+            .classList.remove("opacity-0", "pointer-events-none");
+
+          document.getElementById("detailTestName").textContent =
+            test.name || "Unknown Test";
+          document.getElementById("detailSuiteText").textContent =
+            test.suitePath || "Unknown Suite";
+          document.getElementById("detailDurationText").textContent =
+            (test.duration || 0) + "ms";
+
+          const badge = document.getElementById("detailStatusBadge");
+          const dot = document.getElementById("detailStatusDot");
+          const text = document.getElementById("detailStatusText");
+          text.textContent = (test.status || "unknown").toUpperCase();
+
+          badge.className =
+            "inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold rounded-full border";
+          dot.className = "w-1.5 h-1.5 rounded-full";
+          if (test.status === "passed") {
+            badge.classList.add(
+              "bg-emerald-400/10",
+              "text-emerald-400",
+              "border-emerald-400/30",
+            );
+            dot.classList.add("bg-emerald-400");
+          } else if (test.status === "failed") {
+            badge.classList.add("bg-error/10", "text-error", "border-error/30");
+            dot.classList.add("bg-error");
+          } else {
+            badge.classList.add(
+              "bg-surface-container",
+              "text-outline",
+              "border-outline-variant",
+            );
+            dot.classList.add("bg-outline");
+          }
+
+          let bodyHtml = "";
+          if (test.error) {
+            bodyHtml += `
+            <div class="bg-error/5 border border-error/20 rounded-lg p-3">
+              <div class="font-label-caps text-[10px] text-error uppercase mb-2 flex items-center gap-1">
+                <span class="material-symbols-outlined text-[14px]">bug_report</span> Error Trace
+              </div>
+              <pre class="font-mono text-xs text-error/90 whitespace-pre-wrap break-words custom-scrollbar overflow-x-auto">${escapeHtml(test.error)}</pre>
+            </div>
+          `;
+          }
+
+          if (test.steps && test.steps.length > 0) {
+            bodyHtml += `<div class="font-label-caps text-[10px] text-outline uppercase mt-2">Execution Steps</div>`;
+            bodyHtml += renderSteps(test.steps);
+          } else {
+            bodyHtml += `<div class="text-outline text-xs italic">No steps recorded.</div>`;
+          }
+
+          document.getElementById("detailExecutionBody").innerHTML = bodyHtml;
+        } catch (e) {
+          console.error("Error displaying test details:", e);
+          document.getElementById("detailExecutionBody").innerHTML =
+            `<div class="text-error text-xs p-4 bg-error/10 rounded border border-error/20">Error rendering test details. Check console.</div>`;
+        }
+      }
+
+      function renderSteps(steps, indent = 0) {
+        if (!steps || steps.length === 0) return "";
+        let html = `<div class="flex flex-col gap-1 ${indent > 0 ? "ml-4 border-l border-outline-variant/30 pl-3" : "ml-0"}">`;
+        steps.forEach((step) => {
+          const statusColor = step.error ? "text-error" : "text-emerald-400";
+          const statusIcon = step.error ? "close" : "check";
+          html += `
+            <div class="flex flex-col gap-1">
+              <div class="flex items-start gap-2">
+                <span class="material-symbols-outlined text-[14px] ${statusColor} shrink-0 mt-0.5">${statusIcon}</span>
+                <div class="flex flex-col flex-1 min-w-0">
+                  <div class="flex items-center justify-between gap-2">
+                    <span class="font-body text-xs text-on-surface truncate">${escapeHtml(step.title)}</span>
+                    <span class="font-mono text-[10px] text-on-surface-variant shrink-0">${step.duration}ms</span>
+                  </div>
+                  ${step.error ? `<pre class="mt-1 font-mono text-[10px] text-error/80 whitespace-pre-wrap break-words bg-surface-container-lowest p-2 rounded border border-error/20">${escapeHtml(step.error.message)}</pre>` : ""}
+                </div>
+              </div>
+              ${renderSteps(step.steps, indent + 1)}
+            </div>
+          `;
+        });
+        html += `</div>`;
+        return html;
+      }
+
+      // Hook up filters and search
+      document.addEventListener("DOMContentLoaded", () => {
+        const filterBtns = document.querySelectorAll(".auto-filter-btn");
+        filterBtns.forEach((btn) => {
+          btn.addEventListener("click", (e) => {
+            filterBtns.forEach((b) => {
+              b.classList.remove(
+                "border-primary/40",
+                "bg-primary/20",
+                "text-primary",
+                "active",
+              );
+              b.classList.add(
+                "border-outline-variant/40",
+                "bg-surface-container",
+                "text-on-surface-variant",
+              );
+            });
+            const target = e.currentTarget;
+            target.classList.remove(
+              "border-outline-variant/40",
+              "bg-surface-container",
+              "text-on-surface-variant",
+            );
+            target.classList.add(
+              "border-primary/40",
+              "bg-primary/20",
+              "text-primary",
+              "active",
+            );
+
+            currentFilter = target.getAttribute("data-filter");
+            renderAutomatedTree();
+          });
+        });
+
+        const searchInput = document.getElementById("automatedSearch");
+        if (searchInput) {
+          searchInput.addEventListener("input", (e) => {
+            currentSearch = e.target.value;
+            renderAutomatedTree();
+          });
+        }
+      });
+
+      // Magic Dust (Canvas Particles)
+      (function () {
+        const canvas = document.getElementById("magicDust");
+        if (!canvas) return;
+        const ctx = canvas.getContext("2d");
+        let width = canvas.width = window.innerWidth;
+        let height = canvas.height = window.innerHeight;
+        
+        window.addEventListener("resize", () => {
+          width = canvas.width = window.innerWidth;
+          height = canvas.height = window.innerHeight;
+        }, { passive: true });
+
+        const particles = [];
+        for (let i = 0; i < 40; i++) {
+          particles.push({
+            x: Math.random() * width,
+            y: Math.random() * height,
+            r: Math.random() * 1.5 + 0.3, // Size
+            dx: (Math.random() - 0.5) * 0.15, // Horizontal drift
+            dy: Math.random() * -0.4 - 0.1, // Float up
+            color: Math.random() > 0.6 ? "rgba(251, 191, 36, 0.5)" : "rgba(167, 139, 250, 0.4)" // Gold or purple
+          });
+        }
+
+        let animationFrameId;
+        function animate() {
+          ctx.clearRect(0, 0, width, height);
+          particles.forEach(p => {
+            p.x += p.dx;
+            p.y += p.dy;
+            if (p.y < -10) p.y = height + 10;
+            if (p.x < -10) p.x = width + 10;
+            if (p.x > width + 10) p.x = -10;
+            
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+            ctx.fillStyle = p.color;
+            ctx.shadowBlur = 6;
+            ctx.shadowColor = p.color;
+            ctx.fill();
+          });
+          animationFrameId = requestAnimationFrame(animate);
+        }
+        animate();
       })();
     </script>
   </body>

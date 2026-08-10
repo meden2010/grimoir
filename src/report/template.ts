@@ -74,9 +74,12 @@ const generateFailureRows = (failures: Failure[]): string => {
 
     const typeLabel = type === 'Automated' ? 'Automated' : type;
 
+    const firstLineError = error.split('\n')[0] || error;
+
     return `
-              <tr class="hover:bg-error/5 transition-colors group border-l-4 border-l-error failure-row" data-index="${index}">
-                <td class="p-gutter">
+              <tr class="hover:bg-error/5 transition-colors group failure-row relative" data-index="${index}">
+                <td class="p-gutter pl-4 relative">
+                  <div class="absolute left-0 top-0 bottom-0 w-1 bg-error"></div>
                   <span class="inline-flex items-center gap-1 px-2 py-0.5 ${typeColor} text-[10px] font-bold rounded-full border">
                     <span class="w-1 h-1 ${dotColor} rounded-full"></span> ${typeLabel}
                   </span>
@@ -84,7 +87,7 @@ const generateFailureRows = (failures: Failure[]): string => {
                 <td class="p-gutter font-body-md text-on-surface font-semibold text-sm">${suite} — ${test}</td>
                 <td class="p-gutter max-w-[320px]">
                   <div class="flex items-center gap-2 min-w-0">
-                    <span class="font-mono text-sm text-error/80 truncate">${error}</span>
+                    <span class="font-mono text-sm text-error/80 truncate">${firstLineError}</span>
                     <button type="button" class="view-error-btn material-symbols-outlined text-outline hover:text-primary transition-colors text-sm shrink-0" data-error="${escapeHtml(error)}" aria-label="View full error">open_in_full</button>
                   </div>
                 </td>
@@ -386,6 +389,7 @@ export const generateHTML = (playwright: PlaywrightReport, k6: K6Report | null):
     k6DataArray,
     failureRows: generateFailureRows(buildFailures(playwright, k6)),
     automatedTestRows: generateAutomatedTestRows(playwright),
+    playwrightSuitesJson: JSON.stringify(playwright.suites).replace(/</g, '\\u003c'),
     k6MetricsList: generateK6MetricsList(k6),
     coverageChips: generateCoverageChips(isAutomatedActive, isPerformanceActive),
     automatedCasesVisible: isAutomatedActive ? '' : 'hidden',
