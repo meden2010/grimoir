@@ -6,7 +6,7 @@
     <title>Grimoir — Test Report</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:wght@500;600;700&family=Cinzel:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
       rel="stylesheet"
     />
     <link
@@ -55,7 +55,8 @@
             },
             spacing: { gutter: "16px", base: "8px", section: "25px" },
             fontFamily: {
-              display: ["Playfair Display", "serif"],
+              display: ["Cinzel", "serif"],
+              title: ["Playfair Display", "serif"],
               body: ["Inter", "sans-serif"],
               mono: ["JetBrains Mono", "monospace"],
             },
@@ -418,11 +419,11 @@
         left: 0;
         width: 5px; /* Más delgado */
         height: 100vh;
-        background: linear-gradient(90deg, #050505 0%, #1a1a24 50%, #050505 100%);
-        border-right: 1px solid rgba(255, 255, 255, 0.05);
+        background: rgba(0,0,0,0.2); /* Sutil, sin gradientes duros ni bordes */
         z-index: 99;
-        box-shadow: inset -2px 0 6px rgba(0,0,0,0.8);
       }
+
+
 
       /* Left Full-Height Vertical Scroll Progress Indicator */
       #scrollProgress {
@@ -484,27 +485,52 @@
         position: fixed;
         top: 0;
         right: 0;
-        width: 30px;
+        width: 50px; /* Más ancho para que el desvanecido sea muy suave */
         height: 100vh;
         pointer-events: none;
         z-index: 90;
-        background: linear-gradient(270deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%);
-        border-right: 1px solid rgba(255,255,255,0.03);
-        box-shadow: inset -5px 0 15px rgba(0,0,0,0.8);
+        background: linear-gradient(270deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0) 100%);
       }
+
       .corner-ornament {
         position: fixed;
-        width: 160px;
-        height: 160px;
+        width: 90px;
+        height: 90px;
         pointer-events: none;
         z-index: 95;
-        opacity: 0.08;
+        opacity: 0.15;
         fill: #a78bfa;
       }
       .corner-tl { top: 0; left: 5px; }
-      .corner-tr { top: 0; right: 0; transform: scaleX(-1); }
+      .corner-tr { top: 0; right: 5px; transform: scaleX(-1); }
       .corner-bl { bottom: 0; left: 5px; transform: scaleY(-1); }
-      .corner-br { bottom: 0; right: 0; transform: scale(-1, -1); }
+      .corner-br { bottom: 0; right: 5px; transform: scale(-1, -1); }
+
+      /* Magical Surface Panels (Cards) */
+      .bg-surface-container {
+        position: relative;
+        overflow: hidden;
+        transition: box-shadow 0.5s ease, border-color 0.5s ease;
+      }
+      .bg-surface-container::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        opacity: 0.15;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        mix-blend-mode: overlay;
+        pointer-events: none;
+        z-index: 0;
+      }
+      .bg-surface-container > * {
+        position: relative;
+        z-index: 1;
+      }
+      .bg-surface-container:hover {
+        box-shadow: 0 0 35px rgba(139, 92, 246, 0.12), inset 0 0 20px rgba(139, 92, 246, 0.05) !important;
+        border-color: rgba(139, 92, 246, 0.25) !important;
+      }
+
       #magicDust {
         position: fixed;
         inset: 0;
@@ -539,8 +565,9 @@
     </svg>
     <canvas id="magicDust" aria-hidden="true"></canvas>
     
-    <!-- Binding & Corners -->
+    <!-- Binding & Pages -->
     <div class="page-edge" aria-hidden="true"></div>
+    <!-- Corners -->
     <svg class="corner-ornament corner-tl" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
       <path d="M0,0 L100,0 L100,2 C50,2 2,50 2,100 L0,100 Z" />
       <path d="M10,10 L70,10 C40,15 15,40 10,70 Z" fill="none" stroke="currentColor" stroke-width="1.5" />
@@ -590,7 +617,7 @@
       <div class="flex items-center justify-between mb-gutter animate-fade-in">
         <div>
           <h1
-            class="font-display text-display-lg bg-gradient-to-r from-primary via-amber-300 to-purple-500 bg-clip-text text-transparent tracking-tight text-balance font-bold title-grimoir"
+            class="font-title text-display-lg bg-gradient-to-r from-primary via-amber-300 to-purple-500 bg-clip-text text-transparent tracking-tight text-balance font-bold title-grimoir"
             id="grimoireTitle"
           >
             Grimoir
@@ -598,9 +625,6 @@
           <p
             class="font-label-caps text-outline text-[10px] uppercase mt-base flex items-center gap-2"
           >
-            <span
-              class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"
-            ></span>
             Unified Test Report — __GENERATED_AT__
           </p>
         </div>
