@@ -12,6 +12,8 @@ test.describe('Signup Flow', () => {
     });
     
     // Intentionally fail
-    await expect(page.locator('#pass')).toHaveClass('error', { timeout: 500 });
+    await test.step('Check error class on password field', async () => {
+      await expect(page.locator('#pass')).toHaveClass('error', { timeout: 500 });
+    });
   });
 });

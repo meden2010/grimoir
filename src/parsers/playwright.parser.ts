@@ -1,8 +1,9 @@
 export interface PlaywrightResult {
-  status: 'passed' | 'failed' | 'skipped' | 'timedOut';
+  status: 'passed' | 'failed' | 'skipped' | 'timedOut' | 'interrupted';
   duration: number;
   error?: { message?: string };
   errors: { message?: string }[];
+  steps?: any[];
 }
 
 export interface PlaywrightJsonTest {
@@ -14,11 +15,21 @@ export interface PlaywrightSpec {
   tests?: PlaywrightJsonTest[];
 }
 
+export interface PlaywrightTestStep {
+  title: string;
+  category: string;
+  duration: number;
+  startTime?: string;
+  error?: string;
+  steps?: PlaywrightTestStep[];
+}
+
 export interface PlaywrightTest {
   title: string;
   status: 'passed' | 'failed' | 'skipped' | 'timedOut';
   duration: number;
   error?: string;
+  steps?: PlaywrightTestStep[];
 }
 
 export interface PlaywrightSuite {
@@ -69,6 +80,7 @@ function extractTests(suites: PlaywrightSuite[]): PlaywrightTest[] {
               status: normalizeStatus(result.status),
               duration: result.duration || 0,
               error: result.error?.message || result.errors?.[0]?.message,
+              steps: result.steps,
             });
           }
         }

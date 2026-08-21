@@ -15,6 +15,8 @@ test.describe('Checkout - Payments', () => {
     });
     
     // Intentionally fail
-    await expect(page.locator('#status')).toHaveText('Declined', { timeout: 500 });
+    await test.step('Verify declined status', async () => {
+      await expect(page.locator('#status')).toHaveText('Declined', { timeout: 500 });
+    });
   });
 });

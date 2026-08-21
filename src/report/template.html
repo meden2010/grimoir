@@ -106,7 +106,8 @@
         max-height: 320px;
       }
       .custom-scrollbar::-webkit-scrollbar {
-        width: 4px;
+        width: 6px;
+        height: 6px;
       }
       .custom-scrollbar::-webkit-scrollbar-track {
         background: transparent;
@@ -165,39 +166,6 @@
       }
       .animate-spin-slow {
         animation: spin-slow 45s linear infinite;
-      }
-      .magic-circle {
-        position: relative;
-        width: 310px;
-        height: 310px;
-        border: 2px dashed rgba(139, 92, 246, 0.4);
-        border-radius: 50%;
-        pointer-events: none;
-        z-index: 0;
-        box-shadow:
-          0 0 30px rgba(139, 92, 246, 0.3),
-          inset 0 0 30px rgba(139, 92, 246, 0.3);
-      }
-      .magic-circle::before {
-        content: "";
-        position: absolute;
-        top: -12px;
-        left: -12px;
-        right: -12px;
-        bottom: -12px;
-        border: 1px solid rgba(196, 181, 253, 0.3);
-        border-radius: 50%;
-        box-shadow: 0 0 15px rgba(196, 181, 253, 0.15);
-      }
-      .magic-circle::after {
-        content: "";
-        position: absolute;
-        top: 12px;
-        left: 12px;
-        right: 12px;
-        bottom: 12px;
-        border: 3px dotted rgba(196, 181, 253, 0.4);
-        border-radius: 50%;
       }
 
       .glass-panel {
@@ -298,6 +266,18 @@
         animation: gradientShift 2.5s ease infinite;
         filter: drop-shadow(0 0 12px rgba(139, 92, 246, 0.6));
         transform: scale(1.03);
+      }
+
+      /* Custom Search Input Glow */
+      .search-input-custom {
+        outline: none !important;
+        transition: all 0.3s ease;
+      }
+      .search-input-custom:focus,
+      .search-input-custom:hover,
+      .search-wrapper:hover .search-input-custom {
+        box-shadow: 0 0 12px rgba(139, 92, 246, 0.6) !important;
+        border-color: #8B5CF6 !important;
       }
 
       .animate-fade-in {
@@ -405,8 +385,7 @@
         -ms-overflow-style: none !important;
       }
       html::-webkit-scrollbar,
-      body::-webkit-scrollbar,
-      ::-webkit-scrollbar {
+      body::-webkit-scrollbar {
         width: 0px !important;
         height: 0px !important;
         display: none !important;
@@ -472,7 +451,7 @@
         margin-left: -45vh;
         pointer-events: none;
         z-index: -18;
-        opacity: 0.02;
+        opacity: 0.06;
         animation: spin-slow 120s linear infinite;
         fill: none;
         stroke: #a78bfa;
@@ -885,9 +864,6 @@
               >
                 <!-- Explicit 320x320 square container to force exact alignment -->
                 <div class="relative w-[320px] h-[320px] flex-shrink-0">
-                  <div class="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
-                    <div class="magic-circle animate-spin-slow"></div>
-                  </div>
                   <canvas id="overviewStatusChart" class="relative z-10 w-full h-full"></canvas>
                 </div>
               </div>
@@ -932,7 +908,7 @@
             </div>
 
             <div class="flex items-center gap-2">
-              <div class="relative flex-1 sm:w-48">
+              <div class="relative flex-1 sm:w-48 search-wrapper">
                 <span
                   class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-outline text-sm pointer-events-none"
                   >search</span
@@ -941,7 +917,7 @@
                   type="text"
                   id="failureSearch"
                   placeholder="Filter failures..."
-                  class="w-full bg-surface-container border border-outline-variant/40 rounded-lg pl-8 pr-3 py-1 text-xs text-on-surface placeholder:text-outline focus:outline-none focus:border-primary focus:shadow-[0_0_12px_rgba(139,92,246,0.3)] transition-all"
+                  class="w-full bg-surface-container border border-outline-variant/40 rounded-lg pl-8 pr-3 py-1 text-xs text-on-surface placeholder:text-outline search-input-custom"
                 />
               </div>
 
@@ -1138,7 +1114,7 @@
                 <p
                   class="font-display text-headline-lg text-on-surface tabular-nums mt-1"
                 >
-                  __PLAYWRIGHT_DURATION_MS__ ms
+                  <span class="counter" data-target="__PLAYWRIGHT_DURATION_MS__" data-is-duration="true">0</span>
                 </p>
                 <p class="font-body-md text-on-surface-variant text-sm mt-auto">
                   Execution time
@@ -1324,27 +1300,27 @@
               Duration
             </p>
             <p class="font-display text-headline-md text-primary mt-1">
-              <span class="counter" data-target="__PLAYWRIGHT_DURATION__"
+              <span class="counter" data-target="__PLAYWRIGHT_DURATION__" data-is-duration="true"
                 >0</span
-              >ms
+              >
             </p>
           </div>
         </div>
 
         <!-- Automated Split Pane (Allure Style) -->
         <div
-          class="flex flex-col lg:flex-row h-[calc(100vh-220px)] min-h-[500px] gap-gutter animate-fade-in-up delay-200"
+          class="flex flex-col lg:flex-row h-[calc(100vh-380px)] min-h-[400px] gap-gutter animate-fade-in-up delay-200"
           id="automatedSplitPane"
         >
           <!-- Left Pane: Tree Navigation -->
           <div
-            class="lg:w-1/3 bg-surface-container-lowest border border-outline-variant rounded-xl flex flex-col overflow-hidden card-hover"
+            class="lg:w-1/3 bg-surface-container-lowest border border-outline-variant rounded-xl flex flex-col overflow-hidden card-hover min-h-0"
           >
             <!-- Search & Filters Header -->
             <div
               class="p-3 border-b border-outline-variant/50 bg-surface-container/30"
             >
-              <div class="relative mb-3">
+              <div class="relative mb-3 search-wrapper">
                 <span
                   class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-outline text-sm pointer-events-none"
                   >search</span
@@ -1353,7 +1329,7 @@
                   type="text"
                   id="automatedSearch"
                   placeholder="Search suites or tests..."
-                  class="w-full bg-surface-container border border-outline-variant/40 rounded-lg pl-8 pr-3 py-1.5 text-xs text-on-surface placeholder:text-outline focus:outline-none focus:border-primary focus:shadow-[0_0_12px_rgba(139,92,246,0.3)] transition-all"
+                  class="w-full bg-surface-container border border-outline-variant/40 rounded-lg pl-8 pr-3 py-1.5 text-xs text-on-surface placeholder:text-outline search-input-custom"
                 />
               </div>
               <div
@@ -1393,7 +1369,7 @@
 
             <!-- Tree Container -->
             <div
-              class="flex-1 overflow-y-auto custom-scrollbar p-2"
+              class="flex-1 overflow-y-auto custom-scrollbar p-2 min-h-0"
               id="automatedTreeContainer"
             >
               <!-- Rendered via JS -->
@@ -1402,7 +1378,7 @@
 
           <!-- Right Pane: Test Details -->
           <div
-            class="lg:w-2/3 bg-surface-container-lowest border border-outline-variant rounded-xl flex flex-col overflow-hidden card-hover relative"
+            class="lg:w-2/3 bg-surface-container-lowest border border-outline-variant rounded-xl flex flex-col overflow-hidden card-hover relative min-h-0"
             id="automatedDetailsContainer"
           >
             <!-- Empty State -->
@@ -1422,7 +1398,7 @@
             <!-- Content State -->
             <div
               id="automatedContentState"
-              class="flex flex-col h-full w-full opacity-0 pointer-events-none transition-opacity duration-300"
+              class="flex flex-col flex-1 w-full opacity-0 pointer-events-none transition-opacity duration-300 min-h-0 relative z-10"
             >
               <!-- Header -->
               <div
@@ -1476,7 +1452,7 @@
 
               <!-- Body (Steps & Errors) -->
               <div
-                class="flex-1 overflow-y-auto custom-scrollbar p-4 flex flex-col gap-3"
+                class="flex-1 overflow-y-auto custom-scrollbar p-4 flex flex-col gap-3 min-h-0"
                 id="detailExecutionBody"
               >
                 <!-- Injected via JS -->
@@ -1536,7 +1512,7 @@
               Avg
             </p>
             <p class="font-display text-headline-md text-primary mt-1">
-              <span class="counter" data-target="__K6_AVG_DURATION__">0</span>ms
+              <span class="counter" data-target="__K6_AVG_DURATION__" data-is-duration="true">0</span>
             </p>
           </div>
           <div
@@ -1546,7 +1522,7 @@
               P95
             </p>
             <p class="font-display text-headline-md text-tertiary mt-1">
-              <span class="counter" data-target="__K6_P95__">0</span>ms
+              <span class="counter" data-target="__K6_P95__" data-is-duration="true">0</span>
             </p>
           </div>
         </div>
@@ -2287,7 +2263,7 @@
       (function () {
         const counters = document.querySelectorAll(".counter");
 
-        function animateCounterManual(counter, target, isFloat) {
+        function animateCounterManual(counter, target, isFloat, isDuration) {
           const duration = 1200;
           const startTime = performance.now();
           function easeOutQuart(t) {
@@ -2296,9 +2272,16 @@
           function update(currentTime) {
             const progress = Math.min((currentTime - startTime) / duration, 1);
             const current = target * easeOutQuart(progress);
-            counter.textContent = isFloat
-              ? current.toFixed(2)
-              : Math.round(current).toString();
+            
+            if (isDuration) {
+              counter.textContent = current >= 1000 
+                ? parseFloat((current / 1000).toFixed(1)) + "s" 
+                : Math.round(current) + "ms";
+            } else {
+              counter.textContent = isFloat
+                ? current.toFixed(2)
+                : Math.round(current).toString();
+            }
             if (progress < 1) requestAnimationFrame(update);
           }
           requestAnimationFrame(update);
@@ -2310,6 +2293,7 @@
           const target = parseFloat(rawTarget);
           if (Number.isNaN(target)) return;
           const isFloat = target % 1 !== 0;
+          const isDuration = counter.hasAttribute("data-is-duration");
 
           if (typeof anime !== "undefined") {
             const animObj = { value: 0 };
@@ -2319,13 +2303,20 @@
               round: isFloat ? 100 : 1,
               easing: "spring(1, 80, 12, 0)",
               update: () => {
-                counter.textContent = isFloat
-                  ? animObj.value.toFixed(2)
-                  : animObj.value.toString();
+                const current = animObj.value;
+                if (isDuration) {
+                  counter.textContent = current >= 1000 
+                    ? parseFloat((current / 1000).toFixed(1)) + "s" 
+                    : Math.round(current) + "ms";
+                } else {
+                  counter.textContent = isFloat
+                    ? current.toFixed(2)
+                    : Math.round(current).toString();
+                }
               },
             });
           } else {
-            animateCounterManual(counter, target, isFloat);
+            animateCounterManual(counter, target, isFloat, isDuration);
           }
         });
       })();
@@ -2469,6 +2460,15 @@
           .replace(/'/g, "&#039;");
       }
 
+      function formatDuration(ms) {
+        if (ms == null) return "0ms";
+        if (ms >= 1000) {
+          const seconds = (ms / 1000).toFixed(1);
+          return parseFloat(seconds) + "s";
+        }
+        return ms + "ms";
+      }
+
       let allAutomatedTests = [];
       let currentFilter = "all";
       let currentSearch = "";
@@ -2554,9 +2554,9 @@
         for (const [suite, tests] of Object.entries(grouped)) {
           html += `
             <div class="mb-3">
-              <div class="font-label-caps text-xs text-on-surface-variant uppercase mb-1.5 flex items-center gap-1.5 cursor-pointer hover:text-primary hover:bg-surface-container rounded px-1.5 py-1 transition-colors select-none" onclick="const content = this.nextElementSibling; const icon = this.querySelector('.folder-icon'); const chevron = this.querySelector('.chevron-icon'); const isHidden = content.style.gridTemplateRows === '0fr'; content.style.gridTemplateRows = isHidden ? '1fr' : '0fr'; icon.textContent = isHidden ? 'menu_book' : 'book'; chevron.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(-90deg)';">
-                <span class="material-symbols-outlined text-[16px] chevron-icon transition-transform duration-300" style="transform: rotate(0deg);">expand_more</span>
-                <span class="material-symbols-outlined text-[16px] folder-icon text-primary transition-colors duration-300">menu_book</span>
+              <div class="font-label-caps text-sm text-on-surface-variant uppercase mb-1.5 flex items-center gap-1.5 cursor-pointer hover:text-primary hover:bg-surface-container rounded px-1.5 py-1.5 transition-colors select-none" onclick="const content = this.nextElementSibling; const icon = this.querySelector('.folder-icon'); const chevron = this.querySelector('.chevron-icon'); const isHidden = content.style.gridTemplateRows === '0fr'; content.style.gridTemplateRows = isHidden ? '1fr' : '0fr'; icon.textContent = isHidden ? 'menu_book' : 'book'; chevron.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(-90deg)';">
+                <span class="material-symbols-outlined text-[18px] chevron-icon transition-transform duration-300" style="transform: rotate(0deg);">expand_more</span>
+                <span class="material-symbols-outlined text-[18px] folder-icon text-primary transition-colors duration-300">menu_book</span>
                 <span class="font-bold tracking-wider">${escapeHtml(suite)}</span>
               </div>
               <div class="grid transition-[grid-template-rows] duration-300 ease-in-out" style="grid-template-rows: 1fr;">
@@ -2581,9 +2581,9 @@
                 ? "hover:bg-error/10"
                 : "hover:bg-surface-container";
             html += `
-                <div class="test-tree-item flex items-center gap-2 p-1.5 rounded cursor-pointer ${bgHover} transition-colors" data-id="${test.id}">
-                  <span class="material-symbols-outlined text-[14px] ${statusColor}">${statusIcon}</span>
-                  <span class="font-body text-xs text-on-surface truncate flex-1" title="${escapeHtml(test.name)}">${escapeHtml(test.name)}</span>
+                <div class="test-tree-item flex items-center gap-2.5 p-2 rounded cursor-pointer ${bgHover} transition-colors" data-id="${test.id}">
+                  <span class="material-symbols-outlined text-base ${statusColor}">${statusIcon}</span>
+                  <span class="font-body text-sm text-on-surface truncate flex-1" title="${escapeHtml(test.name)}">${escapeHtml(test.name)}</span>
                 </div>
             `;
           });
@@ -2591,6 +2591,17 @@
         }
 
         container.innerHTML = html;
+
+        if (window.anime) {
+          anime({
+            targets: container.children,
+            translateY: [15, 0],
+            opacity: [0, 1],
+            duration: 400,
+            easing: "easeOutSine",
+            delay: anime.stagger(40)
+          });
+        }
 
         // Attach click events
         container.querySelectorAll(".test-tree-item").forEach((el) => {
@@ -2617,24 +2628,27 @@
         });
       }
 
+
+
       function showTestDetails(test) {
         try {
           document
             .getElementById("automatedEmptyState")
-            .classList.add("opacity-0");
+            .classList.add("opacity-0", "pointer-events-none");
           document
             .getElementById("automatedEmptyState")
             .classList.remove("z-10");
-          document
-            .getElementById("automatedContentState")
-            .classList.remove("opacity-0", "pointer-events-none");
+          
+          const contentState = document.getElementById("automatedContentState");
+          contentState.classList.remove("opacity-0", "pointer-events-none", "animate-fade-in-up");
+          void contentState.offsetWidth;
+          contentState.classList.add("animate-fade-in-up");
 
           document.getElementById("detailTestName").textContent =
             test.name || "Unknown Test";
           document.getElementById("detailSuiteText").textContent =
             test.suitePath || "Unknown Suite";
-          document.getElementById("detailDurationText").textContent =
-            (test.duration || 0) + "ms";
+          document.getElementById("detailDurationText").textContent = formatDuration(test.duration);
 
           const badge = document.getElementById("detailStatusBadge");
           const dot = document.getElementById("detailStatusDot");
@@ -2642,13 +2656,13 @@
           text.textContent = (test.status || "unknown").toUpperCase();
 
           badge.className =
-            "inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold rounded-full border";
+            "inline-flex items-center gap-1 px-2.5 py-1 text-xs font-bold rounded-full border";
           dot.className = "w-1.5 h-1.5 rounded-full";
           if (test.status === "passed") {
             badge.classList.add(
               "bg-emerald-400/10",
               "text-emerald-400",
-              "border-emerald-400/30",
+              "border-emerald-400/30"
             );
             dot.classList.add("bg-emerald-400");
           } else if (test.status === "failed") {
@@ -2664,53 +2678,84 @@
           }
 
           let bodyHtml = "";
-          if (test.error) {
-            bodyHtml += `
-            <div class="bg-error/5 border border-error/20 rounded-lg p-3">
-              <div class="font-label-caps text-[10px] text-error uppercase mb-2 flex items-center gap-1">
-                <span class="material-symbols-outlined text-[14px]">bug_report</span> Error Trace
-              </div>
-              <pre class="font-mono text-xs text-error/90 whitespace-pre-wrap break-words custom-scrollbar overflow-x-auto">${escapeHtml(test.error)}</pre>
-            </div>
-          `;
-          }
 
           if (test.steps && test.steps.length > 0) {
-            bodyHtml += `<div class="font-label-caps text-[10px] text-outline uppercase mt-2">Execution Steps</div>`;
+            bodyHtml += `<div class="font-label-caps text-xs text-outline uppercase mt-3 mb-2">Execution Steps</div>`;
             bodyHtml += renderSteps(test.steps);
           } else {
-            bodyHtml += `<div class="text-outline text-xs italic">No steps recorded.</div>`;
+            bodyHtml += `<div class="text-outline text-sm italic mt-2">No steps recorded.</div>`;
           }
 
           document.getElementById("detailExecutionBody").innerHTML = bodyHtml;
         } catch (e) {
           console.error("Error displaying test details:", e);
           document.getElementById("detailExecutionBody").innerHTML =
-            `<div class="text-error text-xs p-4 bg-error/10 rounded border border-error/20">Error rendering test details. Check console.</div>`;
+            `<div class="text-error text-xs p-4 bg-error/10 rounded border border-error/20">Error rendering test details: ${escapeHtml(e.message)}</div>`;
         }
+      }
+
+      function stepHasError(step) {
+        if (step.error) return true;
+        if (step.steps && step.steps.length > 0) {
+          return step.steps.some(stepHasError);
+        }
+        return false;
       }
 
       function renderSteps(steps, indent = 0) {
         if (!steps || steps.length === 0) return "";
-        let html = `<div class="flex flex-col gap-1 ${indent > 0 ? "ml-4 border-l border-outline-variant/30 pl-3" : "ml-0"}">`;
+        let html = `<div class="flex flex-col gap-1.5 ${indent > 0 ? "ml-4 border-l border-outline-variant/30 pl-3" : "ml-0"}">`;
         steps.forEach((step) => {
-          const statusColor = step.error ? "text-error" : "text-emerald-400";
-          const statusIcon = step.error ? "close" : "check";
-          html += `
+          const isFailed = stepHasError(step);
+          const statusColor = isFailed ? "text-error" : "text-emerald-400";
+          const statusIcon = isFailed ? "close" : "check";
+          const hasChildren = step.steps && step.steps.length > 0;
+          const initialGrid = isFailed ? '1fr' : '0fr';
+          const initialRotate = isFailed ? 'rotate(0deg)' : 'rotate(-90deg)';
+          
+          const errorMessage = step.error ? (typeof step.error === 'string' ? step.error : (step.error.message || '')) : '';
+          const hasChildWithError = hasChildren && step.steps.some(stepHasError);
+          const shouldShowErrorBox = errorMessage && !hasChildWithError;
+          const errorHtml = shouldShowErrorBox ? `<pre class="mt-1.5 font-mono text-xs text-error/80 whitespace-pre-wrap break-words bg-surface-container-lowest p-2.5 rounded border border-error/20">${escapeHtml(errorMessage)}</pre>` : '';
+
+          if (hasChildren) {
+            html += `
             <div class="flex flex-col gap-1">
-              <div class="flex items-start gap-2">
-                <span class="material-symbols-outlined text-[14px] ${statusColor} shrink-0 mt-0.5">${statusIcon}</span>
+              <div class="flex items-start gap-2 cursor-pointer hover:bg-surface-container-low p-1 rounded transition-colors group select-none" onclick="const content = this.nextElementSibling; const chevron = this.querySelector('.step-chevron'); const isHidden = content.style.gridTemplateRows === '0fr'; content.style.gridTemplateRows = isHidden ? '1fr' : '0fr'; chevron.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(-90deg)';">
+                <span class="material-symbols-outlined text-[18px] step-chevron transition-transform duration-300 text-outline-variant group-hover:text-on-surface shrink-0 mt-[1px]" style="transform: ${initialRotate};">expand_more</span>
+                <span class="material-symbols-outlined text-base ${statusColor} shrink-0 mt-[1px]">${statusIcon}</span>
                 <div class="flex flex-col flex-1 min-w-0">
-                  <div class="flex items-center justify-between gap-2">
-                    <span class="font-body text-xs text-on-surface truncate">${escapeHtml(step.title)}</span>
-                    <span class="font-mono text-[10px] text-on-surface-variant shrink-0">${step.duration}ms</span>
+                  <div class="flex items-center justify-between gap-3">
+                    <span class="font-body text-sm text-on-surface break-words group-hover:text-primary transition-colors">${escapeHtml(step.title)}</span>
+                    <span class="font-mono text-xs text-on-surface-variant shrink-0 whitespace-nowrap">${formatDuration(step.duration)}</span>
                   </div>
-                  ${step.error ? `<pre class="mt-1 font-mono text-[10px] text-error/80 whitespace-pre-wrap break-words bg-surface-container-lowest p-2 rounded border border-error/20">${escapeHtml(step.error.message)}</pre>` : ""}
+                  ${errorHtml}
                 </div>
               </div>
-              ${renderSteps(step.steps, indent + 1)}
+              <div class="grid transition-[grid-template-rows] duration-300 ease-in-out" style="grid-template-rows: ${initialGrid};">
+                <div class="overflow-hidden">
+                  ${renderSteps(step.steps, indent + 1)}
+                </div>
+              </div>
             </div>
-          `;
+            `;
+          } else {
+            html += `
+            <div class="flex flex-col gap-1 p-1">
+              <div class="flex items-start gap-2">
+                <span class="w-[18px] shrink-0"></span>
+                <span class="material-symbols-outlined text-base ${statusColor} shrink-0 mt-[1px]">${statusIcon}</span>
+                <div class="flex flex-col flex-1 min-w-0">
+                  <div class="flex items-center justify-between gap-3">
+                    <span class="font-body text-sm text-on-surface break-words">${escapeHtml(step.title)}</span>
+                    <span class="font-mono text-xs text-on-surface-variant shrink-0 whitespace-nowrap">${formatDuration(step.duration)}</span>
+                  </div>
+                  ${errorHtml}
+                </div>
+              </div>
+            </div>
+            `;
+          }
         });
         html += `</div>`;
         return html;

@@ -6,7 +6,7 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
-  reporter: [['json', { outputFile: 'test-results/playwright-results.json' }]],
+  reporter: [['./src/reporter/index.ts', { outputFile: 'test-results/playwright-results.json' }]],
   use: {
     trace: 'on-first-retry',
     headless: true,
