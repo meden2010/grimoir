@@ -1,12 +1,26 @@
+export interface PlaywrightErrorDetails {
+  message?: string;
+  stack?: string;
+  location?: {
+    file: string;
+    column: number;
+    line: number;
+  };
+  snippet?: string;
+}
+
 export interface PlaywrightResult {
   status: 'passed' | 'failed' | 'skipped' | 'timedOut' | 'interrupted';
   duration: number;
-  error?: { message?: string };
-  errors: { message?: string }[];
+  error?: PlaywrightErrorDetails;
+  errors: PlaywrightErrorDetails[];
   steps?: any[];
+  attachments?: any[];
 }
 
 export interface PlaywrightJsonTest {
+  projectName?: string;
+  expectedStatus?: string;
   results: PlaywrightResult[];
 }
 
@@ -28,8 +42,11 @@ export interface PlaywrightTest {
   title: string;
   status: 'passed' | 'failed' | 'skipped' | 'timedOut';
   duration: number;
-  error?: string;
+  error?: PlaywrightErrorDetails | string;
   steps?: PlaywrightTestStep[];
+  attachments?: any[];
+  projectName?: string;
+  results?: PlaywrightResult[];
 }
 
 export interface PlaywrightSuite {
@@ -54,9 +71,9 @@ export interface PlaywrightReport {
 
 export function normalizeStatus(status: string): PlaywrightTest['status'] {
   if (status === 'passed' || status === 'failed' || status === 'skipped' || status === 'timedOut') {
-    return status;
+    return status as PlaywrightTest['status'];
   }
-  return 'failed';
+  return 'skipped';
 }
 
 function extractTests(suites: PlaywrightSuite[]): PlaywrightTest[] {
@@ -73,16 +90,22 @@ function extractTests(suites: PlaywrightSuite[]): PlaywrightTest[] {
       for (const spec of suite.specs) {
         if (!spec.tests) continue;
         for (const test of spec.tests) {
-          if (!test.results) continue;
-          for (const result of test.results) {
-            tests.push({
-              title: spec.title,
-              status: normalizeStatus(result.status),
-              duration: result.duration || 0,
-              error: result.error?.message || result.errors?.[0]?.message,
-              steps: result.steps,
-            });
-          }
+          if (!test.results || test.results.length === 0) continue;
+          
+          const results = test.results;
+          const lastResult = results[results.length - 1];
+          const overallStatus = normalizeStatus(lastResult.status);
+
+          tests.push({
+            title: spec.title,
+            status: overallStatus,
+            duration: results.reduce((acc, r) => acc + (r.duration || 0), 0),
+            error: lastResult.error || lastResult.errors?.[0],
+            steps: lastResult.steps,
+            attachments: lastResult.attachments || [],
+            projectName: test.projectName || '',
+            results: results
+          });
         }
       }
     }

@@ -25,19 +25,27 @@ interface Failure {
   suite: string;
   test: string;
   error: string;
+  location?: { file: string; line: number; column: number };
+  snippet?: string;
   duration: number;
 }
 
 const buildFailures = (playwright: PlaywrightReport, k6: K6Report | null): Failure[] => {
   const automatedFailures = extractAutomatedRows(playwright.suites)
     .filter(row => row.status === 'failed')
-    .map(row => ({
-      type: 'Automated' as const,
-      suite: row.suite,
-      test: row.test,
-      error: stripAnsi(row.error || 'Unknown error'),
-      duration: row.duration,
-    }));
+    .map(row => {
+      const errObj = row.error || {};
+      const errMsg = typeof errObj === 'string' ? errObj : errObj.message || 'Unknown error';
+      return {
+        type: 'Automated' as const,
+        suite: row.suite,
+        test: row.test,
+        error: stripAnsi(errMsg),
+        location: errObj.location,
+        snippet: errObj.snippet,
+        duration: row.duration,
+      };
+    });
 
   const performanceFailures = k6
     ? Object.entries(k6.scenarios)
@@ -65,7 +73,7 @@ const generateFailureRows = (failures: Failure[]): string => {
               </tr>`;
   }
 
-  return failures.map(({ type, suite, test, error, duration }, index) => {
+  return failures.map(({ type, suite, test, error, location, snippet, duration }, index) => {
     const typeColor = type === 'Automated'
       ? 'bg-primary/10 text-primary border-primary/30'
       : 'bg-secondary/10 text-secondary border-secondary/30';
@@ -75,6 +83,26 @@ const generateFailureRows = (failures: Failure[]): string => {
     const typeLabel = type === 'Automated' ? 'Automated' : type;
 
     const firstLineError = error.split('\n')[0] || error;
+    let fullErrorHtml = `<pre class="font-mono text-[11px] text-error/90 whitespace-pre-wrap leading-relaxed">${escapeHtml(error)}</pre>`;
+    
+    if (snippet || location) {
+      fullErrorHtml += `<div class="mt-4 bg-surface-container-lowest/80 border border-error/10 rounded overflow-hidden"> `;
+      
+      if (location) {
+        fullErrorHtml += `<div class="bg-surface-container-lowest/50 border-b border-error/10 px-3 py-2 flex items-center gap-2 text-outline-variant font-mono text-[11px]">
+          <span class="material-symbols-outlined text-[14px]">description</span>
+          <span>${escapeHtml(location.file)}:${location.line}:${location.column}</span>
+        </div>`;
+      }
+      
+      if (snippet) {
+        fullErrorHtml += `<div class="p-3 overflow-x-auto custom-scrollbar">
+          <pre class="font-mono text-[11.5px] text-on-surface-variant whitespace-pre-wrap leading-relaxed">${escapeHtml(snippet)}</pre>
+        </div>`;
+      }
+      
+      fullErrorHtml += `</div>`;
+    }
 
     return `
               <tr class="hover:bg-error/5 transition-colors group failure-row relative" data-index="${index}">
@@ -88,7 +116,7 @@ const generateFailureRows = (failures: Failure[]): string => {
                 <td class="p-gutter max-w-[320px]">
                   <div class="flex items-center gap-2 min-w-0">
                     <span class="font-mono text-sm text-error/80 truncate">${firstLineError}</span>
-                    <button type="button" class="view-error-btn material-symbols-outlined text-outline hover:text-primary transition-colors text-sm shrink-0" data-error="${escapeHtml(error)}" aria-label="View full error">open_in_full</button>
+                    <button type="button" class="view-error-btn material-symbols-outlined text-outline hover:text-primary transition-colors text-sm shrink-0" data-error-html="${escapeHtml(fullErrorHtml)}" aria-label="View full error">open_in_full</button>
                   </div>
                 </td>
                 <td class="p-gutter font-mono text-sm text-on-surface-variant text-right">${durationText}</td>
@@ -115,7 +143,7 @@ interface AutomatedRow {
   test: string;
   status: PlaywrightTest['status'];
   duration: number;
-  error?: string;
+  error?: any;
 }
 
 function extractAutomatedRows(suites: PlaywrightSuite[]): AutomatedRow[] {
@@ -141,7 +169,7 @@ function extractAutomatedRows(suites: PlaywrightSuite[]): AutomatedRow[] {
               test: spec.title,
               status: normalizeStatus(result.status),
               duration: result.duration || 0,
-              error: result.error?.message || result.errors?.[0]?.message,
+              error: result.error || result.errors?.[0],
             });
           }
         }
@@ -226,7 +254,7 @@ const generateK6MetricsList = (k6: K6Report | null): string => {
             </div>`).join('');
 };
 
-export const generateHTML = (playwright: PlaywrightReport, k6: K6Report | null): string => {
+export const generateHTML = (playwright: PlaywrightReport, k6: K6Report | null, history: any[] = []): string => {
   const k6Stats = k6?.stats ?? {
     totalRequests: 0,
     failedRequests: 0,
@@ -396,5 +424,6 @@ export const generateHTML = (playwright: PlaywrightReport, k6: K6Report | null):
     performanceRequestsVisible: isPerformanceActive ? '' : 'hidden',
     automatedTabVisible: isAutomatedActive ? '' : 'hidden',
     performanceTabVisible: isPerformanceActive ? '' : 'hidden',
+    historyData: JSON.stringify(history).replace(/</g, '\\u003c'),
   });
 };
