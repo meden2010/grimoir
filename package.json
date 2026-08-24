@@ -36,7 +36,8 @@
   "homepage": "https://github.com/meden2010/grimoir#readme",
   "dependencies": {
     "chalk": "^5.6.2",
-    "commander": "^15.0.0"
+    "commander": "^15.0.0",
+    "jsdom": "^30.0.1"
   },
   "devDependencies": {
     "@playwright/test": "^1.61.1",

@@ -1,12 +1,21 @@
 #!/usr/bin/env node
 
 import { Command } from 'commander';
-import { readFileSync, writeFileSync, mkdirSync, watch, existsSync } from 'fs';
-import { join } from 'path';
+import { readFileSync, writeFileSync, mkdirSync, watch, existsSync, copyFileSync } from 'fs';
+import { join, basename } from 'path';
 import { createServer, IncomingMessage, ServerResponse } from 'http';
 import { parsePlaywright, PlaywrightReport } from '../parsers/playwright.parser';
 import { parseK6, K6Report } from '../parsers/k6.parser';
 import { generateHTML } from '../report/template';
+
+interface HistoricalRun {
+  date: string;
+  total: number;
+  passed: number;
+  failed: number;
+  skipped: number;
+  duration: number;
+}
 
 interface GenerateOptions {
   input: string;
@@ -26,6 +35,43 @@ const program = new Command();
 const buildReport = (inputPath: string, outputPath: string): string => {
   const playwrightPath: string = join(inputPath, 'playwright-results.json');
   const playwrightRaw: Record<string, unknown> = JSON.parse(readFileSync(playwrightPath, 'utf-8')) as Record<string, unknown>;
+
+  const dataDir = join(outputPath, 'data');
+  if (!existsSync(dataDir)) {
+    mkdirSync(dataDir, { recursive: true });
+  }
+
+  const processAttachments = (suites: any[]) => {
+    for (const suite of suites) {
+      if (suite.specs) {
+        for (const spec of suite.specs) {
+          if (spec.tests) {
+            for (const test of spec.tests) {
+              if (test.results) {
+                for (const result of test.results) {
+                  if (result.attachments) {
+                    for (const attachment of result.attachments) {
+                      if (attachment.path && existsSync(attachment.path)) {
+                        const fileName = `${Date.now()}-${basename(attachment.path)}`;
+                        const destPath = join(dataDir, fileName);
+                        copyFileSync(attachment.path, destPath);
+                        attachment.path = `./data/${fileName}`;
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      if (suite.suites) {
+        processAttachments(suite.suites);
+      }
+    }
+  };
+  processAttachments((playwrightRaw['suites'] as any[]) || []);
+
   const playwrightReport: PlaywrightReport = parsePlaywright(playwrightRaw);
 
   const k6Path: string = join(inputPath, 'k6-results.json');
@@ -35,9 +81,36 @@ const buildReport = (inputPath: string, outputPath: string): string => {
     k6Report = parseK6(k6Raw);
   }
 
-  const html: string = generateHTML(playwrightReport, k6Report);
-
+  // --- History Management ---
   mkdirSync(outputPath, { recursive: true });
+  const historyPath = join(outputPath, '.grimoir-history.json');
+  let history: HistoricalRun[] = [];
+  
+  if (existsSync(historyPath)) {
+    try {
+      history = JSON.parse(readFileSync(historyPath, 'utf-8'));
+    } catch {
+      // Ignore parse errors, start fresh
+    }
+  }
+
+  const currentRun: HistoricalRun = {
+    date: new Date().toISOString(),
+    total: playwrightReport.stats.total,
+    passed: playwrightReport.stats.passed,
+    failed: playwrightReport.stats.failed,
+    skipped: playwrightReport.stats.skipped,
+    duration: playwrightReport.stats.duration,
+  };
+
+  history.push(currentRun);
+  if (history.length > 20) {
+    history = history.slice(history.length - 20);
+  }
+
+  writeFileSync(historyPath, JSON.stringify(history, null, 2), 'utf-8');
+
+  const html: string = generateHTML(playwrightReport, k6Report, history);
   writeFileSync(join(outputPath, 'grimoir-report.html'), html, 'utf-8');
 
   console.log(`\n✅ Playwright Results:`);

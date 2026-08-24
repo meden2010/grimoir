@@ -106,7 +106,8 @@
         max-height: 320px;
       }
       .custom-scrollbar::-webkit-scrollbar {
-        width: 4px;
+        width: 6px;
+        height: 6px;
       }
       .custom-scrollbar::-webkit-scrollbar-track {
         background: transparent;
@@ -165,39 +166,6 @@
       }
       .animate-spin-slow {
         animation: spin-slow 45s linear infinite;
-      }
-      .magic-circle {
-        position: relative;
-        width: 310px;
-        height: 310px;
-        border: 2px dashed rgba(139, 92, 246, 0.4);
-        border-radius: 50%;
-        pointer-events: none;
-        z-index: 0;
-        box-shadow:
-          0 0 30px rgba(139, 92, 246, 0.3),
-          inset 0 0 30px rgba(139, 92, 246, 0.3);
-      }
-      .magic-circle::before {
-        content: "";
-        position: absolute;
-        top: -12px;
-        left: -12px;
-        right: -12px;
-        bottom: -12px;
-        border: 1px solid rgba(196, 181, 253, 0.3);
-        border-radius: 50%;
-        box-shadow: 0 0 15px rgba(196, 181, 253, 0.15);
-      }
-      .magic-circle::after {
-        content: "";
-        position: absolute;
-        top: 12px;
-        left: 12px;
-        right: 12px;
-        bottom: 12px;
-        border: 3px dotted rgba(196, 181, 253, 0.4);
-        border-radius: 50%;
       }
 
       .glass-panel {
@@ -298,6 +266,18 @@
         animation: gradientShift 2.5s ease infinite;
         filter: drop-shadow(0 0 12px rgba(139, 92, 246, 0.6));
         transform: scale(1.03);
+      }
+
+      /* Custom Search Input Glow */
+      .search-input-custom {
+        outline: none !important;
+        transition: all 0.3s ease;
+      }
+      .search-input-custom:focus,
+      .search-input-custom:hover,
+      .search-wrapper:hover .search-input-custom {
+        box-shadow: 0 0 12px rgba(139, 92, 246, 0.6) !important;
+        border-color: #8B5CF6 !important;
       }
 
       .animate-fade-in {
@@ -405,8 +385,7 @@
         -ms-overflow-style: none !important;
       }
       html::-webkit-scrollbar,
-      body::-webkit-scrollbar,
-      ::-webkit-scrollbar {
+      body::-webkit-scrollbar {
         width: 0px !important;
         height: 0px !important;
         display: none !important;
@@ -472,7 +451,7 @@
         margin-left: -45vh;
         pointer-events: none;
         z-index: -18;
-        opacity: 0.02;
+        opacity: 0.06;
         animation: spin-slow 120s linear infinite;
         fill: none;
         stroke: #a78bfa;
@@ -539,7 +518,23 @@
         pointer-events: none;
         z-index: -15;
       }
-    </style>
+    
+      .step-children {
+        position: relative;
+      }
+      .step-children::before {
+        content: '';
+        position: absolute;
+        left: 8px;
+        top: 0;
+        bottom: 0;
+        width: 1px;
+        background-color: rgba(255, 255, 255, 0.05);
+      }
+      .allure-tab-content {
+        transition: opacity 0.3s ease, transform 0.3s ease;
+      }
+</style>
   </head>
   <body
     class="bg-surface text-on-surface font-body font-body-md relative overflow-x-hidden min-h-screen selection:bg-primary/30"
@@ -655,8 +650,7 @@
         >
           <span class="material-symbols-outlined text-sm align-middle"
             >auto_awesome</span
-          >
-          Overview
+          >Overview
         </button>
         <button
           class="font-label-caps text-sm pb-gutter text-on-surface-variant hover:text-[#8B5CF6] transition-colors __AUTOMATED_TAB_VISIBLE__"
@@ -885,9 +879,6 @@
               >
                 <!-- Explicit 320x320 square container to force exact alignment -->
                 <div class="relative w-[320px] h-[320px] flex-shrink-0">
-                  <div class="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
-                    <div class="magic-circle animate-spin-slow"></div>
-                  </div>
                   <canvas id="overviewStatusChart" class="relative z-10 w-full h-full"></canvas>
                 </div>
               </div>
@@ -911,6 +902,7 @@
           </div>
         </section>
 
+
         <!-- Failures Table -->
         <section
           class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-sm animate-fade-in-up delay-500"
@@ -932,7 +924,7 @@
             </div>
 
             <div class="flex items-center gap-2">
-              <div class="relative flex-1 sm:w-48">
+              <div class="relative flex-1 sm:w-48 search-wrapper">
                 <span
                   class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-outline text-sm pointer-events-none"
                   >search</span
@@ -941,7 +933,7 @@
                   type="text"
                   id="failureSearch"
                   placeholder="Filter failures..."
-                  class="w-full bg-surface-container border border-outline-variant/40 rounded-lg pl-8 pr-3 py-1 text-xs text-on-surface placeholder:text-outline focus:outline-none focus:border-primary focus:shadow-[0_0_12px_rgba(139,92,246,0.3)] transition-all"
+                  class="w-full bg-surface-container border border-outline-variant/40 rounded-lg pl-8 pr-3 py-1 text-xs text-on-surface placeholder:text-outline search-input-custom"
                 />
               </div>
 
@@ -1008,39 +1000,17 @@
           </div>
         </section>
 
-        <!-- Error Detail Modal -->
-        <div
-          id="errorModal"
-          class="modal-backdrop fixed inset-0 z-50 hidden items-center justify-center bg-black/60 backdrop-blur-sm p-gutter"
-        >
-          <div
-            class="modal-content bg-surface-container-lowest border border-primary/30 rounded-xl shadow-[0_0_40px_rgba(139,92,246,0.15)] max-w-2xl w-full max-h-[80vh] flex flex-col"
-          >
-            <div
-              class="p-gutter border-b border-outline-variant flex items-center justify-between"
-            >
-              <h3
-                class="font-label-caps text-on-surface-variant text-[11px] uppercase"
-              >
-                Error Detail
-              </h3>
-              <button
-                type="button"
-                id="closeErrorModal"
-                class="material-symbols-outlined text-outline hover:text-primary transition-colors"
-                aria-label="Close"
-              >
-                close
-              </button>
-            </div>
-            <div class="p-gutter overflow-y-auto custom-scrollbar">
-              <pre
-                id="errorModalContent"
-                class="font-mono text-sm text-error/90 whitespace-pre-wrap break-words"
-              ></pre>
+        <!-- Historical Trends -->
+        <section class="mt-gutter mb-gutter animate-fade-in-up delay-450">
+          <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter card-hover">
+            <h3 class="font-label-caps text-on-surface-variant text-[11px] uppercase mb-base">
+              Historical Trends (Last 20 Runs)
+            </h3>
+            <div class="chart-wrap relative h-[250px] w-full" id="trendChartContainer">
+              <!-- Canvas will go here -->
             </div>
           </div>
-        </div>
+        </section>
 
         <!-- Automated Cases KPIs -->
         <section
@@ -1138,7 +1108,7 @@
                 <p
                   class="font-display text-headline-lg text-on-surface tabular-nums mt-1"
                 >
-                  __PLAYWRIGHT_DURATION_MS__ ms
+                  <span class="counter" data-target="__PLAYWRIGHT_DURATION_MS__" data-is-duration="true">0</span>
                 </p>
                 <p class="font-body-md text-on-surface-variant text-sm mt-auto">
                   Execution time
@@ -1324,27 +1294,27 @@
               Duration
             </p>
             <p class="font-display text-headline-md text-primary mt-1">
-              <span class="counter" data-target="__PLAYWRIGHT_DURATION__"
+              <span class="counter" data-target="__PLAYWRIGHT_DURATION__" data-is-duration="true"
                 >0</span
-              >ms
+              >
             </p>
           </div>
         </div>
 
         <!-- Automated Split Pane (Allure Style) -->
         <div
-          class="flex flex-col lg:flex-row h-[calc(100vh-220px)] min-h-[500px] gap-gutter animate-fade-in-up delay-200"
+          class="flex flex-col lg:flex-row h-[calc(100vh-380px)] min-h-[400px] gap-gutter animate-fade-in-up delay-200"
           id="automatedSplitPane"
         >
           <!-- Left Pane: Tree Navigation -->
           <div
-            class="lg:w-1/3 bg-surface-container-lowest border border-outline-variant rounded-xl flex flex-col overflow-hidden card-hover"
+            class="lg:w-1/3 bg-surface-container-lowest border border-outline-variant rounded-xl flex flex-col overflow-hidden card-hover min-h-0"
           >
             <!-- Search & Filters Header -->
             <div
               class="p-3 border-b border-outline-variant/50 bg-surface-container/30"
             >
-              <div class="relative mb-3">
+              <div class="relative mb-3 search-wrapper">
                 <span
                   class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-outline text-sm pointer-events-none"
                   >search</span
@@ -1353,9 +1323,10 @@
                   type="text"
                   id="automatedSearch"
                   placeholder="Search suites or tests..."
-                  class="w-full bg-surface-container border border-outline-variant/40 rounded-lg pl-8 pr-3 py-1.5 text-xs text-on-surface placeholder:text-outline focus:outline-none focus:border-primary focus:shadow-[0_0_12px_rgba(139,92,246,0.3)] transition-all"
+                  class="w-full bg-surface-container border border-outline-variant/40 rounded-lg pl-8 pr-3 py-1.5 text-xs text-on-surface placeholder:text-outline search-input-custom"
                 />
               </div>
+              <div id="automatedTagsContainer" class="flex flex-wrap gap-1.5 mb-2 empty:hidden"></div>
               <div
                 class="flex items-center justify-between gap-1 overflow-x-auto pb-1 scrollbar-none"
                 id="automatedFilterButtons"
@@ -1381,6 +1352,7 @@
                 >
                   Fail
                 </button>
+
                 <button
                   type="button"
                   data-filter="skipped"
@@ -1393,7 +1365,7 @@
 
             <!-- Tree Container -->
             <div
-              class="flex-1 overflow-y-auto custom-scrollbar p-2"
+              class="flex-1 overflow-y-auto custom-scrollbar p-2 min-h-0"
               id="automatedTreeContainer"
             >
               <!-- Rendered via JS -->
@@ -1402,7 +1374,7 @@
 
           <!-- Right Pane: Test Details -->
           <div
-            class="lg:w-2/3 bg-surface-container-lowest border border-outline-variant rounded-xl flex flex-col overflow-hidden card-hover relative"
+            class="lg:w-2/3 bg-surface-container-lowest border border-outline-variant rounded-xl flex flex-col overflow-hidden card-hover relative min-h-0"
             id="automatedDetailsContainer"
           >
             <!-- Empty State -->
@@ -1422,7 +1394,7 @@
             <!-- Content State -->
             <div
               id="automatedContentState"
-              class="flex flex-col h-full w-full opacity-0 pointer-events-none transition-opacity duration-300"
+              class="flex flex-col flex-1 w-full opacity-0 pointer-events-none transition-opacity duration-300 min-h-0 relative z-10"
             >
               <!-- Header -->
               <div
@@ -1454,13 +1426,22 @@
                     <span class="material-symbols-outlined text-sm">timer</span>
                     <span id="detailDurationText">120ms</span>
                   </div>
+                  <div id="detailAttemptsBadge" class="hidden text-amber-500 bg-amber-500/10 font-mono text-[10px] px-1.5 py-0.5 rounded border border-amber-500/30 flex items-center gap-1 ml-2">
+                    <span class="material-symbols-outlined text-[12px]">replay</span>
+                    <span id="detailAttemptsText"></span>
+                  </div>
                 </div>
-                <h3
-                  class="font-display text-lg text-on-surface"
-                  id="detailTestName"
-                >
-                  Test Case Name
-                </h3>
+                <div class="flex items-start justify-between gap-4 mt-2">
+                  <h3
+                    class="font-body font-bold text-lg text-on-surface flex-1 tracking-tight"
+                    id="detailTestName"
+                  >
+                    Test Case Name
+                  </h3>
+                  <button type="button" id="btnOpenAllure" class="text-outline hover:text-primary transition-colors p-1.5 rounded hover:bg-surface-container flex items-center justify-center shrink-0 border border-outline-variant/30 hover:border-primary/50 shadow-sm" title="Expandir detalles (Estilo Allure)">
+                    <span class="material-symbols-outlined text-[18px]">article</span>
+                  </button>
+                </div>
               </div>
 
               <!-- Tabs for Body -->
@@ -1468,18 +1449,36 @@
                 class="px-4 pt-2 border-b border-outline-variant/50 flex items-center gap-4"
               >
                 <button
-                  class="px-2 py-1 text-sm font-label-caps text-primary border-b-2 border-primary"
+                  id="tabBtnExecution"
+                  class="px-2 py-1 text-sm font-label-caps text-primary border-b-2 border-primary transition-colors focus:outline-none"
+                  onclick="switchDetailTab('execution')"
                 >
                   Execution
+                </button>
+                <button
+                  id="tabBtnExecutions"
+                  class="px-2 py-1 text-sm font-label-caps text-on-surface-variant hover:text-on-surface border-b-2 border-transparent transition-colors focus:outline-none hidden"
+                  onclick="switchDetailTab('executions')"
+                >
+                  Attempts
+                </button>
+                <button
+                  id="tabBtnArtifacts"
+                  class="px-2 py-1 text-sm font-label-caps text-on-surface-variant hover:text-on-surface border-b-2 border-transparent transition-colors focus:outline-none hidden"
+                  onclick="switchDetailTab('artifacts')"
+                >
+                  Artifacts
                 </button>
               </div>
 
               <!-- Body (Steps & Errors) -->
-              <div
-                class="flex-1 overflow-y-auto custom-scrollbar p-4 flex flex-col gap-3"
-                id="detailExecutionBody"
-              >
-                <!-- Injected via JS -->
+              <div class="flex-1 overflow-y-auto custom-scrollbar p-4 flex flex-col gap-3 min-h-0 relative">
+                <!-- Execution Tab Content -->
+                <div id="detailExecutionBody" class="w-full flex flex-col gap-3"></div>
+                <!-- Executions History Tab Content -->
+                <div id="detailExecutionsTabBody" class="w-full hidden flex flex-col gap-3"></div>
+                <!-- Artifacts Tab Content -->
+                <div id="detailArtifactsBody" class="w-full hidden flex flex-col gap-3"></div>
               </div>
             </div>
           </div>
@@ -1536,7 +1535,7 @@
               Avg
             </p>
             <p class="font-display text-headline-md text-primary mt-1">
-              <span class="counter" data-target="__K6_AVG_DURATION__">0</span>ms
+              <span class="counter" data-target="__K6_AVG_DURATION__" data-is-duration="true">0</span>
             </p>
           </div>
           <div
@@ -1546,7 +1545,7 @@
               P95
             </p>
             <p class="font-display text-headline-md text-tertiary mt-1">
-              <span class="counter" data-target="__K6_P95__">0</span>ms
+              <span class="counter" data-target="__K6_P95__" data-is-duration="true">0</span>
             </p>
           </div>
         </div>
@@ -1577,6 +1576,217 @@
           </div>
         </div>
       </div>
+    <!-- Error Detail Modal -->
+        <div
+          id="errorModal"
+          class="modal-backdrop fixed inset-0 z-50 hidden items-center justify-center bg-black/60 backdrop-blur-sm p-gutter"
+        >
+          <div
+            class="modal-content bg-surface-container-lowest border border-primary/30 rounded-xl shadow-[0_0_40px_rgba(139,92,246,0.15)] max-w-2xl w-full max-h-[80vh] flex flex-col"
+          >
+            <div
+              class="p-gutter border-b border-outline-variant flex items-center justify-between"
+            >
+              <h3
+                class="font-label-caps text-on-surface-variant text-[11px] uppercase"
+              >
+                Error Detail
+              </h3>
+              <button
+                type="button"
+                id="closeErrorModal"
+                class="material-symbols-outlined text-outline hover:text-primary transition-colors"
+                aria-label="Close"
+              >
+                close
+              </button>
+            </div>
+            <div class="p-gutter overflow-y-auto custom-scrollbar">
+              <div id="errorModalContent" class="text-sm"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Allure-style Details Modal -->
+        <div
+          id="allureModal"
+          class="modal-backdrop fixed inset-0 z-[60] hidden items-center justify-center bg-black/80 backdrop-blur-xl p-4 lg:p-10"
+        >
+          <div class="modal-content bg-surface-container-low border border-outline-variant/30 rounded-xl w-full max-w-5xl h-full flex flex-col shadow-2xl relative overflow-hidden text-[#e4e6eb] font-body">
+            
+            <!-- Header section -->
+            <div class="px-8 pt-6 pb-0 border-b border-outline-variant/20 flex flex-col gap-5 bg-surface-container">
+              <!-- Top row: filepath + actions -->
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3 text-on-surface-variant font-mono text-xs">
+                  <span class="material-symbols-outlined text-[16px]">description</span>
+                  <span id="allureSuiteText"></span>
+                  <button class="material-symbols-outlined text-[14px] hover:text-primary" title="Copy">content_copy</button>
+                </div>
+                <div class="flex items-center gap-4">
+                  <div class="flex items-center gap-2 text-on-surface-variant text-sm">
+                    <button id="allureModalPrevBtn" class="material-symbols-outlined text-[20px] hover:text-primary transition-all disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:text-on-surface-variant hover:scale-110 active:scale-95 disabled:hover:scale-100">expand_less</button>
+                    <span id="allureModalCounter" class="font-mono text-[11px] w-12 text-center"></span>
+                    <button id="allureModalNextBtn" class="material-symbols-outlined text-[20px] hover:text-primary transition-all disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:text-on-surface-variant hover:scale-110 active:scale-95 disabled:hover:scale-100">expand_more</button>
+                  </div>
+                  <button type="button" onclick="closeAllureModal()" class="material-symbols-outlined text-outline hover:text-primary transition-all p-1 rounded-full hover:bg-white/5 hover:scale-110 active:scale-95">
+                    close
+                  </button>
+                </div>
+              </div>
+
+              <!-- Title -->
+              <h2 class="font-body text-xl md:text-3xl font-bold tracking-tight text-on-surface" id="allureTestName"></h2>
+              
+              <!-- Badges Row -->
+              <div class="flex flex-wrap items-center gap-4 text-[11px] font-medium">
+                <!-- Status -->
+                <div id="allureStatusBadge" class="flex items-center gap-1.5 px-2.5 py-1 rounded-full border">
+                  <span id="allureStatusIcon" class="material-symbols-outlined text-[14px]"></span>
+                  <span id="allureStatusText" class="font-bold"></span>
+                </div>
+                <!-- Timeline icon -->
+                <div class="flex items-center gap-1 text-on-surface-variant">
+                  <span class="material-symbols-outlined text-[16px]">linear_scale</span>
+                </div>
+                <!-- Priority -->
+                <div class="flex items-center gap-1.5 text-on-surface-variant">
+                  <span class="material-symbols-outlined text-[14px]">drag_handle</span>
+                  <span>Normal</span>
+                </div>
+                <!-- Duration -->
+                <div class="text-on-surface-variant font-mono" id="allureDurationText"></div>
+              </div>
+
+              <!-- Tabs Row -->
+              <div class="flex items-center gap-6 mt-2">
+                <button class="px-1 py-3 text-sm font-bold text-on-surface border-b-2 border-primary" data-allure-tab="resumen">Overview
+                </button>
+                <button class="px-1 py-3 text-sm font-medium text-on-surface-variant hover:text-on-surface transition-colors flex items-center gap-2" data-allure-tab="historial" id="allureHistorialTabBtn" style="display: none !important;">History
+                </button>
+                <button class="px-1 py-3 text-sm font-medium text-on-surface-variant hover:text-on-surface transition-colors flex items-center gap-2 hidden" id="allureReintentosTabBtn" data-allure-tab="reintentos">Retries <span id="allureAttemptsCountBadge" class="bg-surface-container-high text-on-surface text-[10px] px-1.5 py-0.5 rounded-full font-mono leading-none">0</span>
+                </button>
+                <button class="px-1 py-3 text-sm font-medium text-on-surface-variant hover:text-on-surface transition-colors flex items-center gap-2" data-allure-tab="adjuntos" id="allureAdjuntosTabBtn">Attachments <span id="allureAdjuntosCountBadge" class="bg-surface-container-high text-on-surface text-[10px] px-1.5 py-0.5 rounded-full font-mono leading-none hidden">0</span>
+                </button>
+                <button class="px-1 py-3 text-sm font-medium text-on-surface-variant hover:text-on-surface transition-colors flex items-center gap-2" data-allure-tab="entornos" id="allureEntornosTabBtn" style="display: none !important;">Environments
+                </button>
+              </div>
+            </div>
+
+            <!-- Body Area -->
+            <div class="flex-1 overflow-y-auto custom-scrollbar p-8 bg-surface-container-low">
+              
+              
+              <!-- Tab: Resumen -->
+              <div id="allureTab-resumen" class="allure-tab-content flex flex-col gap-8 max-w-5xl transition-all duration-300 ease-in-out opacity-100 translate-y-0">
+                
+                <!-- Playwright Trace -->
+                <div>
+                  <div class="flex items-center gap-3 mb-4">
+                    <h3 class="text-sm font-bold text-on-surface">Playwright Trace</h3>
+                    <span class="bg-surface-container-high text-on-surface text-[10px] px-1.5 py-0.5 rounded-full font-mono leading-none">1</span>
+                  </div>
+                  <div class="flex items-center justify-between text-[13px] bg-white/[0.02] p-2 rounded hover:bg-white/[0.06] transition-all duration-300 border border-transparent hover:border-outline-variant/50 group cursor-pointer hover:shadow-lg">
+                    <div class="flex items-center gap-3">
+                      <span class="material-symbols-outlined text-error text-[16px]">bug_report</span>
+                      <span class="font-mono text-on-surface-variant group-hover:text-on-surface transition-colors">1</span>
+                      <span class="text-on-surface font-medium">trace</span>
+                    </div>
+                    <div class="flex items-center gap-4 text-on-surface-variant">
+                      <span class="font-mono text-[11px] opacity-70">application/vnd.allure.playwright-trace</span>
+                      <span class="font-mono text-[11px]">4.7 KiB</span>
+                      <span class="material-symbols-outlined text-[16px] hover:text-on-surface">open_in_full</span>
+                      <span class="material-symbols-outlined text-[16px] hover:text-on-surface">cloud_download</span>
+                    </div>
+                  </div>
+                </div>
+
+                <hr class="border-outline-variant/30" />
+
+                <!-- Parameters -->
+                <div>
+                  <div class="flex items-center gap-3 mb-4">
+                    <h3 class="text-sm font-bold text-on-surface">Parameters</h3>
+                    <span class="bg-surface-container-high text-on-surface text-[10px] px-1.5 py-0.5 rounded-full font-mono leading-none">1</span>
+                  </div>
+                  <div class="grid grid-cols-[140px_1fr] items-center text-[13px] gap-y-3">
+                    <span class="text-on-surface-variant">Project</span>
+                    <span class="inline-flex"><span id="allureProjectText" class="bg-surface-container-highest text-on-surface/90 border border-outline-variant/30 px-2 py-0.5 rounded text-xs font-mono"></span></span>
+                  </div>
+                </div>
+
+                <hr class="border-outline-variant/30" />
+
+                <!-- Tags -->
+                <div>
+                  <div class="flex items-center gap-3 mb-4">
+                    <h3 class="text-sm font-bold text-on-surface">Tags</h3>
+                    <span id="allureTagsCountBadge" class="bg-surface-container-high text-on-surface text-[10px] px-1.5 py-0.5 rounded-full font-mono leading-none">0</span>
+                  </div>
+                  <div id="allureTagsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-3 text-[13px]">
+                    <!-- Populated via JS -->
+                  </div>
+                  <button id="allureTagsShowMoreBtn" class="mt-4 text-xs font-bold text-on-surface-variant hover:text-primary transition-colors hidden">Show more (+<span id="allureTagsHiddenCount">0</span>)</button>
+                </div>
+
+                <hr class="border-outline-variant/30" />
+
+                <!-- Test Body -->
+                <div>
+                  <div class="flex items-center gap-2 mb-4 cursor-pointer select-none" onclick="const b=document.getElementById('allureExecutionBody'); const i=this.querySelector('.material-symbols-outlined'); const h=b.style.display==='none'; b.style.display=h?'flex':'none'; i.style.transform=h?'rotate(0deg)':'rotate(-90deg)'">
+                    <span class="material-symbols-outlined text-[18px] text-on-surface-variant transition-transform" style="transform: rotate(0deg)">arrow_drop_down</span>
+                    <h3 class="text-sm font-bold text-on-surface">Test Body</h3>
+                    <span id="allureStepsCountBadge" class="bg-surface-container-high text-on-surface text-[10px] px-1.5 py-0.5 rounded-full font-mono leading-none">0</span>
+                  </div>
+                  <div id="allureExecutionBody" class="flex flex-col w-full pl-[26px]">
+                    <!-- Steps go here -->
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- Tab: Reintentos -->
+              <div id="allureTab-reintentos" class="allure-tab-content hidden opacity-0 translate-y-4 transition-all duration-300 ease-in-out">
+                <div id="allureReintentosBody" class="flex flex-col gap-4">
+                  <div class="text-sm text-on-surface-variant flex flex-col items-center justify-center py-20 gap-4">
+                    <span class="material-symbols-outlined text-[48px] opacity-50">history</span>
+                    <p>No retries for this test case.</p>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Tab: Historial -->
+              <div id="allureTab-historial" class="allure-tab-content hidden opacity-0 translate-y-4 transition-all duration-300 ease-in-out">
+                <div class="text-sm text-on-surface-variant flex flex-col items-center justify-center py-20 gap-4">
+                  <span class="material-symbols-outlined text-[48px] opacity-50 text-primary">timeline</span>
+                  <p class="font-bold">Execution History</p>
+                  <p class="text-xs opacity-70">This feature will be available in the next version of Grimoir.</p>
+                </div>
+              </div>
+              
+              <!-- Tab: Adjuntos -->
+              <div id="allureTab-adjuntos" class="allure-tab-content hidden opacity-0 translate-y-4 transition-all duration-300 ease-in-out">
+                <div id="allureAdjuntosBody" class="flex flex-col gap-4">
+                  <div class="text-sm text-on-surface-variant flex flex-col items-center justify-center py-20 gap-4">
+                    <span class="material-symbols-outlined text-[48px] opacity-50">attachment</span>
+                    <p>No attachments for this test.</p>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Tab: Entornos -->
+              <div id="allureTab-entornos" class="allure-tab-content hidden opacity-0 translate-y-4 transition-all duration-300 ease-in-out">
+                <div class="text-sm text-on-surface-variant flex flex-col items-center justify-center py-20 gap-4">
+                  <span class="material-symbols-outlined text-[48px] opacity-50 text-primary">dns</span>
+                  <p class="font-bold">Environment Variables</p>
+                  <p class="text-xs opacity-70">This feature will be available in the next version of Grimoir.</p>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
     </main>
 
     <!-- Tab switching script -->
@@ -1662,7 +1872,9 @@
 
     <!-- Charts -->
     <script>
+      // --- Global Data Injection ---
       const PLAYWRIGHT_SUITES = __PLAYWRIGHT_SUITES_JSON__;
+      const GRIMOIR_HISTORY = __HISTORY_DATA__;
       const glowPlugin = {
         id: "glow",
         beforeDatasetsDraw: function (chart) {
@@ -2116,14 +2328,25 @@
         }
 
         if (searchInput) {
-          searchInput.addEventListener("input", (e) => {
-            const query = e.target.value.toLowerCase().trim();
+          const debouncedFailuresSearch = typeof debounce === 'function' ? debounce((query) => {
             filteredRows = allRows.filter((row) => {
               const text = row.textContent.toLowerCase();
               return text.includes(query);
             });
             currentPage = 1;
             updatePagination();
+          }, 300) : null;
+          
+          searchInput.addEventListener("input", (e) => {
+            const query = e.target.value.toLowerCase().trim();
+            if (debouncedFailuresSearch) {
+              debouncedFailuresSearch(query);
+            } else {
+              // Fallback
+              filteredRows = allRows.filter((row) => row.textContent.toLowerCase().includes(query));
+              currentPage = 1;
+              updatePagination();
+            }
           });
         }
 
@@ -2149,9 +2372,9 @@
 
         updatePagination();
 
-        function openModal(error) {
-          if (!modalContent || !modal || !error) return;
-          modalContent.textContent = error;
+        function openModal(errorHtml) {
+          if (!modalContent || !modal || !errorHtml) return;
+          modalContent.innerHTML = errorHtml;
           modal.classList.remove("hidden");
           modal.classList.add("flex");
           void modal.offsetWidth;
@@ -2170,8 +2393,8 @@
         tableBody.addEventListener("click", (e) => {
           const btn = e.target.closest(".view-error-btn");
           if (!btn) return;
-          const error = btn.getAttribute("data-error");
-          openModal(error);
+          const errorHtml = btn.getAttribute("data-error-html");
+          openModal(errorHtml);
         });
 
         if (closeModal && modal) {
@@ -2238,9 +2461,19 @@
         }
 
         if (searchInput) {
-          searchInput.addEventListener("input", (e) => {
-            searchQuery = e.target.value.toLowerCase().trim();
+          const debouncedPerfSearch = typeof debounce === 'function' ? debounce((val) => {
+            searchQuery = val;
             filterAutomatedTable();
+          }, 300) : null;
+          
+          searchInput.addEventListener("input", (e) => {
+            const val = e.target.value.toLowerCase().trim();
+            if (debouncedPerfSearch) {
+              debouncedPerfSearch(val);
+            } else {
+              searchQuery = val;
+              filterAutomatedTable();
+            }
           });
         }
 
@@ -2283,11 +2516,81 @@
         }
       })();
 
+      // --- 4. Historical Trend Chart ---
+      if (typeof GRIMOIR_HISTORY !== 'undefined' && Array.isArray(GRIMOIR_HISTORY)) {
+        const trendContainer = document.getElementById('trendChartContainer');
+        if (trendContainer) {
+          if (GRIMOIR_HISTORY.length <= 1) {
+            trendContainer.innerHTML = `<div class="absolute inset-0 flex flex-col items-center justify-center text-outline-variant">
+              <span class="material-symbols-outlined text-[32px] mb-2 opacity-50">show_chart</span>
+              <p class="text-sm">Waiting for more runs to show trends...</p>
+            </div>`;
+          } else {
+            trendContainer.innerHTML = '<canvas id="overviewTrendChart"></canvas>';
+            const ctxTrend = document.getElementById("overviewTrendChart").getContext("2d");
+            
+            const labels = GRIMOIR_HISTORY.map((h, index) => {
+              const d = new Date(h.date);
+              return 'Run ' + (index + 1) + ' (' + d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ')';
+            });
+            const passedData = GRIMOIR_HISTORY.map(h => h.passed);
+            const failedData = GRIMOIR_HISTORY.map(h => h.failed);
+            
+            new Chart(ctxTrend, {
+              type: "line",
+              data: {
+                labels: labels,
+                datasets: [
+                  {
+                    label: "Passed",
+                    data: passedData,
+                    borderColor: "#34d399",
+                    backgroundColor: "rgba(52, 211, 153, 0.1)",
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4
+                  },
+                  {
+                    label: "Failed",
+                    data: failedData,
+                    borderColor: "#f87171",
+                    backgroundColor: "rgba(248, 113, 113, 0.1)",
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4
+                  }
+                ]
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: {
+                    labels: { color: "#9ca3af", font: { family: "'Inter', sans-serif", size: 11 } }
+                  }
+                },
+                scales: {
+                  y: {
+                    beginAtZero: true,
+                    grid: { color: "rgba(255, 255, 255, 0.05)" },
+                    ticks: { color: "#9ca3af", precision: 0 }
+                  },
+                  x: {
+                    grid: { display: false },
+                    ticks: { color: "#9ca3af", maxRotation: 0, minRotation: 0 }
+                  }
+                }
+              }
+            });
+          }
+        }
+      }
+
       // Counter animation for KPI numbers using anime.js spring with manual fallback
       (function () {
         const counters = document.querySelectorAll(".counter");
 
-        function animateCounterManual(counter, target, isFloat) {
+        function animateCounterManual(counter, target, isFloat, isDuration) {
           const duration = 1200;
           const startTime = performance.now();
           function easeOutQuart(t) {
@@ -2296,9 +2599,16 @@
           function update(currentTime) {
             const progress = Math.min((currentTime - startTime) / duration, 1);
             const current = target * easeOutQuart(progress);
-            counter.textContent = isFloat
-              ? current.toFixed(2)
-              : Math.round(current).toString();
+            
+            if (isDuration) {
+              counter.textContent = current >= 1000 
+                ? parseFloat((current / 1000).toFixed(1)) + "s" 
+                : Math.round(current) + "ms";
+            } else {
+              counter.textContent = isFloat
+                ? current.toFixed(2)
+                : Math.round(current).toString();
+            }
             if (progress < 1) requestAnimationFrame(update);
           }
           requestAnimationFrame(update);
@@ -2310,6 +2620,7 @@
           const target = parseFloat(rawTarget);
           if (Number.isNaN(target)) return;
           const isFloat = target % 1 !== 0;
+          const isDuration = counter.hasAttribute("data-is-duration");
 
           if (typeof anime !== "undefined") {
             const animObj = { value: 0 };
@@ -2319,13 +2630,20 @@
               round: isFloat ? 100 : 1,
               easing: "spring(1, 80, 12, 0)",
               update: () => {
-                counter.textContent = isFloat
-                  ? animObj.value.toFixed(2)
-                  : animObj.value.toString();
+                const current = animObj.value;
+                if (isDuration) {
+                  counter.textContent = current >= 1000 
+                    ? parseFloat((current / 1000).toFixed(1)) + "s" 
+                    : Math.round(current) + "ms";
+                } else {
+                  counter.textContent = isFloat
+                    ? current.toFixed(2)
+                    : Math.round(current).toString();
+                }
               },
             });
           } else {
-            animateCounterManual(counter, target, isFloat);
+            animateCounterManual(counter, target, isFloat, isDuration);
           }
         });
       })();
@@ -2469,9 +2787,32 @@
           .replace(/'/g, "&#039;");
       }
 
+      function formatDuration(ms) {
+        if (ms == null) return "0ms";
+        if (ms >= 1000) {
+          const seconds = (ms / 1000).toFixed(1);
+          return parseFloat(seconds) + "s";
+        }
+        return ms + "ms";
+      }
+
       let allAutomatedTests = [];
+      const extractedTags = new Set();
       let currentFilter = "all";
       let currentSearch = "";
+      const expandedSuites = new Set();
+
+      function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+          const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+          };
+          clearTimeout(timeout);
+          timeout = setTimeout(later, wait);
+        };
+      }
 
       function normalizeStatusStr(s) {
         if (!s) return "skipped";
@@ -2493,18 +2834,29 @@
             suite.specs.forEach((spec) => {
               if (spec.tests) {
                 spec.tests.forEach((test) => {
-                  const result = test.results?.[0];
+                  if (!test.results || test.results.length === 0) return;
+                  
+                  const results = test.results;
+                  const lastResult = results[results.length - 1];
+                  const overallStatus = normalizeStatusStr(lastResult.status);
+
+                  const matchTags = spec.title.match(/@\w+/g);
+                  if (matchTags) {
+                    matchTags.forEach(t => extractedTags.add(t));
+                  }
+
                   allAutomatedTests.push({
                     id: Math.random().toString(36).substr(2, 9),
                     suitePath: path,
                     name: spec.title,
-                    status: normalizeStatusStr(result?.status),
-                    duration: result?.duration || 0,
-                    error:
-                      result?.error?.message ||
-                      result?.errors?.[0]?.message ||
-                      null,
-                    steps: result?.steps || [],
+                    projectName: test.projectName || '',
+                    status: overallStatus,
+                    duration: results.reduce((acc, r) => acc + (r.duration || 0), 0),
+                    error: lastResult.error?.message || lastResult.errors?.[0]?.message || null,
+                    errorObj: lastResult.error || (lastResult.errors?.[0] || null),
+                    steps: lastResult.steps || [],
+                    attachments: lastResult.attachments || [],
+                    results: results
                   });
                 });
               }
@@ -2517,10 +2869,42 @@
         });
       }
 
+      function renderTags() {
+        const container = document.getElementById("automatedTagsContainer");
+        if (!container || extractedTags.size === 0) return;
+        
+        let html = '';
+        Array.from(extractedTags).sort().forEach(tag => {
+           const isActive = currentSearch.includes(tag);
+           const activeClass = isActive 
+             ? 'bg-primary/20 text-primary border-primary/40 shadow-[0_0_8px_rgba(139,92,246,0.2)]' 
+             : 'bg-surface-container border-outline-variant/40 text-outline hover:text-on-surface hover:border-outline-variant';
+           html += `<button type="button" class="tag-chip text-[10px] font-mono px-2 py-0.5 rounded-full border transition-all ${activeClass}" data-tag="${tag}">${tag}</button>`;
+        });
+        container.innerHTML = html;
+
+        container.querySelectorAll('.tag-chip').forEach(btn => {
+           btn.addEventListener('click', (e) => {
+              const tag = e.currentTarget.getAttribute('data-tag');
+              const searchInput = document.getElementById('automatedSearch');
+              
+              if (currentSearch.includes(tag)) {
+                currentSearch = currentSearch.replace(tag, '').replace(/\\s+/g, ' ').trim();
+              } else {
+                currentSearch = (currentSearch + ' ' + tag).trim();
+              }
+              
+              if (searchInput) searchInput.value = currentSearch;
+              renderAutomatedTree();
+           });
+        });
+      }
+
       function renderAutomatedTree() {
         if (allAutomatedTests.length === 0 && PLAYWRIGHT_SUITES) {
           buildFlatTestList(PLAYWRIGHT_SUITES);
         }
+        renderTags();
 
         const container = document.getElementById("automatedTreeContainer");
         if (!container) return;
@@ -2552,14 +2936,19 @@
 
         let html = "";
         for (const [suite, tests] of Object.entries(grouped)) {
+          const isCollapsed = !expandedSuites.has(suite);
+          const gridRows = isCollapsed ? '0fr' : '1fr';
+          const chevronRotation = isCollapsed ? '-90deg' : '0deg';
+          const folderIcon = isCollapsed ? 'book' : 'menu_book';
+          
           html += `
             <div class="mb-3">
-              <div class="font-label-caps text-xs text-on-surface-variant uppercase mb-1.5 flex items-center gap-1.5 cursor-pointer hover:text-primary hover:bg-surface-container rounded px-1.5 py-1 transition-colors select-none" onclick="const content = this.nextElementSibling; const icon = this.querySelector('.folder-icon'); const chevron = this.querySelector('.chevron-icon'); const isHidden = content.style.gridTemplateRows === '0fr'; content.style.gridTemplateRows = isHidden ? '1fr' : '0fr'; icon.textContent = isHidden ? 'menu_book' : 'book'; chevron.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(-90deg)';">
-                <span class="material-symbols-outlined text-[16px] chevron-icon transition-transform duration-300" style="transform: rotate(0deg);">expand_more</span>
-                <span class="material-symbols-outlined text-[16px] folder-icon text-primary transition-colors duration-300">menu_book</span>
+              <div class="suite-header font-label-caps text-sm text-on-surface-variant uppercase mb-1.5 flex items-center gap-1.5 cursor-pointer hover:text-primary hover:bg-surface-container rounded px-1.5 py-1.5 transition-colors select-none" data-suite="${escapeHtml(suite)}">
+                <span class="material-symbols-outlined text-[18px] chevron-icon transition-transform duration-300" style="transform: rotate(${chevronRotation});">expand_more</span>
+                <span class="material-symbols-outlined text-[18px] folder-icon text-primary transition-colors duration-300">${folderIcon}</span>
                 <span class="font-bold tracking-wider">${escapeHtml(suite)}</span>
               </div>
-              <div class="grid transition-[grid-template-rows] duration-300 ease-in-out" style="grid-template-rows: 1fr;">
+              <div class="grid transition-[grid-template-rows] duration-300 ease-in-out suite-content" style="grid-template-rows: ${gridRows};">
                 <div class="overflow-hidden">
                   <div class="flex flex-col gap-0.5 ml-4 border-l border-outline-variant/40 pl-2">
           `;
@@ -2580,10 +2969,12 @@
               test.status === "failed"
                 ? "hover:bg-error/10"
                 : "hover:bg-surface-container";
+            const projectBadge = test.projectName ? `<span class="bg-surface-container-highest text-[10px] px-1.5 py-0.5 rounded text-outline-variant font-mono uppercase ml-2 border border-outline-variant/30">${escapeHtml(test.projectName)}</span>` : '';
+            const retriesBadge = test.results && test.results.length > 1 ? `<span class="bg-amber-500/10 text-amber-500 text-[10px] px-1.5 py-0.5 rounded font-mono border border-amber-500/30 whitespace-nowrap ml-2" title="${test.results.length} attempts total"><span class="material-symbols-outlined text-[10px] align-middle mr-0.5">replay</span>${test.results.length}</span>` : '';
             html += `
-                <div class="test-tree-item flex items-center gap-2 p-1.5 rounded cursor-pointer ${bgHover} transition-colors" data-id="${test.id}">
-                  <span class="material-symbols-outlined text-[14px] ${statusColor}">${statusIcon}</span>
-                  <span class="font-body text-xs text-on-surface truncate flex-1" title="${escapeHtml(test.name)}">${escapeHtml(test.name)}</span>
+                <div class="test-tree-item flex items-center gap-2.5 p-2 rounded cursor-pointer ${bgHover} transition-colors" data-id="${test.id}">
+                  <span class="material-symbols-outlined text-base ${statusColor}">${statusIcon}</span>
+                  <span class="font-body text-sm text-on-surface truncate flex-1 flex items-center" title="${escapeHtml(test.name)}">${escapeHtml(test.name)}${projectBadge}${retriesBadge}</span>
                 </div>
             `;
           });
@@ -2592,49 +2983,52 @@
 
         container.innerHTML = html;
 
-        // Attach click events
-        container.querySelectorAll(".test-tree-item").forEach((el) => {
-          el.addEventListener("click", (e) => {
-            document
-              .querySelectorAll(".test-tree-item")
-              .forEach((i) =>
-                i.classList.remove(
-                  "bg-primary/20",
-                  "border",
-                  "border-primary/30",
-                ),
-              );
-            const target = e.currentTarget;
-            target.classList.add(
-              "bg-primary/20",
-              "border",
-              "border-primary/30",
-            );
-            const testId = target.getAttribute("data-id");
-            const test = allAutomatedTests.find((t) => t.id === testId);
-            if (test) showTestDetails(test);
+        if (window.anime) {
+          anime({
+            targets: container.children,
+            translateY: [15, 0],
+            opacity: [0, 1],
+            duration: 400,
+            easing: "easeOutSine",
+            delay: anime.stagger(40)
           });
-        });
+        }
       }
+
+
 
       function showTestDetails(test) {
         try {
           document
+            .getElementById("btnOpenAllure")
+            .setAttribute("onclick", `openAllureModal('${test.id}')`);
+
+          document
             .getElementById("automatedEmptyState")
-            .classList.add("opacity-0");
+            .classList.add("opacity-0", "pointer-events-none");
           document
             .getElementById("automatedEmptyState")
             .classList.remove("z-10");
-          document
-            .getElementById("automatedContentState")
-            .classList.remove("opacity-0", "pointer-events-none");
+          
+          const contentState = document.getElementById("automatedContentState");
+          contentState.classList.remove("opacity-0", "pointer-events-none", "animate-fade-in-up");
+          void contentState.offsetWidth;
+          contentState.classList.add("animate-fade-in-up");
 
           document.getElementById("detailTestName").textContent =
             test.name || "Unknown Test";
           document.getElementById("detailSuiteText").textContent =
             test.suitePath || "Unknown Suite";
-          document.getElementById("detailDurationText").textContent =
-            (test.duration || 0) + "ms";
+          document.getElementById("detailDurationText").textContent = formatDuration(test.duration);
+
+          const attemptsBadge = document.getElementById("detailAttemptsBadge");
+          const attemptsText = document.getElementById("detailAttemptsText");
+          if (test.results && test.results.length > 1) {
+            attemptsBadge.classList.remove("hidden");
+            attemptsText.textContent = test.results.length + " Attempts";
+          } else {
+            attemptsBadge.classList.add("hidden");
+          }
 
           const badge = document.getElementById("detailStatusBadge");
           const dot = document.getElementById("detailStatusDot");
@@ -2642,13 +3036,13 @@
           text.textContent = (test.status || "unknown").toUpperCase();
 
           badge.className =
-            "inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold rounded-full border";
+            "inline-flex items-center gap-1 px-2.5 py-1 text-xs font-bold rounded-full border";
           dot.className = "w-1.5 h-1.5 rounded-full";
           if (test.status === "passed") {
             badge.classList.add(
               "bg-emerald-400/10",
               "text-emerald-400",
-              "border-emerald-400/30",
+              "border-emerald-400/30"
             );
             dot.classList.add("bg-emerald-400");
           } else if (test.status === "failed") {
@@ -2663,54 +3057,637 @@
             dot.classList.add("bg-outline");
           }
 
-          let bodyHtml = "";
-          if (test.error) {
-            bodyHtml += `
-            <div class="bg-error/5 border border-error/20 rounded-lg p-3">
-              <div class="font-label-caps text-[10px] text-error uppercase mb-2 flex items-center gap-1">
-                <span class="material-symbols-outlined text-[14px]">bug_report</span> Error Trace
-              </div>
-              <pre class="font-mono text-xs text-error/90 whitespace-pre-wrap break-words custom-scrollbar overflow-x-auto">${escapeHtml(test.error)}</pre>
-            </div>
-          `;
-          }
+          const tabBtnExecutions = document.getElementById("tabBtnExecutions");
+          const tabBtnArtifacts = document.getElementById("tabBtnArtifacts");
+          
+          let execHtml = "";
+          let artiHtml = "";
+          let historyHtml = "";
+          
+          const results = test.results || [];
+          const lastResult = results.length > 0 ? results[results.length - 1] : { steps: test.steps, attachments: test.attachments, error: { message: test.error } };
+          
+          // --- Execution Tab ---
+          const mainErrorObj = lastResult.error || (lastResult.errors && lastResult.errors.length > 0 ? lastResult.errors[0] : null);
+          const mainErrorMsg = mainErrorObj?.message || (typeof lastResult.error === 'string' ? lastResult.error : null) || (typeof mainErrorObj === 'string' ? mainErrorObj : null) || test.error;
 
-          if (test.steps && test.steps.length > 0) {
-            bodyHtml += `<div class="font-label-caps text-[10px] text-outline uppercase mt-2">Execution Steps</div>`;
-            bodyHtml += renderSteps(test.steps);
+          if (lastResult.steps && lastResult.steps.length > 0) {
+            execHtml += `<div class="font-label-caps text-xs text-outline uppercase mt-3 mb-2">Execution Steps</div>`;
+            execHtml += renderSteps(lastResult.steps, test);
           } else {
-            bodyHtml += `<div class="text-outline text-xs italic">No steps recorded.</div>`;
+            execHtml += `<div class="text-outline text-sm italic mt-2">No steps recorded.</div>`;
+          }
+          
+          // --- Artifacts Tab ---
+          if (lastResult.attachments && lastResult.attachments.length > 0) {
+            tabBtnArtifacts.classList.remove("hidden");
+            artiHtml += `<div class="font-label-caps text-xs text-outline uppercase mt-3 mb-2">Attachments</div>`;
+            artiHtml += `<div class="flex flex-col gap-4">`;
+            lastResult.attachments.forEach(att => {
+              artiHtml += `
+              <div class="flex flex-col gap-1 bg-surface-container-low/50 rounded border border-outline-variant/30 overflow-hidden group">
+                <div class="flex items-center gap-2 cursor-pointer hover:bg-surface-container-low p-2.5 transition-colors select-none" onclick="const content = this.nextElementSibling; const chevron = this.querySelector('.att-chevron'); const isHidden = content.style.gridTemplateRows === '0fr'; content.style.gridTemplateRows = isHidden ? '1fr' : '0fr'; chevron.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(-90deg)';">
+                  <span class="material-symbols-outlined text-[18px] att-chevron transition-transform duration-300 text-outline-variant group-hover:text-on-surface shrink-0" style="transform: rotate(-90deg);">expand_more</span>
+                  <span class="material-symbols-outlined text-[16px] text-primary">attachment</span>
+                  <span class="font-body text-sm font-semibold text-on-surface group-hover:text-primary transition-colors flex-1">${escapeHtml(att.name)}</span>
+                </div>
+                <div class="grid transition-[grid-template-rows] duration-300 ease-in-out" style="grid-template-rows: 0fr;">
+                  <div class="overflow-hidden">
+                    <div class="p-3 border-t border-outline-variant/20 bg-surface-container-lowest/50">`;
+              
+              if (att.name.toLowerCase().includes('trace') || att.path.endsWith('.zip')) {
+                artiHtml += `
+                  <div class="bg-surface-container border border-primary/20 rounded-lg p-4">
+                    <div class="flex items-center gap-2 mb-2">
+                      <span class="material-symbols-outlined text-primary text-[20px]">troubleshoot</span>
+                      <h4 class="font-bold text-on-surface text-sm">Playwright Trace Viewer</h4>
+                    </div>
+                    <p class="text-xs text-on-surface-variant mb-4 leading-relaxed">
+                      Explore a full timeline of your test execution including DOM snapshots, network requests, and console logs.
+                    </p>
+                    
+                    <div class="flex flex-col gap-3">
+                      <!-- Option 1: Web -->
+                      <div class="bg-surface-container-lowest/50 border border-outline-variant/30 rounded p-3">
+                        <div class="text-[10px] font-bold text-on-surface mb-2 font-label-caps uppercase">Option 1: View in Browser</div>
+                        <div class="flex items-center justify-between">
+                          <span class="text-xs text-outline text-wrap flex-1 mr-2 leading-relaxed">Download the trace and drop it into <a href="https://trace.playwright.dev" target="_blank" class="text-primary hover:underline">trace.playwright.dev</a></span>
+                          <a href="${att.path}" download class="shrink-0 flex items-center gap-1.5 bg-primary/10 text-primary border border-primary/20 px-3 py-1.5 rounded text-xs font-bold hover:bg-primary hover:text-on-primary transition-colors">
+                            <span class="material-symbols-outlined text-[16px]">download</span> Download
+                          </a>
+                        </div>
+                      </div>
+
+                      <!-- Option 2: Local CLI -->
+                      <div class="bg-surface-container-lowest/50 border border-outline-variant/30 rounded p-3">
+                        <div class="text-[10px] font-bold text-on-surface mb-2 font-label-caps uppercase">Option 2: Run Locally</div>
+                        <div class="flex items-center gap-2 bg-[#0d1117] rounded border border-outline-variant/20 p-2 group">
+                          <span class="material-symbols-outlined text-outline text-[16px]">terminal</span>
+                          <code class="font-mono text-[11px] text-emerald-400/90 flex-1 overflow-x-auto whitespace-nowrap custom-scrollbar">npx playwright show-trace ${escapeHtml(att.path)}</code>
+                          <button type="button" onclick="navigator.clipboard.writeText('npx playwright show-trace ${escapeHtml(att.path)}'); this.querySelector('span').textContent = 'check'; setTimeout(() => this.querySelector('span').textContent = 'content_copy', 2000)" class="text-outline hover:text-primary transition-colors shrink-0 p-0.5" title="Copy command">
+                            <span class="material-symbols-outlined text-[16px]">content_copy</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                `;
+              } else if (att.contentType.startsWith('image/')) {
+                artiHtml += `<img src="${att.path}" alt="${escapeHtml(att.name)}" class="rounded max-w-full border border-outline-variant/20 shadow-sm cursor-pointer hover:opacity-90 transition-opacity" onclick="window.open(this.src, '_blank')" />`;
+              } else if (att.contentType.startsWith('video/')) {
+                artiHtml += `<video controls src="${att.path}" class="rounded max-w-full border border-outline-variant/20 shadow-sm"></video>`;
+              } else {
+                artiHtml += `<a href="${att.path}" target="_blank" class="text-primary hover:underline text-sm flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">download</span> Download File</a>`;
+              }
+              artiHtml += `
+                    </div>
+                  </div>
+                </div>
+              </div>`;
+            });
+            artiHtml += `</div>`;
+          } else {
+            tabBtnArtifacts.classList.add("hidden");
+            artiHtml = `<div class="text-outline text-sm italic mt-2">No attachments found.</div>`;
+          }
+          
+          // --- Executions History Tab ---
+          if (results.length > 0) {
+            tabBtnExecutions.classList.remove("hidden");
+            historyHtml += `<div class="font-label-caps text-xs text-outline uppercase mt-3 mb-2">Execution History</div>`;
+            historyHtml += `<div class="flex flex-col gap-3">`;
+            
+            results.forEach((r, idx) => {
+              const isPassed = r.status === 'passed';
+              const rStatusColor = isPassed ? 'emerald-400' : 'error';
+              const rIcon = isPassed ? 'check_circle' : 'cancel';
+              const rBgGradient = isPassed ? 'from-emerald-400/5 to-transparent' : 'from-error/5 to-transparent';
+              const rBorder = isPassed ? 'border-l-emerald-400/50' : 'border-l-error/50';
+              const rErrorObj = r.error || (r.errors && r.errors.length > 0 ? r.errors[0] : null);
+              const rErrorMsg = rErrorObj?.message || (typeof r.error === 'string' ? r.error : null) || (typeof rErrorObj === 'string' ? rErrorObj : null);
+              const startTime = r.startTime ? new Date(r.startTime).toLocaleString() : "Unknown Time";
+              
+              const hasError = !!rErrorMsg;
+              const gridRows = "0fr";
+              const chevronRot = "-90deg";
+
+              historyHtml += `
+              <div class="relative overflow-hidden bg-surface-container-low/50 rounded-lg border border-outline-variant/30 border-l-4 ${rBorder} shadow-sm group">
+                <div class="relative flex flex-col">
+                  <!-- Header (Clickable) -->
+                  <div class="flex items-start justify-between p-4 cursor-pointer hover:bg-surface-container-low transition-colors select-none" onclick="const content = this.nextElementSibling; const chevron = this.querySelector('.att-chevron'); const isHidden = content.style.gridTemplateRows === '0fr'; content.style.gridTemplateRows = isHidden ? '1fr' : '0fr'; chevron.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(-90deg)';">
+                    <div class="flex items-center gap-3">
+                      <span class="material-symbols-outlined text-[20px] att-chevron transition-transform duration-300 text-outline-variant group-hover:text-on-surface shrink-0" style="transform: rotate(${chevronRot});">expand_more</span>
+                      <div class="flex items-center justify-center w-8 h-8 rounded-full bg-${rStatusColor}/10 text-${rStatusColor}">
+                        <span class="material-symbols-outlined text-[18px]">${rIcon}</span>
+                      </div>
+                      <div>
+                        <div class="text-sm font-bold text-on-surface">Attempt #${idx + 1}</div>
+                        <div class="text-[11px] font-label-caps text-${rStatusColor} font-bold uppercase tracking-wider mt-0.5">${r.status}</div>
+                      </div>
+                    </div>
+                    <div class="flex flex-col items-end gap-1 text-xs text-outline">
+                      <span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[14px]">calendar_today</span> ${startTime}</span>
+                      <span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[14px]">timer</span> ${formatDuration(r.duration || 0)}</span>
+                    </div>
+                  </div>
+                  <!-- Content (Accordion) -->
+                  <div class="grid transition-[grid-template-rows] duration-300 ease-in-out" style="grid-template-rows: ${gridRows};">
+                    <div class="overflow-hidden">
+                      <div class="px-14 pb-4 pt-1">
+              `;
+              if (hasError) {
+                historyHtml += `<div class="bg-surface-container-highest border border-error/20 rounded overflow-hidden">`;
+                
+                // Location Bar
+                if (rErrorObj?.location) {
+                  const loc = rErrorObj.location;
+                  historyHtml += `
+                    <div class="bg-surface-container-lowest/50 border-b border-error/10 px-3 py-2 flex items-center gap-2 text-outline-variant font-mono text-[11px]">
+                      <span class="material-symbols-outlined text-[14px]">description</span>
+                      <span>${escapeHtml(loc.file)}:${loc.line}:${loc.column}</span>
+                    </div>
+                  `;
+                }
+
+                // Error Message
+                historyHtml += `
+                  <div class="p-3 ${rErrorObj?.snippet ? 'border-b border-error/10' : ''}">
+                    <div class="flex items-center gap-2 mb-1.5 text-error font-semibold text-xs font-label-caps">
+                      <span class="material-symbols-outlined text-[14px]">warning</span> Error Message
+                    </div>
+                    <pre class="font-mono text-[11.5px] text-error/90 whitespace-pre-wrap overflow-x-auto custom-scrollbar leading-relaxed">${escapeHtml(rErrorMsg)}</pre>
+                  </div>
+                `;
+
+                // Snippet
+                if (rErrorObj?.snippet) {
+                  historyHtml += `
+                    <div class="p-3 bg-surface-container-lowest/80">
+                      <div class="flex items-center gap-2 mb-1.5 text-on-surface-variant font-semibold text-xs font-label-caps">
+                        <span class="material-symbols-outlined text-[14px]">code</span> Source Snippet
+                      </div>
+                      <pre class="font-mono text-[11px] text-on-surface-variant whitespace-pre-wrap overflow-x-auto custom-scrollbar leading-relaxed">${escapeHtml(rErrorObj.snippet)}</pre>
+                    </div>
+                  `;
+                }
+
+                historyHtml += `</div>`;
+              } else {
+                 historyHtml += `<div class="text-xs text-outline italic">Execution succeeded without errors.</div>`;
+              }
+              historyHtml += `
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>`;
+            });
+            historyHtml += `</div>`;
+          } else {
+            tabBtnExecutions.classList.add("hidden");
           }
 
-          document.getElementById("detailExecutionBody").innerHTML = bodyHtml;
-        } catch (e) {
+          document.getElementById("detailExecutionBody").innerHTML = execHtml;
+          document.getElementById("detailExecutionsTabBody").innerHTML = historyHtml;
+          document.getElementById("detailArtifactsBody").innerHTML = artiHtml;
+          switchDetailTab('execution');
+        } catch(e) {
           console.error("Error displaying test details:", e);
-          document.getElementById("detailExecutionBody").innerHTML =
-            `<div class="text-error text-xs p-4 bg-error/10 rounded border border-error/20">Error rendering test details. Check console.</div>`;
         }
       }
 
-      function renderSteps(steps, indent = 0) {
+      function closeAllureModal() {
+        const modal = document.getElementById("allureModal");
+        if (modal) {
+          modal.classList.remove("open");
+          const content = modal.querySelector('.modal-content');
+          if (content) {
+            content.style.transform = 'scale(0.95)';
+            content.style.opacity = '0';
+          }
+          if (window.allureCloseTimeout) clearTimeout(window.allureCloseTimeout);
+          window.allureCloseTimeout = setTimeout(() => {
+            modal.classList.add("hidden");
+            modal.classList.remove("flex");
+          }, 300);
+        }
+      }
+
+            function openAllureModal(testId) {
+        if (window.allureCloseTimeout) clearTimeout(window.allureCloseTimeout);
+        
+        const testIndex = allAutomatedTests.findIndex(t => t.id === testId);
+        if (testIndex === -1) return;
+        const test = allAutomatedTests[testIndex];
+        
+        // Setup pagination
+        const prevBtn = document.getElementById("allureModalPrevBtn");
+        const nextBtn = document.getElementById("allureModalNextBtn");
+        document.getElementById("allureModalCounter").textContent = `${testIndex + 1} / ${allAutomatedTests.length}`;
+        
+        if (testIndex > 0) {
+           prevBtn.disabled = false;
+           prevBtn.onclick = () => openAllureModal(allAutomatedTests[testIndex - 1].id);
+        } else {
+           prevBtn.disabled = true;
+           prevBtn.onclick = null;
+        }
+
+        if (testIndex < allAutomatedTests.length - 1) {
+           nextBtn.disabled = false;
+           nextBtn.onclick = () => openAllureModal(allAutomatedTests[testIndex + 1].id);
+        } else {
+           nextBtn.disabled = true;
+           nextBtn.onclick = null;
+        }
+        
+        document.getElementById("allureTestName").textContent = test.name || "Unknown Test";
+        document.getElementById("allureDurationText").textContent = formatDuration(test.duration);
+        document.getElementById("allureProjectText").textContent = test.projectName || "default";
+        document.getElementById("allureSuiteText").textContent = test.suitePath || "Unknown Suite";
+        
+        // Status Badges
+        const statusBadge = document.getElementById("allureStatusBadge");
+        const statusIcon = document.getElementById("allureStatusIcon");
+        const statusText = document.getElementById("allureStatusText");
+        
+        statusBadge.className = "flex items-center gap-1.5 px-2.5 py-1 rounded-full border ";
+        if (test.status === "passed") {
+          statusBadge.className += "bg-emerald-500/15 text-emerald-400 border-emerald-500/30";
+          statusIcon.textContent = "check_circle";
+          statusText.textContent = "Aprobado";
+        } else if (test.status === "failed") {
+          statusBadge.className += "bg-error/15 text-error border-error/30";
+          statusIcon.textContent = "cancel";
+          statusText.textContent = "Fallido";
+        } else {
+          statusBadge.className += "bg-outline-variant/20 text-outline border-outline-variant/30";
+          statusIcon.textContent = "do_not_disturb_on";
+          statusText.textContent = "Omitido";
+        }
+        
+        // Tags Grid
+        let tagsGridHtml = '';
+        const allTags = [
+          { label: 'language', value: 'javascript' },
+          { label: 'framework', value: 'playwright' },
+          { label: 'package', value: test.suitePath },
+          { label: 'suite', value: test.suitePath }
+        ];
+        
+        const explicitTags = ((test.name || "").match(/@\w+/g) || []);
+        explicitTags.forEach(t => allTags.push({ label: 'tag', value: t }));
+
+        const visibleTags = allTags.slice(0, 4);
+        const hiddenTags = allTags.slice(4);
+
+        function renderTag(t, hidden = false) {
+           return `
+          <div class="grid grid-cols-[100px_1fr] items-center gap-y-2 ${hidden ? 'hidden-tag hidden' : ''}">
+            <span class="text-on-surface-variant">${escapeHtml(t.label)}</span>
+            <span class="inline-flex"><span class="bg-surface-container-highest text-on-surface border border-outline-variant/30 px-2 py-0.5 rounded text-xs font-mono truncate max-w-[200px]" title="${escapeHtml(t.value)}">${escapeHtml(t.value)}</span></span>
+          </div>`;
+        }
+
+        allTags.forEach((t, index) => {
+          tagsGridHtml += renderTag(t, index >= 4);
+        });
+        
+        document.getElementById("allureTagsGrid").innerHTML = tagsGridHtml;
+        document.getElementById("allureTagsCountBadge").textContent = allTags.length.toString();
+
+        const showMoreBtn = document.getElementById("allureTagsShowMoreBtn");
+        if (hiddenTags.length > 0) {
+          showMoreBtn.classList.remove("hidden");
+          showMoreBtn.textContent = `Show more (+${hiddenTags.length})`;
+          showMoreBtn.onclick = function() {
+            const isShowingAll = this.textContent.includes('Menos');
+            document.querySelectorAll('.hidden-tag').forEach(el => el.classList.toggle('hidden', isShowingAll));
+            this.textContent = isShowingAll 
+              ? `Show more (+${hiddenTags.length})` 
+              : `Mostrar menos`;
+          };
+        } else {
+          showMoreBtn.classList.add("hidden");
+        }
+
+                let stepCount = 0;
+        function renderAllureSteps(steps, indent = 0) {
+          if (!steps || steps.length === 0) return "";
+          let html = "";
+          steps.forEach(step => {
+            stepCount++;
+            const isFailed = step.error;
+            const statusIcon = isFailed ? "cancel" : "check_circle";
+            const statusColor = isFailed ? "text-error" : "text-emerald-500";
+            const hasChildren = step.steps && step.steps.length > 0;
+            const hasChildWithError = hasChildren && step.steps.some(s => s.error);
+            const shouldShowErrorBox = isFailed && step.error && !hasChildWithError;
+            
+            const paddingLeft = indent * 20;
+            
+            let stepErrorHtml = '';
+            if (shouldShowErrorBox) {
+               const errMsg = typeof step.error === 'string' ? step.error : step.error.message;
+               stepErrorHtml += `<div class="pl-[${paddingLeft + 48}px] pr-4 py-2 flex flex-col gap-2">
+                 <div class="bg-surface-container-highest border border-error/20 rounded overflow-hidden">
+                   <div class="p-3 border-b border-error/10">
+                     <div class="flex items-center gap-2 mb-1.5 text-error font-semibold text-xs font-label-caps">
+                       <span class="material-symbols-outlined text-[14px]">warning</span> Error Message
+                     </div>
+                     <pre class="font-mono text-[11.5px] text-error/90 whitespace-pre-wrap overflow-x-auto custom-scrollbar leading-relaxed">${escapeHtml(errMsg)}</pre>
+                   </div>`;
+               if (test.errorObj && test.errorObj.snippet) {
+                 stepErrorHtml += `
+                   <div class="p-3 bg-surface-container-lowest/80">
+                     <div class="flex items-center gap-2 mb-1.5 text-on-surface-variant font-semibold text-xs font-label-caps">
+                       <span class="material-symbols-outlined text-[14px]">code</span> Source Snippet
+                     </div>
+                     <pre class="font-mono text-[11px] text-on-surface-variant whitespace-pre-wrap overflow-x-auto custom-scrollbar leading-relaxed">${escapeHtml(test.errorObj.snippet)}</pre>
+                   </div>`;
+               }
+               stepErrorHtml += `</div></div>`;
+            }
+
+            if (hasChildren) {
+              html += `
+              <div class="flex flex-col border-b border-outline-variant/10 last:border-0">
+                <div class="flex items-center gap-2 cursor-pointer hover:bg-surface-container-highest p-1.5 rounded transition-colors group select-none text-[13px]" style="padding-left: ${paddingLeft}px" onclick="const c=this.nextElementSibling; const i=this.querySelector('.step-chevron'); const h=c.style.display==='none'; c.style.display=h?'block':'none'; i.style.transform=h?'rotate(0deg)':'rotate(-90deg)'">
+                  <span class="material-symbols-outlined text-[16px] step-chevron transition-transform text-outline-variant group-hover:text-on-surface" style="transform: rotate(-90deg)">arrow_drop_down</span>
+                  <span class="material-symbols-outlined text-[14px] ${statusColor}">${statusIcon}</span>
+                  <span class="font-mono text-on-surface-variant text-[11px] w-4">${stepCount}</span>
+                  <span class="text-on-surface group-hover:text-primary transition-colors truncate flex-1">${escapeHtml(step.title)}</span>
+                  <span class="font-mono text-[11px] text-on-surface-variant">${formatDuration(step.duration)}</span>
+                </div>
+                <div class="step-children" style="display: none">
+                  ${renderAllureSteps(step.steps, indent + 1)}
+                </div>
+              </div>`;
+            } else {
+              html += `
+              <div class="flex flex-col border-b border-outline-variant/10 last:border-0">
+                <div class="flex items-center gap-2 hover:bg-surface-container-highest p-1.5 rounded transition-colors text-[13px]" style="padding-left: ${paddingLeft + 24}px">
+                  <span class="material-symbols-outlined text-[14px] ${statusColor}">${statusIcon}</span>
+                  <span class="font-mono text-on-surface-variant text-[11px] w-4">${stepCount}</span>
+                  <span class="text-on-surface truncate flex-1">${escapeHtml(step.title)}</span>
+                  <span class="font-mono text-[11px] text-on-surface-variant">${formatDuration(step.duration)}</span>
+                </div>
+                ${stepErrorHtml}
+              </div>`;
+            }
+          });
+          return html;
+        }
+
+        let stepsHtml = renderAllureSteps(test.steps || []);
+        
+        document.getElementById("allureExecutionBody").innerHTML = stepsHtml;
+        document.getElementById("allureStepsCountBadge").textContent = stepCount.toString();
+
+        // Populate Reintentos Tab
+        if (test.results && test.results.length > 1) {
+          const tabBtn = document.getElementById("allureReintentosTabBtn");
+          tabBtn.classList.remove("hidden");
+          document.getElementById("allureAttemptsCountBadge").textContent = (test.results.length - 1).toString();
+          
+          let reintentosHtml = '<div class="flex flex-col gap-3">';
+          test.results.forEach((res, idx) => {
+             const statColor = normalizeStatusStr(res.status) === 'passed' ? 'text-emerald-400 border-emerald-400/20 bg-emerald-400/10' : 'text-error border-error/20 bg-error/10';
+             const icon = normalizeStatusStr(res.status) === 'passed' ? 'check_circle' : 'cancel';
+             reintentosHtml += `
+               <div class="flex items-center justify-between p-3 rounded border border-outline-variant/20 bg-surface-container">
+                 <div class="flex items-center gap-3">
+                   <div class="flex items-center justify-center w-8 h-8 rounded-full ${statColor}">
+                     <span class="material-symbols-outlined text-[16px]">${icon}</span>
+                   </div>
+                   <div class="flex flex-col">
+                     <span class="text-sm font-bold text-on-surface">Attempt #${idx + 1}</span>
+                     <span class="text-[11px] text-on-surface-variant">Duration: ${formatDuration(res.duration)}</span>
+                   </div>
+                 </div>
+                 ${res.error ? `<span class="text-xs text-error font-mono bg-error/10 px-2 py-1 rounded truncate max-w-[200px]">${escapeHtml(res.error.message || '')}</span>` : ''}
+               </div>
+             `;
+          });
+          reintentosHtml += '</div>';
+          document.getElementById("allureReintentosBody").innerHTML = reintentosHtml;
+        } else {
+          document.getElementById("allureReintentosTabBtn").classList.add("hidden");
+        }
+
+        // Populate Adjuntos Tab
+        if (test.attachments && test.attachments.length > 0) {
+          const adjBadge = document.getElementById("allureAdjuntosCountBadge");
+          if (adjBadge) {
+            adjBadge.textContent = test.attachments.length.toString();
+            adjBadge.classList.remove("hidden");
+          }
+          
+          let adjuntosHtml = '<div class="grid grid-cols-1 md:grid-cols-2 gap-4">';
+          test.attachments.forEach(att => {
+             adjuntosHtml += `
+               <div class="flex items-center justify-between p-3 rounded border border-outline-variant/20 bg-surface-container hover:border-primary/50 transition-colors group cursor-pointer">
+                 <div class="flex items-center gap-3">
+                   <span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors text-[24px]">attachment</span>
+                   <div class="flex flex-col">
+                     <span class="text-sm font-bold text-on-surface truncate max-w-[150px]">${escapeHtml(att.name)}</span>
+                     <span class="text-[10px] text-on-surface-variant font-mono">${escapeHtml(att.contentType)}</span>
+                   </div>
+                 </div>
+                 <span class="material-symbols-outlined text-[18px] text-on-surface-variant group-hover:text-primary">download</span>
+               </div>
+             `;
+          });
+          adjuntosHtml += '</div>';
+          document.getElementById("allureAdjuntosBody").innerHTML = adjuntosHtml;
+        } else {
+          const adjBadge = document.getElementById("allureAdjuntosCountBadge");
+          if (adjBadge) {
+            adjBadge.textContent = '0';
+            adjBadge.classList.add("hidden");
+          }
+        }
+
+        const modal = document.getElementById("allureModal");
+        if (modal) {
+          modal.classList.remove("hidden");
+          modal.classList.add("flex");
+          
+          // Reset tabs
+          document.querySelectorAll('.allure-tab-content').forEach(el => {
+            el.classList.add('hidden', 'opacity-0', 'translate-y-4');
+            el.classList.remove('opacity-100', 'translate-y-0');
+          });
+          document.querySelectorAll('[data-allure-tab]').forEach(btn => {
+             btn.className = "px-1 py-3 text-sm font-medium text-on-surface-variant hover:text-on-surface transition-colors flex items-center gap-2";
+          });
+          
+          const resumenTab = document.getElementById("allureTab-resumen");
+          const resumenBtn = document.querySelector('[data-allure-tab="resumen"]');
+          if (resumenTab && resumenBtn) {
+            resumenTab.classList.remove('hidden');
+            resumenBtn.className = "px-1 py-3 text-sm font-bold text-on-surface border-b-2 border-primary transition-colors flex items-center gap-2";
+            void resumenTab.offsetWidth;
+            resumenTab.classList.remove('opacity-0', 'translate-y-4');
+            resumenTab.classList.add('opacity-100', 'translate-y-0');
+          }
+
+          // Setup tab click listeners (only once)
+          if (!modal.dataset.tabsInitialized) {
+            document.querySelectorAll('[data-allure-tab]').forEach(btn => {
+              btn.addEventListener('click', (e) => {
+                const targetName = e.currentTarget.getAttribute('data-allure-tab');
+                
+                document.querySelectorAll('[data-allure-tab]').forEach(b => {
+                  b.className = "px-1 py-3 text-sm font-medium text-on-surface-variant hover:text-on-surface transition-colors flex items-center gap-2";
+                });
+                e.currentTarget.className = "px-1 py-3 text-sm font-bold text-on-surface border-b-2 border-primary transition-colors flex items-center gap-2";
+                
+                document.querySelectorAll('.allure-tab-content').forEach(contentDiv => {
+                  contentDiv.classList.add('hidden', 'opacity-0', 'translate-y-4');
+                  contentDiv.classList.remove('opacity-100', 'translate-y-0');
+                });
+                
+                const targetDiv = document.getElementById('allureTab-' + targetName);
+                if (targetDiv) {
+                  targetDiv.classList.remove('hidden');
+                  void targetDiv.offsetWidth; 
+                  targetDiv.classList.remove('opacity-0', 'translate-y-4');
+                  targetDiv.classList.add('opacity-100', 'translate-y-0');
+                }
+              });
+            });
+            modal.dataset.tabsInitialized = 'true';
+          }
+
+          // Modal Entry Animation
+          const content = modal.querySelector('.modal-content');
+          if (content) {
+             content.style.transform = 'scale(0.95)';
+             content.style.opacity = '0';
+             content.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+          }
+          
+          void modal.offsetWidth;
+          
+          modal.classList.add("open");
+          if (content) {
+             content.style.transform = 'scale(1)';
+             content.style.opacity = '1';
+          }
+        }
+      }
+
+      function switchDetailTab(tabName) {
+        const btnExec = document.getElementById("tabBtnExecution");
+        const btnExecs = document.getElementById("tabBtnExecutions");
+        const btnArti = document.getElementById("tabBtnArtifacts");
+        
+        const bodyExec = document.getElementById("detailExecutionBody");
+        const bodyExecs = document.getElementById("detailExecutionsTabBody");
+        const bodyArti = document.getElementById("detailArtifactsBody");
+
+        // Reset all buttons
+        [btnExec, btnExecs, btnArti].forEach(btn => {
+          btn.classList.add("text-on-surface-variant", "border-transparent");
+          btn.classList.remove("text-primary", "border-primary");
+        });
+
+        // Hide all bodies
+        [bodyExec, bodyExecs, bodyArti].forEach(body => {
+          body.classList.add("hidden");
+        });
+
+        if (tabName === 'execution') {
+          btnExec.classList.add("text-primary", "border-primary");
+          btnExec.classList.remove("text-on-surface-variant", "border-transparent");
+          bodyExec.classList.remove("hidden");
+        } else if (tabName === 'executions') {
+          btnExecs.classList.add("text-primary", "border-primary");
+          btnExecs.classList.remove("text-on-surface-variant", "border-transparent");
+          bodyExecs.classList.remove("hidden");
+        } else {
+          btnArti.classList.add("text-primary", "border-primary");
+          btnArti.classList.remove("text-on-surface-variant", "border-transparent");
+          bodyArti.classList.remove("hidden");
+        }
+      }
+
+      function stepHasError(step) {
+        if (step.error) return true;
+        if (step.steps && step.steps.length > 0) {
+          return step.steps.some(stepHasError);
+        }
+        return false;
+      }
+
+      function renderSteps(steps, testRef = null, indent = 0) {
         if (!steps || steps.length === 0) return "";
-        let html = `<div class="flex flex-col gap-1 ${indent > 0 ? "ml-4 border-l border-outline-variant/30 pl-3" : "ml-0"}">`;
+        let html = `<div class="flex flex-col gap-1.5 ${indent > 0 ? "ml-4 border-l border-outline-variant/30 pl-3" : "ml-0"}">`;
         steps.forEach((step) => {
-          const statusColor = step.error ? "text-error" : "text-emerald-400";
-          const statusIcon = step.error ? "close" : "check";
-          html += `
+          const isFailed = stepHasError(step);
+          const statusColor = isFailed ? "text-error" : "text-emerald-400";
+          const statusIcon = isFailed ? "close" : "check";
+          const hasChildren = step.steps && step.steps.length > 0;
+          const initialGrid = isFailed ? '1fr' : '0fr';
+          const initialRotate = isFailed ? 'rotate(0deg)' : 'rotate(-90deg)';
+          
+          const errorMessage = step.error ? (typeof step.error === 'string' ? step.error : (step.error.message || '')) : '';
+          const hasChildWithError = hasChildren && step.steps.some(stepHasError);
+          const shouldShowErrorBox = errorMessage && !hasChildWithError;
+          let errorHtml = '';
+          if (shouldShowErrorBox) {
+            errorHtml += `<div class="mt-1.5 flex flex-col gap-2 bg-surface-container-lowest rounded border border-error/20 overflow-hidden">
+               <div class="p-2 ${testRef && testRef.errorObj && testRef.errorObj.snippet ? 'border-b border-error/10' : ''}">
+                 <pre class="font-mono text-xs text-error/80 whitespace-pre-wrap break-words">${escapeHtml(errorMessage)}</pre>
+               </div>`;
+            if (testRef && testRef.errorObj && testRef.errorObj.snippet) {
+               errorHtml += `<div class="p-2 bg-surface-container-lowest/50">
+                 <pre class="font-mono text-[11px] text-on-surface-variant whitespace-pre-wrap">${escapeHtml(testRef.errorObj.snippet)}</pre>
+               </div>`;
+            }
+            errorHtml += `</div>`;
+          }
+
+          if (hasChildren) {
+            html += `
             <div class="flex flex-col gap-1">
-              <div class="flex items-start gap-2">
-                <span class="material-symbols-outlined text-[14px] ${statusColor} shrink-0 mt-0.5">${statusIcon}</span>
+              <div class="flex items-start gap-2 cursor-pointer hover:bg-surface-container-low p-1 rounded transition-colors group select-none" onclick="const content = this.nextElementSibling; const chevron = this.querySelector('.step-chevron'); const isHidden = content.style.gridTemplateRows === '0fr'; content.style.gridTemplateRows = isHidden ? '1fr' : '0fr'; chevron.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(-90deg)';">
+                <span class="material-symbols-outlined text-[18px] step-chevron transition-transform duration-300 text-outline-variant group-hover:text-on-surface shrink-0 mt-[1px]" style="transform: ${initialRotate};">expand_more</span>
+                <span class="material-symbols-outlined text-base ${statusColor} shrink-0 mt-[1px]">${statusIcon}</span>
                 <div class="flex flex-col flex-1 min-w-0">
-                  <div class="flex items-center justify-between gap-2">
-                    <span class="font-body text-xs text-on-surface truncate">${escapeHtml(step.title)}</span>
-                    <span class="font-mono text-[10px] text-on-surface-variant shrink-0">${step.duration}ms</span>
+                  <div class="flex items-center justify-between gap-3">
+                    <span class="font-body text-sm text-on-surface break-words group-hover:text-primary transition-colors">${escapeHtml(step.title)}</span>
+                    <span class="font-mono text-xs text-on-surface-variant shrink-0 whitespace-nowrap">${formatDuration(step.duration)}</span>
                   </div>
-                  ${step.error ? `<pre class="mt-1 font-mono text-[10px] text-error/80 whitespace-pre-wrap break-words bg-surface-container-lowest p-2 rounded border border-error/20">${escapeHtml(step.error.message)}</pre>` : ""}
+                  ${errorHtml}
                 </div>
               </div>
-              ${renderSteps(step.steps, indent + 1)}
+              <div class="grid transition-[grid-template-rows] duration-300 ease-in-out" style="grid-template-rows: ${initialGrid};">
+                <div class="overflow-hidden">
+                  ${renderSteps(step.steps, testRef, indent + 1)}
+                </div>
+              </div>
             </div>
-          `;
+            `;
+          } else {
+            html += `
+            <div class="flex flex-col gap-1 p-1">
+              <div class="flex items-start gap-2">
+                <span class="w-[18px] shrink-0"></span>
+                <span class="material-symbols-outlined text-base ${statusColor} shrink-0 mt-[1px]">${statusIcon}</span>
+                <div class="flex flex-col flex-1 min-w-0">
+                  <div class="flex items-center justify-between gap-3">
+                    <span class="font-body text-sm text-on-surface break-words">${escapeHtml(step.title)}</span>
+                    <span class="font-mono text-xs text-on-surface-variant shrink-0 whitespace-nowrap">${formatDuration(step.duration)}</span>
+                  </div>
+                  ${errorHtml}
+                </div>
+              </div>
+            </div>
+            `;
+          }
         });
         html += `</div>`;
         return html;
@@ -2754,9 +3731,57 @@
 
         const searchInput = document.getElementById("automatedSearch");
         if (searchInput) {
+          const debouncedRenderAutomated = typeof debounce === 'function' ? debounce(() => {
+            renderAutomatedTree();
+          }, 300) : null;
+          
           searchInput.addEventListener("input", (e) => {
             currentSearch = e.target.value;
-            renderAutomatedTree();
+            if (debouncedRenderAutomated) {
+              debouncedRenderAutomated();
+            } else {
+              renderAutomatedTree();
+            }
+          });
+        }
+
+        // Event Delegation for Automated Tree
+        const autoContainer = document.getElementById("automatedTreeContainer");
+        if (autoContainer) {
+          autoContainer.addEventListener("click", (e) => {
+            // 1. Handle Suite Folders (Accordion)
+            const header = e.target.closest(".suite-header");
+            if (header) {
+              const suite = header.getAttribute("data-suite");
+              const content = header.nextElementSibling;
+              const icon = header.querySelector('.folder-icon');
+              const chevron = header.querySelector('.chevron-icon');
+              
+              if (expandedSuites.has(suite)) {
+                expandedSuites.delete(suite);
+                content.style.gridTemplateRows = '0fr';
+                icon.textContent = 'book';
+                chevron.style.transform = 'rotate(-90deg)';
+              } else {
+                expandedSuites.add(suite);
+                content.style.gridTemplateRows = '1fr';
+                icon.textContent = 'menu_book';
+                chevron.style.transform = 'rotate(0deg)';
+              }
+              return;
+            }
+
+            // 2. Handle Test Selection
+            const testItem = e.target.closest(".test-tree-item");
+            if (testItem) {
+              autoContainer.querySelectorAll(".test-tree-item").forEach((i) =>
+                i.classList.remove("bg-primary/20", "border", "border-primary/30")
+              );
+              testItem.classList.add("bg-primary/20", "border", "border-primary/30");
+              const testId = testItem.getAttribute("data-id");
+              const test = allAutomatedTests.find((t) => t.id === testId);
+              if (test) showTestDetails(test);
+            }
           });
         }
       });

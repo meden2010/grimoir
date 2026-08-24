@@ -28,7 +28,11 @@ test.describe('Login Flow', () => {
   
   test('login button should be disabled when empty', async ({ page }) => {
     // Failing intentionally
-    await page.goto('data:text/html,<button id="login" disabled>Login</button>');
-    await expect(page.locator('#login')).not.toBeDisabled({ timeout: 500 });
+    await test.step('Load login page with disabled button', async () => {
+      await page.goto('data:text/html,<button id="login" disabled>Login</button>');
+    });
+    await test.step('Assert button is not disabled (fails intentionally)', async () => {
+      await expect(page.locator('#login')).not.toBeDisabled({ timeout: 500 });
+    });
   });
 });

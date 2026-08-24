@@ -6,10 +6,12 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
-  reporter: [['json', { outputFile: 'test-results/playwright-results.json' }]],
+  reporter: [['./src/reporter/index.ts', { outputFile: 'test-results/playwright-results.json' }]],
   use: {
     trace: 'on-first-retry',
     headless: true,
+    screenshot: 'only-on-failure',
+    video: 'retain-on-failure',
     userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
   },
   projects: [
