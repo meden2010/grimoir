@@ -38,6 +38,20 @@ const replacePlaceholders = (template: string, placeholders: Placeholders): stri
   }, template);
 };
 
+const formatDuration = (ms: number | null | undefined): string => {
+  if (ms == null) return "0ms";
+  if (ms >= 60000) {
+    const minutes = Math.floor(ms / 60000);
+    const seconds = ((ms % 60000) / 1000).toFixed(1);
+    return `${minutes}m ${parseFloat(seconds)}s`;
+  }
+  if (ms >= 1000) {
+    const seconds = (ms / 1000).toFixed(1);
+    return `${parseFloat(seconds)}s`;
+  }
+  return `${ms}ms`;
+};
+
 interface Failure {
   type: 'Automated' | 'Performance';
   suite: string;
@@ -96,7 +110,7 @@ const generateFailureRows = (failures: Failure[]): string => {
       ? 'bg-primary/10 text-primary border-primary/30'
       : 'bg-secondary/10 text-secondary border-secondary/30';
     const dotColor = type === 'Automated' ? 'bg-primary' : 'bg-secondary';
-    const durationText = duration > 0 ? `${duration}ms` : '—';
+    const durationText = duration > 0 ? formatDuration(duration) : '—';
 
     const typeLabel = type === 'Automated' ? 'Automated' : type;
 
@@ -226,7 +240,7 @@ const generateAutomatedTestRows = (playwright: PlaywrightReport): string => {
                       ${row.status.toUpperCase()}
                     </span>
                   </td>
-                  <td class="py-2 font-mono text-xs text-on-surface-variant text-right">${row.duration}ms</td>
+                  <td class="py-2 font-mono text-xs text-on-surface-variant text-right">${formatDuration(row.duration)}</td>
                 </tr>`;
   }).join('');
 };
@@ -258,11 +272,11 @@ const generateK6MetricsList = (k6: K6Report | null): string => {
   const metrics = [
     { label: 'Requests', value: k6.metrics.httpReqs, color: 'text-on-surface' },
     { label: 'Failed Rate', value: `${(k6.metrics.httpReqFailed * 100).toFixed(1)}%`, color: 'text-error' },
-    { label: 'Avg Response', value: `${k6.metrics.httpReqDuration.avg}ms`, color: 'text-on-surface' },
-    { label: 'Min Response', value: `${k6.metrics.httpReqDuration.min}ms`, color: 'text-on-surface' },
-    { label: 'Max Response', value: `${k6.metrics.httpReqDuration.max}ms`, color: 'text-on-surface' },
-    { label: 'P90', value: `${k6.metrics.httpReqDuration.p90}ms`, color: 'text-on-surface' },
-    { label: 'P95', value: `${k6.metrics.httpReqDuration.p95}ms`, color: 'text-tertiary font-semibold' },
+    { label: 'Avg Response', value: formatDuration(k6.metrics.httpReqDuration.avg), color: 'text-on-surface' },
+    { label: 'Min Response', value: formatDuration(k6.metrics.httpReqDuration.min), color: 'text-on-surface' },
+    { label: 'Max Response', value: formatDuration(k6.metrics.httpReqDuration.max), color: 'text-on-surface' },
+    { label: 'P90', value: formatDuration(k6.metrics.httpReqDuration.p90), color: 'text-on-surface' },
+    { label: 'P95', value: formatDuration(k6.metrics.httpReqDuration.p95), color: 'text-tertiary font-semibold' },
   ];
 
   return metrics.map((metric, index) => `
