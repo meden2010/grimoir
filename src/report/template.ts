@@ -42,8 +42,8 @@ const formatDuration = (ms: number | null | undefined): string => {
   if (ms == null) return "0ms";
   if (ms >= 60000) {
     const minutes = Math.floor(ms / 60000);
-    const seconds = ((ms % 60000) / 1000).toFixed(1);
-    return `${minutes}m ${parseFloat(seconds)}s`;
+    const seconds = Math.floor((ms % 60000) / 1000);
+    return `${minutes}.${seconds.toString().padStart(2, '0')}m`;
   }
   if (ms >= 1000) {
     const seconds = (ms / 1000).toFixed(1);
