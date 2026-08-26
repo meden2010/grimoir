@@ -1125,11 +1125,34 @@
           return true;
         });
 
-        // Group by suitePath
-        const grouped = {};
+        const treeRoot = {};
         filtered.forEach((t) => {
-          if (!grouped[t.suitePath]) grouped[t.suitePath] = [];
-          grouped[t.suitePath].push(t);
+          let parts = [];
+          let pathStr = t.suitePath;
+          let projectPart = "";
+          const projMatch = pathStr.match(/^\[(.*?)\]\s*(.*)$/);
+          if (projMatch) {
+            projectPart = `[${projMatch[1]}]`;
+            pathStr = projMatch[2];
+          }
+          
+          const arrowParts = pathStr.split(" > ");
+          arrowParts.forEach(ap => {
+            const slashParts = ap.split("/");
+            parts = parts.concat(slashParts);
+          });
+          parts = parts.map(p => p.trim()).filter(Boolean);
+          
+          let current = treeRoot;
+          parts.forEach((part, i) => {
+            if (!current[part]) {
+              current[part] = { _tests: [], _children: {} };
+            }
+            if (i === parts.length - 1) {
+               current[part]._tests.push(t);
+            }
+            current = current[part]._children;
+          });
         });
 
         if (filtered.length === 0) {
@@ -1138,54 +1161,76 @@
           return;
         }
 
-        let html = "";
-        for (const [suite, tests] of Object.entries(grouped)) {
-          const isCollapsed = !expandedSuites.has(suite);
-          const gridRows = isCollapsed ? '0fr' : '1fr';
-          const chevronRotation = isCollapsed ? '-90deg' : '0deg';
-          const folderIcon = isCollapsed ? 'book' : 'menu_book';
-          
-          html += `
-            <div class="mb-3">
-              <div class="suite-header font-label-caps text-sm text-on-surface-variant uppercase mb-1.5 flex items-center gap-1.5 cursor-pointer hover:text-primary hover:bg-surface-container rounded px-1.5 py-1.5 transition-colors select-none" data-suite="${escapeHtml(suite)}">
-                <span class="material-symbols-outlined text-[18px] chevron-icon transition-transform duration-300" style="transform: rotate(${chevronRotation});">expand_more</span>
-                <span class="material-symbols-outlined text-[18px] folder-icon text-primary transition-colors duration-300">${folderIcon}</span>
-                <span class="font-bold tracking-wider">${escapeHtml(suite)}</span>
+        function renderTreeNodes(node, parentPath = "", indent = 0) {
+          let html = "";
+          const keys = Object.keys(node).sort();
+          keys.forEach(key => {
+            const childNode = node[key];
+            const currentPath = parentPath ? `${parentPath}/${key}` : key;
+            const isFile = /\.(ts|js|mjs|tsx|jsx|php|py|rb|java|cs|go)$/i.test(key) || key.toLowerCase().includes('.spec.') || key.toLowerCase().includes('.test.');
+            
+            const isCollapsed = !expandedSuites.has(currentPath);
+            const gridRows = isCollapsed ? '0fr' : '1fr';
+            const chevronRotation = isCollapsed ? '-90deg' : '0deg';
+            const iconName = isFile ? 'description' : (isCollapsed ? 'folder' : 'folder_open');
+            const iconColor = isFile ? 'text-primary' : 'text-amber-400';
+            const marginClass = indent > 0 ? 'ml-4 border-l border-outline-variant/30 pl-2' : '';
+            const hideChevron = isFile && Object.keys(childNode._children).length === 0 && childNode._tests.length === 0 ? 'invisible' : '';
+            
+            html += `
+            <div class="${marginClass} mb-2">
+              <div class="suite-header font-label-caps text-sm text-on-surface-variant uppercase mb-1 flex items-center gap-1.5 cursor-pointer hover:text-primary hover:bg-surface-container rounded px-1.5 py-1 transition-colors select-none" data-suite="${escapeHtml(currentPath)}" data-is-file="${isFile}">
+                <span class="material-symbols-outlined text-[18px] chevron-icon transition-transform duration-300 ${hideChevron}" style="transform: rotate(${chevronRotation});">expand_more</span>
+                <span class="material-symbols-outlined text-[18px] folder-icon ${iconColor} transition-colors duration-300">${iconName}</span>
+                <span class="font-bold tracking-wider truncate" title="${escapeHtml(key)}">${escapeHtml(key)}</span>
               </div>
               <div class="grid transition-[grid-template-rows] duration-300 ease-in-out suite-content" style="grid-template-rows: ${gridRows};">
                 <div class="overflow-hidden">
-                  <div class="flex flex-col gap-0.5 ml-4 border-l border-outline-variant/40 pl-2">
-          `;
-          tests.forEach((test) => {
-            const statusColor =
-              test.status === "passed"
-                ? "text-emerald-400"
-                : test.status === "failed"
-                  ? "text-error"
-                  : "text-outline";
-            const statusIcon =
-              test.status === "passed"
-                ? "check_circle"
-                : test.status === "failed"
-                  ? "cancel"
-                  : "radio_button_unchecked";
-            const bgHover =
-              test.status === "failed"
-                ? "hover:bg-error/10"
-                : "hover:bg-surface-container";
-            const projectBadge = test.projectName ? `<span class="bg-surface-container-highest text-[10px] px-1.5 py-0.5 rounded text-outline-variant font-mono uppercase ml-2 border border-outline-variant/30">${escapeHtml(test.projectName)}</span>` : '';
-            const retriesBadge = test.results && test.results.length > 1 ? `<span class="bg-amber-500/10 text-amber-500 text-[10px] px-1.5 py-0.5 rounded font-mono border border-amber-500/30 whitespace-nowrap ml-2" title="${test.results.length} attempts total"><span class="material-symbols-outlined text-[10px] align-middle mr-0.5">replay</span>${test.results.length}</span>` : '';
-            html += `
-                <div class="test-tree-item flex items-center gap-2.5 p-2 rounded cursor-pointer ${bgHover} transition-colors" data-id="${test.id}">
-                  <span class="material-symbols-outlined text-base ${statusColor}">${statusIcon}</span>
-                  <span class="font-body text-sm text-on-surface truncate flex-1 flex items-center" title="${escapeHtml(test.name)}">${escapeHtml(test.name)}${projectBadge}${retriesBadge}</span>
-                </div>
             `;
+            
+            if (Object.keys(childNode._children).length > 0) {
+              html += renderTreeNodes(childNode._children, currentPath, indent + 1);
+            }
+            
+            if (childNode._tests.length > 0) {
+              html += `<div class="flex flex-col gap-0.5 ml-4 border-l border-outline-variant/30 pl-2">`;
+              childNode._tests.forEach(test => {
+                const statusColor =
+                  test.status === "passed"
+                    ? "text-emerald-400"
+                    : test.status === "failed"
+                      ? "text-error"
+                      : "text-outline";
+                const statusIcon =
+                  test.status === "passed"
+                    ? "check_circle"
+                    : test.status === "failed"
+                      ? "cancel"
+                      : "radio_button_unchecked";
+                const bgHover =
+                  test.status === "failed"
+                    ? "hover:bg-error/10"
+                    : "hover:bg-surface-container";
+                
+                const projectBadge = test.projectName ? `<span class="bg-surface-container-highest text-[10px] px-1.5 py-0.5 rounded text-outline-variant font-mono uppercase ml-2 border border-outline-variant/30">${escapeHtml(test.projectName)}</span>` : '';
+                const retriesBadge = test.results && test.results.length > 1 ? `<span class="bg-amber-500/10 text-amber-500 text-[10px] px-1.5 py-0.5 rounded font-mono border border-amber-500/30 whitespace-nowrap ml-2" title="${test.results.length} attempts total"><span class="material-symbols-outlined text-[10px] align-middle mr-0.5">replay</span>${test.results.length}</span>` : '';
+                
+                html += `
+                  <div class="test-tree-item flex items-center gap-2.5 p-2 rounded cursor-pointer ${bgHover} transition-colors" data-id="${test.id}">
+                    <span class="material-symbols-outlined text-base ${statusColor}">${statusIcon}</span>
+                    <span class="font-body text-sm text-on-surface truncate flex-1 flex items-center" title="${escapeHtml(test.name)}">${escapeHtml(test.name)}${projectBadge}${retriesBadge}</span>
+                  </div>
+                `;
+              });
+              html += `</div>`;
+            }
+            
+            html += `</div></div></div>`;
           });
-          html += `</div></div></div></div>`;
+          return html;
         }
 
-        container.innerHTML = html;
+        container.innerHTML = renderTreeNodes(treeRoot);
 
         if (window.anime) {
           anime({
@@ -1269,25 +1314,28 @@
           let historyHtml = "";
           
           const results = test.results || [];
-          const lastResult = results.length > 0 ? results[results.length - 1] : { steps: test.steps, attachments: test.attachments, error: { message: test.error } };
+          const lastResult = results.length > 0 ? results[results.length - 1] : {};
+          
+          const stepsToRender = test.steps || lastResult.steps || [];
+          const attachmentsToRender = test.attachments || lastResult.attachments || [];
           
           // --- Execution Tab ---
-          const mainErrorObj = lastResult.error || (lastResult.errors && lastResult.errors.length > 0 ? lastResult.errors[0] : null);
-          const mainErrorMsg = mainErrorObj?.message || (typeof lastResult.error === 'string' ? lastResult.error : null) || (typeof mainErrorObj === 'string' ? mainErrorObj : null) || test.error;
+          const mainErrorObj = test.errorObj || lastResult.error || (lastResult.errors && lastResult.errors.length > 0 ? lastResult.errors[0] : null);
+          const mainErrorMsg = test.error || mainErrorObj?.message || (typeof lastResult.error === 'string' ? lastResult.error : null) || (typeof mainErrorObj === 'string' ? mainErrorObj : null);
 
-          if (lastResult.steps && lastResult.steps.length > 0) {
+          if (stepsToRender && stepsToRender.length > 0) {
             execHtml += `<div class="font-label-caps text-xs text-outline uppercase mt-3 mb-2">Execution Steps</div>`;
-            execHtml += renderSteps(lastResult.steps, test);
+            execHtml += renderSteps(stepsToRender, test);
           } else {
             execHtml += `<div class="text-outline text-sm italic mt-2">No steps recorded.</div>`;
           }
           
           // --- Artifacts Tab ---
-          if (lastResult.attachments && lastResult.attachments.length > 0) {
+          if (attachmentsToRender && attachmentsToRender.length > 0) {
             tabBtnArtifacts.classList.remove("hidden");
             artiHtml += `<div class="font-label-caps text-xs text-outline uppercase mt-3 mb-2">Attachments</div>`;
             artiHtml += `<div class="flex flex-col gap-4">`;
-            lastResult.attachments.forEach(att => {
+            attachmentsToRender.forEach(att => {
               artiHtml += `
               <div class="flex flex-col gap-1 bg-surface-container-low/50 rounded border border-outline-variant/30 overflow-hidden group">
                 <div class="flex items-center gap-2 cursor-pointer hover:bg-surface-container-low p-2.5 transition-colors select-none" onclick="const content = this.nextElementSibling; const chevron = this.querySelector('.att-chevron'); const isHidden = content.style.gridTemplateRows === '0fr'; content.style.gridTemplateRows = isHidden ? '1fr' : '0fr'; chevron.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(-90deg)';">
@@ -1299,7 +1347,7 @@
                   <div class="overflow-hidden">
                     <div class="p-3 border-t border-outline-variant/20 bg-surface-container-lowest/50">`;
               
-              if (att.name.toLowerCase().includes('trace') || att.path.endsWith('.zip')) {
+              if (att.name && att.name.toLowerCase().includes('trace') || (att.path && att.path.endsWith('.zip'))) {
                 artiHtml += `
                   <div class="bg-surface-container border border-primary/20 rounded-lg p-4">
                     <div class="flex items-center gap-2 mb-2">
@@ -1316,9 +1364,9 @@
                         <div class="text-[10px] font-bold text-on-surface mb-2 font-label-caps uppercase">Option 1: View in Browser</div>
                         <div class="flex items-center justify-between">
                           <span class="text-xs text-outline text-wrap flex-1 mr-2 leading-relaxed">Download the trace and drop it into <a href="https://trace.playwright.dev" target="_blank" class="text-primary hover:underline">trace.playwright.dev</a></span>
-                          <a href="${att.path}" download class="shrink-0 flex items-center gap-1.5 bg-primary/10 text-primary border border-primary/20 px-3 py-1.5 rounded text-xs font-bold hover:bg-primary hover:text-on-primary transition-colors">
+                          ${att.path ? `<a href="${att.path}" download class="shrink-0 flex items-center gap-1.5 bg-primary/10 text-primary border border-primary/20 px-3 py-1.5 rounded text-xs font-bold hover:bg-primary hover:text-on-primary transition-colors">
                             <span class="material-symbols-outlined text-[16px]">download</span> Download
-                          </a>
+                          </a>` : `<span class="text-xs text-error">File path missing</span>`}
                         </div>
                       </div>
 
@@ -1327,21 +1375,21 @@
                         <div class="text-[10px] font-bold text-on-surface mb-2 font-label-caps uppercase">Option 2: Run Locally</div>
                         <div class="flex items-center gap-2 bg-[#0d1117] rounded border border-outline-variant/20 p-2 group">
                           <span class="material-symbols-outlined text-outline text-[16px]">terminal</span>
-                          <code class="font-mono text-[11px] text-emerald-400/90 flex-1 overflow-x-auto whitespace-nowrap custom-scrollbar">npx playwright show-trace ${escapeHtml(att.path)}</code>
-                          <button type="button" onclick="navigator.clipboard.writeText('npx playwright show-trace ${escapeHtml(att.path)}'); this.querySelector('span').textContent = 'check'; setTimeout(() => this.querySelector('span').textContent = 'content_copy', 2000)" class="text-outline hover:text-primary transition-colors shrink-0 p-0.5" title="Copy command">
+                          <code class="font-mono text-[11px] text-emerald-400/90 flex-1 overflow-x-auto whitespace-nowrap custom-scrollbar">npx playwright show-trace ${att.path ? escapeHtml(att.path) : '[trace-file]'}</code>
+                          ${att.path ? `<button type="button" onclick="navigator.clipboard.writeText('npx playwright show-trace ${escapeHtml(att.path)}'); this.querySelector('span').textContent = 'check'; setTimeout(() => this.querySelector('span').textContent = 'content_copy', 2000)" class="text-outline hover:text-primary transition-colors shrink-0 p-0.5" title="Copy command">
                             <span class="material-symbols-outlined text-[16px]">content_copy</span>
-                          </button>
+                          </button>` : ''}
                         </div>
                       </div>
                     </div>
                   </div>
                 `;
-              } else if (att.contentType.startsWith('image/')) {
-                artiHtml += `<img src="${att.path}" alt="${escapeHtml(att.name)}" class="rounded max-w-full border border-outline-variant/20 shadow-sm cursor-pointer hover:opacity-90 transition-opacity" onclick="window.open(this.src, '_blank')" />`;
-              } else if (att.contentType.startsWith('video/')) {
-                artiHtml += `<video controls src="${att.path}" class="rounded max-w-full border border-outline-variant/20 shadow-sm"></video>`;
+              } else if (att.contentType && att.contentType.startsWith('image/')) {
+                artiHtml += `<img src="${att.path || 'data:image/png;base64,' + (att.body || '')}" alt="${escapeHtml(att.name)}" class="rounded max-w-full border border-outline-variant/20 shadow-sm cursor-pointer hover:opacity-90 transition-opacity" onclick="window.open(this.src, '_blank')" />`;
+              } else if (att.contentType && att.contentType.startsWith('video/')) {
+                artiHtml += `<video controls src="${att.path || ''}" class="rounded max-w-full border border-outline-variant/20 shadow-sm"></video>`;
               } else {
-                artiHtml += `<a href="${att.path}" target="_blank" class="text-primary hover:underline text-sm flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">download</span> Download File</a>`;
+                artiHtml += `<a href="${att.path || '#'}" target="_blank" class="text-primary hover:underline text-sm flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">download</span> Download File</a>`;
               }
               artiHtml += `
                     </div>
@@ -1957,6 +2005,7 @@
             const header = e.target.closest(".suite-header");
             if (header) {
               const suite = header.getAttribute("data-suite");
+              const isFile = header.getAttribute("data-is-file") === "true";
               const content = header.nextElementSibling;
               const icon = header.querySelector('.folder-icon');
               const chevron = header.querySelector('.chevron-icon');
@@ -1964,13 +2013,13 @@
               if (expandedSuites.has(suite)) {
                 expandedSuites.delete(suite);
                 content.style.gridTemplateRows = '0fr';
-                icon.textContent = 'book';
-                chevron.style.transform = 'rotate(-90deg)';
+                if (!isFile) icon.textContent = 'folder';
+                if (chevron) chevron.style.transform = 'rotate(-90deg)';
               } else {
                 expandedSuites.add(suite);
                 content.style.gridTemplateRows = '1fr';
-                icon.textContent = 'menu_book';
-                chevron.style.transform = 'rotate(0deg)';
+                if (!isFile) icon.textContent = 'folder_open';
+                if (chevron) chevron.style.transform = 'rotate(0deg)';
               }
               return;
             }
