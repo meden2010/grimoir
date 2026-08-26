@@ -993,6 +993,11 @@
 
       function formatDuration(ms) {
         if (ms == null) return "0ms";
+        if (ms >= 60000) {
+          const minutes = Math.floor(ms / 60000);
+          const seconds = ((ms % 60000) / 1000).toFixed(1);
+          return `${minutes}m ${parseFloat(seconds)}s`;
+        }
         if (ms >= 1000) {
           const seconds = (ms / 1000).toFixed(1);
           return parseFloat(seconds) + "s";
