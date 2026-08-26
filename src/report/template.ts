@@ -9,7 +9,25 @@ interface Placeholders {
 
 const loadTemplate = (): string => {
   const templatePath = join(__dirname, 'template.html');
-  return readFileSync(templatePath, 'utf-8');
+  let template = readFileSync(templatePath, 'utf-8');
+  
+  try {
+    const cssPath = join(__dirname, 'styles.css');
+    const customStyles = readFileSync(cssPath, 'utf-8');
+    template = template.replace('__CUSTOM_STYLES__', customStyles);
+  } catch (e) {
+    // Optional CSS missing
+  }
+
+  try {
+    const jsPath = join(__dirname, 'script.js');
+    const customScripts = readFileSync(jsPath, 'utf-8');
+    template = template.replace('__CUSTOM_SCRIPTS__', customScripts);
+  } catch (e) {
+    // Optional JS missing
+  }
+
+  return template;
 };
 
 const replacePlaceholders = (template: string, placeholders: Placeholders): string => {
