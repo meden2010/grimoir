@@ -144,7 +144,7 @@ const generateFailureRows = (failures: Failure[]): string => {
                     <span class="w-1 h-1 ${dotColor} rounded-full"></span> ${typeLabel}
                   </span>
                 </td>
-                <td class="p-gutter font-body-md text-on-surface font-semibold text-sm">${suite} — ${test}</td>
+                <td class="p-gutter font-body-md text-on-surface font-semibold text-sm">${test}</td>
                 <td class="p-gutter max-w-[320px]">
                   <div class="flex items-center gap-2 min-w-0">
                     <span class="font-mono text-sm text-error/80 truncate">${firstLineError}</span>
