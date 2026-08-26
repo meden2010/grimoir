@@ -40,4 +40,15 @@ test.describe('Pruebas de Demostración - Grimoir', () => {
       await expect(page.locator('#response')).toHaveText('Payment Declined', { timeout: 1000 });
     });
   });
+
+  // Caso de larga duración
+  test('prueba de carga de datos pesados (larga duración)', async ({ page }) => {
+    test.setTimeout(80000);
+    await test.step('Simular carga de datos durante más de un minuto', async () => {
+      await page.waitForTimeout(62000);
+    });
+    await test.step('Validar finalización exitosa', async () => {
+      expect(true).toBeTruthy();
+    });
+  });
 });
