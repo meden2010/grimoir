@@ -1023,7 +1023,7 @@
         if (!s) return "skipped";
         const low = s.toLowerCase();
         if (low === "expected" || low === "passed") return "passed";
-        if (low === "unexpected" || low === "failed") return "failed";
+        if (low === "unexpected" || low === "failed" || low === "timedout" || low === "interrupted") return "failed";
         if (low === "flaky") return "passed";
         return "skipped";
       }
@@ -1043,8 +1043,10 @@
                   
                   const results = test.results;
                   const lastResult = results[results.length - 1];
-                  const overallStatus = normalizeStatusStr(lastResult.status);
-
+                  const overallStatus = results.some(r => {
+                    const status = normalizeStatusStr(r.status);
+                    return status === 'failed';
+                  }) ? 'failed' : normalizeStatusStr(lastResult.status);
                   const matchTags = spec.title.match(/@\w+/g);
                   if (matchTags) {
                     matchTags.forEach(t => extractedTags.add(t));

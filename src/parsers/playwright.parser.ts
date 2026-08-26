@@ -40,7 +40,7 @@ export interface PlaywrightTestStep {
 
 export interface PlaywrightTest {
   title: string;
-  status: 'passed' | 'failed' | 'skipped' | 'timedOut';
+  status: 'passed' | 'failed' | 'skipped';
   duration: number;
   error?: PlaywrightErrorDetails | string;
   steps?: PlaywrightTestStep[];
@@ -70,8 +70,11 @@ export interface PlaywrightReport {
 }
 
 export function normalizeStatus(status: string): PlaywrightTest['status'] {
-  if (status === 'passed' || status === 'failed' || status === 'skipped' || status === 'timedOut') {
-    return status as PlaywrightTest['status'];
+  if (status === 'passed' || status === 'expected') {
+    return 'passed';
+  }
+  if (status === 'failed' || status === 'timedOut' || status === 'interrupted' || status === 'unexpected' || status === 'flaky') {
+    return 'failed';
   }
   return 'skipped';
 }
@@ -94,7 +97,12 @@ function extractTests(suites: PlaywrightSuite[]): PlaywrightTest[] {
           
           const results = test.results;
           const lastResult = results[results.length - 1];
-          const overallStatus = normalizeStatus(lastResult.status);
+          
+          // Determine overall status
+          const overallStatus = results.some(r => {
+            const s = r.status;
+            return s === 'failed' || s === 'timedOut' || s === 'interrupted';
+          }) ? 'failed' : normalizeStatus(lastResult.status);
 
           tests.push({
             title: spec.title,
@@ -126,7 +134,7 @@ export function parsePlaywright(rawJson: Record<string, unknown>): PlaywrightRep
   const stats = {
     total: tests.length,
     passed: tests.filter(t => t.status === 'passed').length,
-    failed: tests.filter(t => t.status === 'failed' || t.status === 'timedOut').length,
+    failed: tests.filter(t => t.status === 'failed').length,
     skipped: tests.filter(t => t.status === 'skipped').length,
     duration: tests.reduce((acc, t) => acc + (t.duration || 0), 0),
   };
