@@ -111,7 +111,7 @@ const buildReport = (inputPath: string, outputPath: string): string => {
   writeFileSync(historyPath, JSON.stringify(history, null, 2), 'utf-8');
 
   const html: string = generateHTML(playwrightReport, k6Report, history);
-  writeFileSync(join(outputPath, 'grimoir-report.html'), html, 'utf-8');
+  writeFileSync(join(outputPath, 'index.html'), html, 'utf-8');
 
   console.log(`\n✅ Playwright Results:`);
   console.log(`   Total:   ${playwrightReport.stats.total}`);
@@ -150,12 +150,12 @@ program
 
     buildReport(options.input, options.output);
 
-    console.log(`\n🔮 Report saved at: ${join(options.output, 'grimoir-report.html')}`);
+    console.log(`\n🔮 Report saved at: ${join(options.output, 'index.html')}`);
 
     // Start local server
     if (options.serve) {
       const port: number = parseInt(options.port, 10);
-      const reportFile: string = join(options.output, 'grimoir-report.html');
+      const reportFile: string = join(options.output, 'index.html');
 
       const requestHandler = (_req: IncomingMessage, res: ServerResponse): void => {
         try {
