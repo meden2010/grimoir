@@ -1128,12 +1128,17 @@
           return true;
         });
 
-        const totalFiltered = filtered.length;
-        const passedFiltered = filtered.filter(t => t.status === 'passed').length;
-        const failedFiltered = filtered.filter(t => t.status === 'failed').length;
-        const skippedFiltered = filtered.filter(t => t.status === 'skipped').length;
+        const chartBase = allAutomatedTests.filter((t) => {
+          if (currentSearch && !t.name.toLowerCase().includes(currentSearch.toLowerCase()) && !t.suitePath.toLowerCase().includes(currentSearch.toLowerCase())) return false;
+          return true;
+        });
+
+        const totalChart = chartBase.length;
+        const passedChart = chartBase.filter(t => t.status === 'passed').length;
+        const failedChart = chartBase.filter(t => t.status === 'failed').length;
+        const skippedChart = chartBase.filter(t => t.status === 'skipped').length;
         
-        const passRate = totalFiltered > 0 ? Math.round((passedFiltered / totalFiltered) * 100) : 0;
+        const passRate = totalChart > 0 ? Math.round((passedChart / totalChart) * 100) : 0;
         
         const pathSkipped = document.getElementById('donutSkipped');
         const pathFailed = document.getElementById('donutFailed');
@@ -1142,10 +1147,10 @@
         
         if (text) text.textContent = `${passRate}%`;
         
-        if (pathSkipped && pathFailed && pathPassed && totalFiltered > 0) {
-          const skipPct = (skippedFiltered / totalFiltered) * 100;
-          const failPct = (failedFiltered / totalFiltered) * 100;
-          const passPct = (passedFiltered / totalFiltered) * 100;
+        if (pathSkipped && pathFailed && pathPassed && totalChart > 0) {
+          const skipPct = (skippedChart / totalChart) * 100;
+          const failPct = (failedChart / totalChart) * 100;
+          const passPct = (passedChart / totalChart) * 100;
           
           pathSkipped.setAttribute('stroke-dasharray', `${skipPct}, 100`);
           pathSkipped.setAttribute('stroke-dashoffset', `0`);
