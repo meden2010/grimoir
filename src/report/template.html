@@ -789,7 +789,8 @@ __CUSTOM_STYLES__
         class="tab-panel hidden-panel hidden flex flex-col gap-gutter"
       >
         <!-- Automated Stats -->
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-base">
+        <div class="flex flex-col md:flex-row gap-gutter items-center justify-between mb-gutter">
+          <div class="flex-1 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-base w-full">
           <div
             class="bg-surface-container-lowest border border-outline-variant rounded-lg p-base text-center card-hover animate-fade-in-up delay-100"
           >
@@ -855,10 +856,26 @@ __CUSTOM_STYLES__
             </p>
           </div>
         </div>
+          
+        <!-- Standalone Large Donut -->
+          <div class="flex-shrink-0 flex flex-col items-center justify-center w-20 h-20 lg:w-24 lg:h-24 mr-4 md:mr-8 animate-fade-in-up delay-500">
+            <div class="relative w-full h-full" title="Execution Distribution">
+              <svg viewBox="0 0 36 36" class="w-full h-full transform -rotate-90 filter drop-shadow-md">
+                 <path class="text-outline-variant/30" stroke-width="4" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                 <path id="donutSkipped" class="text-outline transition-all duration-1000 ease-out" stroke-width="4" stroke-linecap="butt" stroke="currentColor" fill="none" stroke-dasharray="0, 100" stroke-dashoffset="0" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                 <path id="donutFailed" class="text-error transition-all duration-1000 ease-out" stroke-width="4" stroke-linecap="butt" stroke="currentColor" fill="none" stroke-dasharray="0, 100" stroke-dashoffset="0" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                 <path id="donutPassed" class="text-emerald-400 transition-all duration-1000 ease-out" stroke-width="4" stroke-linecap="butt" stroke="currentColor" fill="none" stroke-dasharray="0, 100" stroke-dashoffset="0" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+              </svg>
+              <div class="absolute inset-0 flex flex-col items-center justify-center leading-none">
+                <span class="text-lg lg:text-xl font-display font-bold text-on-surface antialiased" id="sidebarPassRateText">0%</span>
+              </div>
+            </div>
+          </div>
+        </div>
 
         <!-- Automated Split Pane (Allure Style) -->
         <div
-          class="flex flex-col lg:flex-row h-[calc(100vh-380px)] min-h-[400px] gap-gutter animate-fade-in-up delay-200"
+          class="flex flex-col lg:flex-row h-[calc(100vh-440px)] min-h-[400px] gap-gutter animate-fade-in-up delay-200"
           id="automatedSplitPane"
         >
           <!-- Left Pane: Tree Navigation -->
@@ -869,22 +886,6 @@ __CUSTOM_STYLES__
             <div
               class="p-3 border-b border-outline-variant/50 bg-surface-container/30"
             >
-              <div class="flex items-center justify-between mb-3">
-                <span class="text-xs font-bold tracking-wider uppercase text-on-surface-variant font-label-caps">Execution</span>
-                <div class="flex items-center gap-2">
-                  <div class="relative w-14 h-14" title="Execution Distribution">
-                    <svg viewBox="0 0 36 36" class="w-full h-full transform -rotate-90">
-                       <path class="text-outline-variant/30" stroke-width="4" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                       <path id="donutSkipped" class="text-outline" stroke-width="4" stroke-linecap="butt" stroke="currentColor" fill="none" stroke-dasharray="0, 100" stroke-dashoffset="0" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                       <path id="donutFailed" class="text-error" stroke-width="4" stroke-linecap="butt" stroke="currentColor" fill="none" stroke-dasharray="0, 100" stroke-dashoffset="0" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                       <path id="donutPassed" class="text-emerald-400" stroke-width="4" stroke-linecap="butt" stroke="currentColor" fill="none" stroke-dasharray="0, 100" stroke-dashoffset="0" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                    </svg>
-                    <div class="absolute inset-0 flex flex-col items-center justify-center leading-none">
-                      <span class="text-sm font-mono font-bold text-on-surface antialiased" id="sidebarPassRateText">0%</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
               <div class="relative mb-3 search-wrapper">
                 <span
                   class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-outline text-sm pointer-events-none"
