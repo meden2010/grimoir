@@ -1177,7 +1177,7 @@
             const chevronRotation = isCollapsed ? '-90deg' : '0deg';
             const iconName = isFile ? 'description' : (isCollapsed ? 'folder' : 'folder_open');
             const iconColor = isFile ? 'text-primary' : 'text-amber-400';
-            const marginClass = indent > 0 ? 'ml-4 border-l border-outline-variant/30 pl-2' : '';
+            const marginClass = indent > 0 ? 'mt-2' : '';
             const hideChevron = isFile && Object.keys(childNode._children).length === 0 && childNode._tests.length === 0 ? 'invisible' : '';
             
             html += `
@@ -1196,7 +1196,7 @@
             }
             
             if (childNode._tests.length > 0) {
-              html += `<div class="flex flex-col gap-0.5 ml-4 border-l border-outline-variant/30 pl-2">`;
+              html += `<div class="flex flex-col gap-0.5 mt-1">`;
               childNode._tests.forEach(test => {
                 const statusColor =
                   test.status === "passed"
