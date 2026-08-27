@@ -1130,21 +1130,35 @@
 
         const totalFiltered = filtered.length;
         const passedFiltered = filtered.filter(t => t.status === 'passed').length;
+        const failedFiltered = filtered.filter(t => t.status === 'failed').length;
+        const skippedFiltered = filtered.filter(t => t.status === 'skipped').length;
+        
         const passRate = totalFiltered > 0 ? Math.round((passedFiltered / totalFiltered) * 100) : 0;
         
-        const donut = document.getElementById('sidebarPassRateDonut');
+        const pathSkipped = document.getElementById('donutSkipped');
+        const pathFailed = document.getElementById('donutFailed');
+        const pathPassed = document.getElementById('donutPassed');
         const text = document.getElementById('sidebarPassRateText');
-        if (donut && text) {
-          donut.setAttribute('stroke-dasharray', `${passRate}, 100`);
-          text.textContent = `${passRate}%`;
-          donut.classList.remove('text-emerald-400', 'text-amber-400', 'text-error');
-          if (passRate === 100) {
-            donut.classList.add('text-emerald-400');
-          } else if (passRate >= 80) {
-            donut.classList.add('text-amber-400');
-          } else {
-            donut.classList.add('text-error');
-          }
+        
+        if (text) text.textContent = `${passRate}%`;
+        
+        if (pathSkipped && pathFailed && pathPassed && totalFiltered > 0) {
+          const skipPct = (skippedFiltered / totalFiltered) * 100;
+          const failPct = (failedFiltered / totalFiltered) * 100;
+          const passPct = (passedFiltered / totalFiltered) * 100;
+          
+          pathSkipped.setAttribute('stroke-dasharray', `${skipPct}, 100`);
+          pathSkipped.setAttribute('stroke-dashoffset', `0`);
+          
+          pathFailed.setAttribute('stroke-dasharray', `${failPct}, 100`);
+          pathFailed.setAttribute('stroke-dashoffset', `-${skipPct}`);
+          
+          pathPassed.setAttribute('stroke-dasharray', `${passPct}, 100`);
+          pathPassed.setAttribute('stroke-dashoffset', `-${skipPct + failPct}`);
+        } else if (pathSkipped && pathFailed && pathPassed) {
+          pathSkipped.setAttribute('stroke-dasharray', `0, 100`);
+          pathFailed.setAttribute('stroke-dasharray', `0, 100`);
+          pathPassed.setAttribute('stroke-dasharray', `0, 100`);
         }
 
         const treeRoot = {};
