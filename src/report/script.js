@@ -1128,6 +1128,25 @@
           return true;
         });
 
+        const totalFiltered = filtered.length;
+        const passedFiltered = filtered.filter(t => t.status === 'passed').length;
+        const passRate = totalFiltered > 0 ? Math.round((passedFiltered / totalFiltered) * 100) : 0;
+        
+        const donut = document.getElementById('sidebarPassRateDonut');
+        const text = document.getElementById('sidebarPassRateText');
+        if (donut && text) {
+          donut.setAttribute('stroke-dasharray', `${passRate}, 100`);
+          text.textContent = `${passRate}%`;
+          donut.classList.remove('text-emerald-400', 'text-amber-400', 'text-error');
+          if (passRate === 100) {
+            donut.classList.add('text-emerald-400');
+          } else if (passRate >= 80) {
+            donut.classList.add('text-amber-400');
+          } else {
+            donut.classList.add('text-error');
+          }
+        }
+
         const treeRoot = {};
         filtered.forEach((t) => {
           let parts = [];
