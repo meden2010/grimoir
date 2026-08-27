@@ -1215,13 +1215,12 @@
                     ? "hover:bg-error/10"
                     : "hover:bg-surface-container";
                 
-                const projectBadge = test.projectName ? `<span class="bg-surface-container-highest text-[10px] px-1.5 py-0.5 rounded text-outline-variant font-mono uppercase ml-2 border border-outline-variant/30">${escapeHtml(test.projectName)}</span>` : '';
                 const retriesBadge = test.results && test.results.length > 1 ? `<span class="bg-amber-500/10 text-amber-500 text-[10px] px-1.5 py-0.5 rounded font-mono border border-amber-500/30 whitespace-nowrap ml-2" title="${test.results.length} attempts total"><span class="material-symbols-outlined text-[10px] align-middle mr-0.5">replay</span>${test.results.length}</span>` : '';
                 
                 html += `
                   <div class="test-tree-item flex items-center gap-2.5 p-2 rounded cursor-pointer ${bgHover} transition-colors" data-id="${test.id}">
                     <span class="material-symbols-outlined text-base ${statusColor}">${statusIcon}</span>
-                    <span class="font-body text-sm text-on-surface truncate flex-1 flex items-center" title="${escapeHtml(test.name)}">${escapeHtml(test.name)}${projectBadge}${retriesBadge}</span>
+                    <span class="font-body text-sm text-on-surface truncate flex-1 flex items-center" title="${escapeHtml(test.name)}">${escapeHtml(test.name)}${retriesBadge}</span>
                   </div>
                 `;
               });
