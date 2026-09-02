@@ -3,10 +3,25 @@
   "version": "0.1.0",
   "description": "Unified test report tool that consolidates E2E, performance, API and unit test results into a single visual report",
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./reporter": {
+      "types": "./dist/reporter/index.d.ts",
+      "default": "./dist/reporter/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
   "bin": {
     "grimoir": "./dist/cli/index.js"
   },
   "scripts": {
+    "prepare": "npm run build",
     "build": "tsc",
     "postbuild": "copyfiles -u 1 src/**/*.html src/**/*.css src/**/*.js dist/",
     "dev": "ts-node src/cli/index.ts",
