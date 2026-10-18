@@ -1234,7 +1234,7 @@ __CUSTOM_STYLES__
               <div class="flex items-center gap-6 mt-2">
                 <button class="px-1 py-3 text-sm font-bold text-on-surface border-b-2 border-primary" data-allure-tab="resumen">Overview
                 </button>
-                <button class="px-1 py-3 text-sm font-medium text-on-surface-variant hover:text-on-surface transition-colors flex items-center gap-2" data-allure-tab="historial" id="allureHistorialTabBtn" style="display: none !important;">History
+                <button class="px-1 py-3 text-sm font-medium text-on-surface-variant hover:text-on-surface transition-colors flex items-center gap-2" data-allure-tab="historial" id="allureHistorialTabBtn">History <span id="allureHistoryCountBadge" class="bg-surface-container-high text-on-surface text-[10px] px-1.5 py-0.5 rounded-full font-mono leading-none">0</span>
                 </button>
                 <button class="px-1 py-3 text-sm font-medium text-on-surface-variant hover:text-on-surface transition-colors flex items-center gap-2 hidden" id="allureReintentosTabBtn" data-allure-tab="reintentos">Retries <span id="allureAttemptsCountBadge" class="bg-surface-container-high text-on-surface text-[10px] px-1.5 py-0.5 rounded-full font-mono leading-none">0</span>
                 </button>
@@ -1329,10 +1329,12 @@ __CUSTOM_STYLES__
               
               <!-- Tab: Historial -->
               <div id="allureTab-historial" class="allure-tab-content hidden opacity-0 translate-y-4 transition-all duration-300 ease-in-out">
-                <div class="text-sm text-on-surface-variant flex flex-col items-center justify-center py-20 gap-4">
-                  <span class="material-symbols-outlined text-[48px] opacity-50 text-primary">timeline</span>
-                  <p class="font-bold">Execution History</p>
-                  <p class="text-xs opacity-70">This feature will be available in the next version of Grimoir.</p>
+                <div id="allureHistorialBody" class="flex flex-col gap-3 max-w-4xl">
+                  <div class="text-sm text-on-surface-variant flex flex-col items-center justify-center py-20 gap-4">
+                    <span class="material-symbols-outlined text-[48px] opacity-50 text-primary">timeline</span>
+                    <p class="font-bold">No execution history recorded yet</p>
+                    <p class="text-xs opacity-70">Execute more test runs to build an execution timeline for this test.</p>
+                  </div>
                 </div>
               </div>
               

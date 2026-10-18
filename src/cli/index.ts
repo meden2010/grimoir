@@ -1,14 +1,14 @@
 #!/usr/bin/env node
 
 import { Command } from 'commander';
-import { readFileSync, writeFileSync, mkdirSync, watch, existsSync, copyFileSync } from 'fs';
+import { readFileSync, writeFileSync, mkdirSync, watch, existsSync, copyFileSync, rmSync } from 'fs';
 import { join, basename } from 'path';
 import { createServer, IncomingMessage, ServerResponse } from 'http';
 import { parsePlaywright, PlaywrightReport } from '../parsers/playwright.parser';
 import { parseK6, K6Report } from '../parsers/k6.parser';
 import { generateHTML } from '../report/template';
 
-interface HistoricalRun {
+export interface HistoricalRun {
   date: string;
   total: number;
   passed: number;
@@ -17,12 +17,29 @@ interface HistoricalRun {
   duration: number;
 }
 
+export interface TestHistoryItem {
+  date: string;
+  status: 'passed' | 'failed' | 'skipped';
+  duration: number;
+  error?: string;
+}
+
+export interface GrimoirHistoryData {
+  runs: HistoricalRun[];
+  tests: Record<string, TestHistoryItem[]>;
+}
+
 interface GenerateOptions {
   input: string;
   output: string;
   port: string;
   serve: boolean;
   watch: boolean;
+  clean?: boolean;
+}
+
+interface CleanOptions {
+  output: string;
 }
 
 interface ServeOptions {
@@ -32,7 +49,22 @@ interface ServeOptions {
 
 const program = new Command();
 
-const buildReport = (inputPath: string, outputPath: string): string => {
+export const cleanOutput = (outputPath: string): void => {
+  const historyPath = join(outputPath, '.grimoir-history.json');
+  if (existsSync(historyPath)) {
+    rmSync(historyPath, { force: true });
+  }
+  const dataDir = join(outputPath, 'data');
+  if (existsSync(dataDir)) {
+    rmSync(dataDir, { recursive: true, force: true });
+  }
+};
+
+const buildReport = (inputPath: string, outputPath: string, clean: boolean = false): string => {
+  if (clean) {
+    cleanOutput(outputPath);
+  }
+
   const playwrightPath: string = join(inputPath, 'playwright-results.json');
   const playwrightRaw: Record<string, unknown> = JSON.parse(readFileSync(playwrightPath, 'utf-8')) as Record<string, unknown>;
 
@@ -84,11 +116,19 @@ const buildReport = (inputPath: string, outputPath: string): string => {
   // --- History Management ---
   mkdirSync(outputPath, { recursive: true });
   const historyPath = join(outputPath, '.grimoir-history.json');
-  let history: HistoricalRun[] = [];
+  let historyData: GrimoirHistoryData = { runs: [], tests: {} };
   
   if (existsSync(historyPath)) {
     try {
-      history = JSON.parse(readFileSync(historyPath, 'utf-8'));
+      const parsed = JSON.parse(readFileSync(historyPath, 'utf-8'));
+      if (Array.isArray(parsed)) {
+        historyData = { runs: parsed, tests: {} };
+      } else if (parsed && typeof parsed === 'object') {
+        historyData = {
+          runs: Array.isArray(parsed.runs) ? parsed.runs : [],
+          tests: parsed.tests && typeof parsed.tests === 'object' ? parsed.tests : {}
+        };
+      }
     } catch {
       // Ignore parse errors, start fresh
     }
@@ -103,14 +143,68 @@ const buildReport = (inputPath: string, outputPath: string): string => {
     duration: playwrightReport.stats.duration,
   };
 
-  history.push(currentRun);
-  if (history.length > 20) {
-    history = history.slice(history.length - 20);
+  historyData.runs.push(currentRun);
+  if (historyData.runs.length > 20) {
+    historyData.runs = historyData.runs.slice(historyData.runs.length - 20);
   }
 
-  writeFileSync(historyPath, JSON.stringify(history, null, 2), 'utf-8');
+  // Record individual test histories
+  const recordTestHistory = (suites: any[], parentPath: string = '') => {
+    for (const suite of suites) {
+      const suitePath = parentPath ? `${parentPath} > ${suite.title}` : suite.title;
+      if (suite.specs) {
+        for (const spec of suite.specs) {
+          if (spec.tests) {
+            for (const test of spec.tests) {
+              if (test.results && test.results.length > 0) {
+                const results = test.results;
+                const lastResult = results[results.length - 1];
+                const isFailed = results.some((r: any) => {
+                  const s = (r.status || '').toLowerCase();
+                  return s === 'failed' || s === 'timedout' || s === 'interrupted';
+                });
+                const testStatus: 'passed' | 'failed' | 'skipped' = isFailed
+                  ? 'failed'
+                  : ((lastResult.status === 'passed' || lastResult.status === 'expected' || lastResult.status === 'flaky')
+                      ? 'passed'
+                      : 'skipped');
+                
+                const duration = results.reduce((acc: number, r: any) => acc + (r.duration || 0), 0);
+                const rawError = lastResult.error?.message || lastResult.errors?.[0]?.message || (typeof lastResult.error === 'string' ? lastResult.error : undefined);
+                const errorSnippet = rawError ? (rawError.length > 200 ? rawError.slice(0, 200) + '...' : rawError) : undefined;
 
-  const html: string = generateHTML(playwrightReport, k6Report, history);
+                const testKey = `${suitePath} > ${spec.title}`;
+
+                if (!historyData.tests[testKey]) {
+                  historyData.tests[testKey] = [];
+                }
+
+                historyData.tests[testKey].push({
+                  date: currentRun.date,
+                  status: testStatus,
+                  duration,
+                  error: errorSnippet
+                });
+
+                if (historyData.tests[testKey].length > 20) {
+                  historyData.tests[testKey] = historyData.tests[testKey].slice(historyData.tests[testKey].length - 20);
+                }
+              }
+            }
+          }
+        }
+      }
+      if (suite.suites) {
+        recordTestHistory(suite.suites, suitePath);
+      }
+    }
+  };
+
+  recordTestHistory((playwrightRaw['suites'] as any[]) || []);
+
+  writeFileSync(historyPath, JSON.stringify(historyData, null, 2), 'utf-8');
+
+  const html: string = generateHTML(playwrightReport, k6Report, historyData);
   writeFileSync(join(outputPath, 'index.html'), html, 'utf-8');
 
   console.log(`\n✅ Playwright Results:`);
@@ -143,12 +237,13 @@ program
   .requiredOption('-i, --input <path>', 'Path to the folder containing test results')
   .requiredOption('-o, --output <path>', 'Path where the report will be generated')
   .option('-p, --port <number>', 'Port to serve the report', '8080')
+  .option('-c, --clean', 'Clean previous execution history before generating report')
   .option('--no-serve', 'Do not start the report server')
   .option('-w, --watch', 'Watch input folder and regenerate on changes')
   .action((options: GenerateOptions): void => {
     console.log(`📖 Grimoir - Generating report...`);
 
-    buildReport(options.input, options.output);
+    buildReport(options.input, options.output, !!options.clean);
 
     console.log(`\n🔮 Report saved at: ${join(options.output, 'index.html')}`);
 
@@ -215,6 +310,20 @@ program
       console.log(`   Report available at: ${url}`);
       console.log(`   Press Ctrl+C to stop the server\n`);
     });
+  });
+
+program
+  .command('clean')
+  .description('Clean previous report and execution history')
+  .requiredOption('-o, --output <path>', 'Path to the report output folder to clean')
+  .action((options: CleanOptions): void => {
+    console.log(`🧹 Grimoir - Cleaning report history and output...`);
+    cleanOutput(options.output);
+    const indexPath = join(options.output, 'index.html');
+    if (existsSync(indexPath)) {
+      rmSync(indexPath, { force: true });
+    }
+    console.log(`✨ Output folder ${options.output} cleaned successfully.`);
   });
 
 program.parse();

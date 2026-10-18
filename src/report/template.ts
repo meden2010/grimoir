@@ -286,7 +286,7 @@ const generateK6MetricsList = (k6: K6Report | null): string => {
             </div>`).join('');
 };
 
-export const generateHTML = (playwright: PlaywrightReport, k6: K6Report | null, history: any[] = []): string => {
+export const generateHTML = (playwright: PlaywrightReport, k6: K6Report | null, history: any = { runs: [], tests: {} }): string => {
   const k6Stats = k6?.stats ?? {
     totalRequests: 0,
     failedRequests: 0,

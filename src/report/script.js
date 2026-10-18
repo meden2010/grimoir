@@ -721,10 +721,13 @@
       })();
 
       // --- 4. Historical Trend Chart ---
-      if (typeof GRIMOIR_HISTORY !== 'undefined' && Array.isArray(GRIMOIR_HISTORY)) {
+      const historyRuns = (typeof GRIMOIR_HISTORY !== 'undefined')
+        ? (Array.isArray(GRIMOIR_HISTORY) ? GRIMOIR_HISTORY : (GRIMOIR_HISTORY.runs || []))
+        : [];
+      if (historyRuns.length > 0) {
         const trendContainer = document.getElementById('trendChartContainer');
         if (trendContainer) {
-          if (GRIMOIR_HISTORY.length <= 1) {
+          if (historyRuns.length <= 1) {
             trendContainer.innerHTML = `<div class="absolute inset-0 flex flex-col items-center justify-center text-outline-variant">
               <span class="material-symbols-outlined text-[32px] mb-2 opacity-50">show_chart</span>
               <p class="text-sm">Waiting for more runs to show trends...</p>
@@ -733,12 +736,12 @@
             trendContainer.innerHTML = '<canvas id="overviewTrendChart"></canvas>';
             const ctxTrend = document.getElementById("overviewTrendChart").getContext("2d");
             
-            const labels = GRIMOIR_HISTORY.map((h, index) => {
+            const labels = historyRuns.map((h, index) => {
               const d = new Date(h.date);
               return 'Run ' + (index + 1) + ' (' + d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ')';
             });
-            const passedData = GRIMOIR_HISTORY.map(h => h.passed);
-            const failedData = GRIMOIR_HISTORY.map(h => h.failed);
+            const passedData = historyRuns.map(h => h.passed);
+            const failedData = historyRuns.map(h => h.failed);
             
             new Chart(ctxTrend, {
               type: "line",
@@ -1052,8 +1055,11 @@
                     matchTags.forEach(t => extractedTags.add(t));
                   }
 
+                  const testKey = `${path} > ${spec.title}`;
+
                   allAutomatedTests.push({
                     id: Math.random().toString(36).substr(2, 9),
+                    testKey: testKey,
                     suitePath: path,
                     name: spec.title,
                     projectName: test.projectName || '',
@@ -1798,6 +1804,68 @@
           if (adjBadge) {
             adjBadge.textContent = '0';
             adjBadge.classList.add("hidden");
+          }
+        }
+
+        // Populate Historial Tab
+        const histBadge = document.getElementById("allureHistoryCountBadge");
+        const testsHistory = (typeof GRIMOIR_HISTORY !== 'undefined' && GRIMOIR_HISTORY && GRIMOIR_HISTORY.tests) || {};
+        const testHistoryList = testsHistory[test.testKey] || [];
+
+        if (histBadge) {
+          histBadge.textContent = testHistoryList.length.toString();
+        }
+
+        const historialBody = document.getElementById("allureHistorialBody");
+        if (historialBody) {
+          if (testHistoryList.length > 0) {
+            let histHtml = '<div class="flex flex-col gap-3">';
+            const reversedList = [...testHistoryList].reverse();
+            reversedList.forEach((entry, idx) => {
+              const runNumber = testHistoryList.length - idx;
+              const isPassed = normalizeStatusStr(entry.status) === 'passed';
+              const isFailed = normalizeStatusStr(entry.status) === 'failed';
+              const statColor = isPassed
+                ? 'text-emerald-400 border-emerald-400/20 bg-emerald-400/10'
+                : (isFailed ? 'text-error border-error/20 bg-error/10' : 'text-slate-400 border-slate-400/20 bg-slate-400/10');
+              const icon = isPassed ? 'check_circle' : (isFailed ? 'cancel' : 'skip_next');
+              const dateObj = new Date(entry.date);
+              const formattedDate = !isNaN(dateObj.getTime())
+                ? dateObj.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+                : entry.date;
+              const isCurrent = idx === 0;
+
+              histHtml += `
+                <div class="flex items-center justify-between p-3.5 rounded-lg border border-outline-variant/20 bg-surface-container hover:border-outline-variant/50 transition-colors">
+                  <div class="flex items-center gap-3">
+                    <div class="flex items-center justify-center w-8 h-8 rounded-full ${statColor}">
+                      <span class="material-symbols-outlined text-[16px]">${icon}</span>
+                    </div>
+                    <div class="flex flex-col">
+                      <div class="flex items-center gap-2">
+                        <span class="text-sm font-bold text-on-surface">Execution #${runNumber}</span>
+                        ${isCurrent ? '<span class="text-[9px] uppercase tracking-wider font-bold bg-primary/20 text-primary px-1.5 py-0.5 rounded font-mono">Current</span>' : ''}
+                      </div>
+                      <span class="text-[11px] text-on-surface-variant">${escapeHtml(formattedDate)} • Duration: ${formatDuration(entry.duration)}</span>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    ${entry.error ? `<span class="text-xs text-error font-mono bg-error/10 px-2 py-1 rounded max-w-[280px] truncate" title="${escapeHtml(entry.error)}">${escapeHtml(entry.error)}</span>` : ''}
+                    <span class="text-xs uppercase font-bold px-2 py-0.5 rounded font-mono ${statColor}">${entry.status}</span>
+                  </div>
+                </div>
+              `;
+            });
+            histHtml += '</div>';
+            historialBody.innerHTML = histHtml;
+          } else {
+            historialBody.innerHTML = `
+              <div class="text-sm text-on-surface-variant flex flex-col items-center justify-center py-20 gap-4">
+                <span class="material-symbols-outlined text-[48px] opacity-50 text-primary">timeline</span>
+                <p class="font-bold">No execution history recorded yet</p>
+                <p class="text-xs opacity-70">Execute more test runs to build an execution timeline for this test.</p>
+              </div>
+            `;
           }
         }
 
