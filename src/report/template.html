@@ -4,6 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Grimoir — Test Report</title>
+    <link rel="icon" type="image/png" sizes="16x16" href="./assets/favicon-16x16.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="./assets/favicon-32x32.png" />
+    <link rel="alternate icon" href="./assets/favicon.ico" />
+    <link rel="apple-touch-icon" href="./assets/apple-touch-icon.png" />
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:wght@500;600;700&family=Cinzel:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
@@ -88,7 +92,7 @@
       };
     </script>
     <style>
-__CUSTOM_STYLES__
+      __CUSTOM_STYLES__
     </style>
   </head>
   <body
@@ -96,7 +100,12 @@ __CUSTOM_STYLES__
   >
     <!-- Grimoire Background Elements -->
     <div class="grimoire-texture" aria-hidden="true"></div>
-    <svg class="magic-circle" viewBox="0 0 1000 1000" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <svg
+      class="magic-circle"
+      viewBox="0 0 1000 1000"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
       <circle cx="500" cy="500" r="480" stroke-dasharray="10, 20" />
       <circle cx="500" cy="500" r="460" />
       <circle cx="500" cy="500" r="280" />
@@ -104,7 +113,13 @@ __CUSTOM_STYLES__
       <polygon points="500,40 898,730 102,730" />
       <polygon points="500,960 102,270 898,270" />
       <!-- Inner Square -->
-      <rect x="302" y="302" width="396" height="396" transform="rotate(45 500 500)" />
+      <rect
+        x="302"
+        y="302"
+        width="396"
+        height="396"
+        transform="rotate(45 500 500)"
+      />
       <!-- Runes / Orbs -->
       <circle cx="500" cy="40" r="25" />
       <circle cx="898" cy="730" r="25" />
@@ -114,34 +129,74 @@ __CUSTOM_STYLES__
       <circle cx="898" cy="270" r="25" />
     </svg>
     <canvas id="magicDust" aria-hidden="true"></canvas>
-    
+
     <!-- Binding & Pages -->
     <div class="page-edge" aria-hidden="true"></div>
     <!-- Corners -->
-    <svg class="corner-ornament corner-tl" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <svg
+      class="corner-ornament corner-tl"
+      viewBox="0 0 100 100"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
       <path d="M0,0 L100,0 L100,2 C50,2 2,50 2,100 L0,100 Z" />
-      <path d="M10,10 L70,10 C40,15 15,40 10,70 Z" fill="none" stroke="currentColor" stroke-width="1.5" />
+      <path
+        d="M10,10 L70,10 C40,15 15,40 10,70 Z"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+      />
       <circle cx="20" cy="20" r="3" />
       <circle cx="35" cy="15" r="1.5" />
       <circle cx="15" cy="35" r="1.5" />
     </svg>
-    <svg class="corner-ornament corner-tr" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <svg
+      class="corner-ornament corner-tr"
+      viewBox="0 0 100 100"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
       <path d="M0,0 L100,0 L100,2 C50,2 2,50 2,100 L0,100 Z" />
-      <path d="M10,10 L70,10 C40,15 15,40 10,70 Z" fill="none" stroke="currentColor" stroke-width="1.5" />
+      <path
+        d="M10,10 L70,10 C40,15 15,40 10,70 Z"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+      />
       <circle cx="20" cy="20" r="3" />
       <circle cx="35" cy="15" r="1.5" />
       <circle cx="15" cy="35" r="1.5" />
     </svg>
-    <svg class="corner-ornament corner-bl" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <svg
+      class="corner-ornament corner-bl"
+      viewBox="0 0 100 100"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
       <path d="M0,0 L100,0 L100,2 C50,2 2,50 2,100 L0,100 Z" />
-      <path d="M10,10 L70,10 C40,15 15,40 10,70 Z" fill="none" stroke="currentColor" stroke-width="1.5" />
+      <path
+        d="M10,10 L70,10 C40,15 15,40 10,70 Z"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+      />
       <circle cx="20" cy="20" r="3" />
       <circle cx="35" cy="15" r="1.5" />
       <circle cx="15" cy="35" r="1.5" />
     </svg>
-    <svg class="corner-ornament corner-br" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <svg
+      class="corner-ornament corner-br"
+      viewBox="0 0 100 100"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
       <path d="M0,0 L100,0 L100,2 C50,2 2,50 2,100 L0,100 Z" />
-      <path d="M10,10 L70,10 C40,15 15,40 10,70 Z" fill="none" stroke="currentColor" stroke-width="1.5" />
+      <path
+        d="M10,10 L70,10 C40,15 15,40 10,70 Z"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+      />
       <circle cx="20" cy="20" r="3" />
       <circle cx="35" cy="15" r="1.5" />
       <circle cx="15" cy="35" r="1.5" />
@@ -434,7 +489,10 @@ __CUSTOM_STYLES__
               >
                 <!-- Explicit 320x320 square container to force exact alignment -->
                 <div class="relative w-[320px] h-[320px] flex-shrink-0">
-                  <canvas id="overviewStatusChart" class="relative z-10 w-full h-full"></canvas>
+                  <canvas
+                    id="overviewStatusChart"
+                    class="relative z-10 w-full h-full"
+                  ></canvas>
                 </div>
               </div>
               <div
@@ -456,7 +514,6 @@ __CUSTOM_STYLES__
             </div>
           </div>
         </section>
-
 
         <!-- Failures Table -->
         <section
@@ -557,11 +614,18 @@ __CUSTOM_STYLES__
 
         <!-- Historical Trends -->
         <section class="mt-gutter mb-gutter animate-fade-in-up delay-450">
-          <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter card-hover">
-            <h3 class="font-label-caps text-on-surface-variant text-[11px] uppercase mb-base">
+          <div
+            class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter card-hover"
+          >
+            <h3
+              class="font-label-caps text-on-surface-variant text-[11px] uppercase mb-base"
+            >
               Historical Trends (Last 20 Runs)
             </h3>
-            <div class="chart-wrap relative h-[250px] w-full" id="trendChartContainer">
+            <div
+              class="chart-wrap relative h-[250px] w-full"
+              id="trendChartContainer"
+            >
               <!-- Canvas will go here -->
             </div>
           </div>
@@ -663,7 +727,12 @@ __CUSTOM_STYLES__
                 <p
                   class="font-display text-headline-lg text-on-surface tabular-nums mt-1"
                 >
-                  <span class="counter" data-target="__PLAYWRIGHT_DURATION_MS__" data-is-duration="true">0</span>
+                  <span
+                    class="counter"
+                    data-target="__PLAYWRIGHT_DURATION_MS__"
+                    data-is-duration="true"
+                    >0</span
+                  >
                 </p>
                 <p class="font-body-md text-on-surface-variant text-sm mt-auto">
                   Execution time
@@ -789,85 +858,139 @@ __CUSTOM_STYLES__
         class="tab-panel hidden-panel hidden flex flex-col gap-gutter"
       >
         <!-- Automated Stats -->
-        <div class="flex flex-col md:flex-row gap-gutter items-center justify-between mb-gutter">
-          <div class="flex-1 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-base w-full">
+        <div
+          class="flex flex-col md:flex-row gap-gutter items-center justify-between mb-gutter"
+        >
           <div
-            class="bg-surface-container-lowest border border-outline-variant rounded-lg p-base text-center card-hover animate-fade-in-up delay-100"
+            class="flex-1 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-base w-full"
           >
-            <p class="font-label-caps text-outline text-[10px] uppercase">
-              Total
-            </p>
-            <p
-              class="font-display text-headline-md text-on-surface mt-1 counter"
-              data-target="__PLAYWRIGHT_TOTAL__"
+            <div
+              class="bg-surface-container-lowest border border-outline-variant rounded-lg p-base text-center card-hover animate-fade-in-up delay-100"
             >
-              0
-            </p>
-          </div>
-          <div
-            class="bg-surface-container-lowest border border-outline-variant rounded-lg p-base text-center card-hover animate-fade-in-up delay-200"
-          >
-            <p class="font-label-caps text-outline text-[10px] uppercase">
-              Passed
-            </p>
-            <p
-              class="font-display text-headline-md text-emerald-400 mt-1 counter"
-              data-target="__PLAYWRIGHT_PASSED__"
-            >
-              0
-            </p>
-          </div>
-          <div
-            class="bg-surface-container-lowest border border-outline-variant rounded-lg p-base text-center card-hover animate-fade-in-up delay-300"
-          >
-            <p class="font-label-caps text-outline text-[10px] uppercase">
-              Failed
-            </p>
-            <p
-              class="font-display text-headline-md text-error mt-1 counter"
-              data-target="__PLAYWRIGHT_FAILED__"
-            >
-              0
-            </p>
-          </div>
-          <div
-            class="bg-surface-container-lowest border border-outline-variant rounded-lg p-base text-center card-hover animate-fade-in-up delay-400"
-          >
-            <p class="font-label-caps text-outline text-[10px] uppercase">
-              Skipped
-            </p>
-            <p
-              class="font-display text-headline-md text-outline mt-1 counter"
-              data-target="__PLAYWRIGHT_SKIPPED__"
-            >
-              0
-            </p>
-          </div>
-          <div
-            class="bg-surface-container-lowest border border-outline-variant rounded-lg p-base text-center card-hover animate-fade-in-up delay-500"
-          >
-            <p class="font-label-caps text-outline text-[10px] uppercase">
-              Duration
-            </p>
-            <p class="font-display text-headline-md text-primary mt-1">
-              <span class="counter" data-target="__PLAYWRIGHT_DURATION__" data-is-duration="true"
-                >0</span
+              <p class="font-label-caps text-outline text-[10px] uppercase">
+                Total
+              </p>
+              <p
+                class="font-display text-headline-md text-on-surface mt-1 counter"
+                data-target="__PLAYWRIGHT_TOTAL__"
               >
-            </p>
+                0
+              </p>
+            </div>
+            <div
+              class="bg-surface-container-lowest border border-outline-variant rounded-lg p-base text-center card-hover animate-fade-in-up delay-200"
+            >
+              <p class="font-label-caps text-outline text-[10px] uppercase">
+                Passed
+              </p>
+              <p
+                class="font-display text-headline-md text-emerald-400 mt-1 counter"
+                data-target="__PLAYWRIGHT_PASSED__"
+              >
+                0
+              </p>
+            </div>
+            <div
+              class="bg-surface-container-lowest border border-outline-variant rounded-lg p-base text-center card-hover animate-fade-in-up delay-300"
+            >
+              <p class="font-label-caps text-outline text-[10px] uppercase">
+                Failed
+              </p>
+              <p
+                class="font-display text-headline-md text-error mt-1 counter"
+                data-target="__PLAYWRIGHT_FAILED__"
+              >
+                0
+              </p>
+            </div>
+            <div
+              class="bg-surface-container-lowest border border-outline-variant rounded-lg p-base text-center card-hover animate-fade-in-up delay-400"
+            >
+              <p class="font-label-caps text-outline text-[10px] uppercase">
+                Skipped
+              </p>
+              <p
+                class="font-display text-headline-md text-outline mt-1 counter"
+                data-target="__PLAYWRIGHT_SKIPPED__"
+              >
+                0
+              </p>
+            </div>
+            <div
+              class="bg-surface-container-lowest border border-outline-variant rounded-lg p-base text-center card-hover animate-fade-in-up delay-500"
+            >
+              <p class="font-label-caps text-outline text-[10px] uppercase">
+                Duration
+              </p>
+              <p class="font-display text-headline-md text-primary mt-1">
+                <span
+                  class="counter"
+                  data-target="__PLAYWRIGHT_DURATION__"
+                  data-is-duration="true"
+                  >0</span
+                >
+              </p>
+            </div>
           </div>
-        </div>
-          
-        <!-- Standalone Large Donut -->
-          <div class="flex-shrink-0 flex flex-col items-center justify-center w-20 h-20 lg:w-24 lg:h-24 mr-4 md:mr-8 animate-fade-in-up delay-500">
+
+          <!-- Standalone Large Donut -->
+          <div
+            class="flex-shrink-0 flex flex-col items-center justify-center w-20 h-20 lg:w-24 lg:h-24 mr-4 md:mr-8 animate-fade-in-up delay-500"
+          >
             <div class="relative w-full h-full" title="Execution Distribution">
-              <svg viewBox="0 0 36 36" class="w-full h-full transform -rotate-90 filter drop-shadow-md">
-                 <path class="text-outline-variant/30" stroke-width="4" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                 <path id="donutSkipped" class="text-outline transition-all duration-1000 ease-out" stroke-width="4" stroke-linecap="butt" stroke="currentColor" fill="none" stroke-dasharray="0, 100" stroke-dashoffset="0" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                 <path id="donutFailed" class="text-error transition-all duration-1000 ease-out" stroke-width="4" stroke-linecap="butt" stroke="currentColor" fill="none" stroke-dasharray="0, 100" stroke-dashoffset="0" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                 <path id="donutPassed" class="text-emerald-400 transition-all duration-1000 ease-out" stroke-width="4" stroke-linecap="butt" stroke="currentColor" fill="none" stroke-dasharray="0, 100" stroke-dashoffset="0" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+              <svg
+                viewBox="0 0 36 36"
+                class="w-full h-full transform -rotate-90 filter drop-shadow-md"
+              >
+                <path
+                  class="text-outline-variant/30"
+                  stroke-width="4"
+                  stroke="currentColor"
+                  fill="none"
+                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                />
+                <path
+                  id="donutSkipped"
+                  class="text-outline transition-all duration-1000 ease-out"
+                  stroke-width="4"
+                  stroke-linecap="butt"
+                  stroke="currentColor"
+                  fill="none"
+                  stroke-dasharray="0, 100"
+                  stroke-dashoffset="0"
+                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                />
+                <path
+                  id="donutFailed"
+                  class="text-error transition-all duration-1000 ease-out"
+                  stroke-width="4"
+                  stroke-linecap="butt"
+                  stroke="currentColor"
+                  fill="none"
+                  stroke-dasharray="0, 100"
+                  stroke-dashoffset="0"
+                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                />
+                <path
+                  id="donutPassed"
+                  class="text-emerald-400 transition-all duration-1000 ease-out"
+                  stroke-width="4"
+                  stroke-linecap="butt"
+                  stroke="currentColor"
+                  fill="none"
+                  stroke-dasharray="0, 100"
+                  stroke-dashoffset="0"
+                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                />
               </svg>
-              <div class="absolute inset-0 flex flex-col items-center justify-center leading-none">
-                <span class="text-lg lg:text-xl font-display font-bold text-on-surface antialiased" id="sidebarPassRateText">0%</span>
+              <div
+                class="absolute inset-0 flex flex-col items-center justify-center leading-none"
+              >
+                <span
+                  class="text-lg lg:text-xl font-display font-bold text-on-surface antialiased"
+                  id="sidebarPassRateText"
+                  >0%</span
+                >
               </div>
             </div>
           </div>
@@ -898,7 +1021,10 @@ __CUSTOM_STYLES__
                   class="w-full bg-surface-container border border-outline-variant/40 rounded-lg pl-8 pr-3 py-1.5 text-xs text-on-surface placeholder:text-outline search-input-custom"
                 />
               </div>
-              <div id="automatedTagsContainer" class="flex flex-wrap gap-1.5 mb-2 empty:hidden"></div>
+              <div
+                id="automatedTagsContainer"
+                class="flex flex-wrap gap-1.5 mb-2 empty:hidden"
+              ></div>
               <div
                 class="flex items-center justify-between gap-1 overflow-x-auto pb-1 scrollbar-none"
                 id="automatedFilterButtons"
@@ -998,8 +1124,13 @@ __CUSTOM_STYLES__
                     <span class="material-symbols-outlined text-sm">timer</span>
                     <span id="detailDurationText">120ms</span>
                   </div>
-                  <div id="detailAttemptsBadge" class="hidden text-amber-500 bg-amber-500/10 font-mono text-[10px] px-1.5 py-0.5 rounded border border-amber-500/30 flex items-center gap-1 ml-2">
-                    <span class="material-symbols-outlined text-[12px]">replay</span>
+                  <div
+                    id="detailAttemptsBadge"
+                    class="hidden text-amber-500 bg-amber-500/10 font-mono text-[10px] px-1.5 py-0.5 rounded border border-amber-500/30 flex items-center gap-1 ml-2"
+                  >
+                    <span class="material-symbols-outlined text-[12px]"
+                      >replay</span
+                    >
                     <span id="detailAttemptsText"></span>
                   </div>
                 </div>
@@ -1010,8 +1141,15 @@ __CUSTOM_STYLES__
                   >
                     Test Case Name
                   </h3>
-                  <button type="button" id="btnOpenAllure" class="text-outline hover:text-primary transition-colors p-1.5 rounded hover:bg-surface-container flex items-center justify-center shrink-0 border border-outline-variant/30 hover:border-primary/50 shadow-sm" title="Expandir detalles (Estilo Allure)">
-                    <span class="material-symbols-outlined text-[18px]">article</span>
+                  <button
+                    type="button"
+                    id="btnOpenAllure"
+                    class="text-outline hover:text-primary transition-colors p-1.5 rounded hover:bg-surface-container flex items-center justify-center shrink-0 border border-outline-variant/30 hover:border-primary/50 shadow-sm"
+                    title="Expandir detalles (Estilo Allure)"
+                  >
+                    <span class="material-symbols-outlined text-[18px]"
+                      >article</span
+                    >
                   </button>
                 </div>
               </div>
@@ -1044,13 +1182,24 @@ __CUSTOM_STYLES__
               </div>
 
               <!-- Body (Steps & Errors) -->
-              <div class="flex-1 overflow-y-auto custom-scrollbar p-4 flex flex-col gap-3 min-h-0 relative">
+              <div
+                class="flex-1 overflow-y-auto custom-scrollbar p-4 flex flex-col gap-3 min-h-0 relative"
+              >
                 <!-- Execution Tab Content -->
-                <div id="detailExecutionBody" class="w-full flex flex-col gap-3"></div>
+                <div
+                  id="detailExecutionBody"
+                  class="w-full flex flex-col gap-3"
+                ></div>
                 <!-- Executions History Tab Content -->
-                <div id="detailExecutionsTabBody" class="w-full hidden flex flex-col gap-3"></div>
+                <div
+                  id="detailExecutionsTabBody"
+                  class="w-full hidden flex flex-col gap-3"
+                ></div>
                 <!-- Artifacts Tab Content -->
-                <div id="detailArtifactsBody" class="w-full hidden flex flex-col gap-3"></div>
+                <div
+                  id="detailArtifactsBody"
+                  class="w-full hidden flex flex-col gap-3"
+                ></div>
               </div>
             </div>
           </div>
@@ -1107,7 +1256,12 @@ __CUSTOM_STYLES__
               Avg
             </p>
             <p class="font-display text-headline-md text-primary mt-1">
-              <span class="counter" data-target="__K6_AVG_DURATION__" data-is-duration="true">0</span>
+              <span
+                class="counter"
+                data-target="__K6_AVG_DURATION__"
+                data-is-duration="true"
+                >0</span
+              >
             </p>
           </div>
           <div
@@ -1117,7 +1271,12 @@ __CUSTOM_STYLES__
               P95
             </p>
             <p class="font-display text-headline-md text-tertiary mt-1">
-              <span class="counter" data-target="__K6_P95__" data-is-duration="true">0</span>
+              <span
+                class="counter"
+                data-target="__K6_P95__"
+                data-is-duration="true"
+                >0</span
+              >
             </p>
           </div>
         </div>
@@ -1148,227 +1307,415 @@ __CUSTOM_STYLES__
           </div>
         </div>
       </div>
-    <!-- Error Detail Modal -->
+      <!-- Error Detail Modal -->
+      <div
+        id="errorModal"
+        class="modal-backdrop fixed inset-0 z-50 hidden items-center justify-center bg-black/60 backdrop-blur-sm p-gutter"
+      >
         <div
-          id="errorModal"
-          class="modal-backdrop fixed inset-0 z-50 hidden items-center justify-center bg-black/60 backdrop-blur-sm p-gutter"
+          class="modal-content bg-surface-container-lowest border border-primary/30 rounded-xl shadow-[0_0_40px_rgba(139,92,246,0.15)] max-w-2xl w-full max-h-[80vh] flex flex-col"
         >
           <div
-            class="modal-content bg-surface-container-lowest border border-primary/30 rounded-xl shadow-[0_0_40px_rgba(139,92,246,0.15)] max-w-2xl w-full max-h-[80vh] flex flex-col"
+            class="p-gutter border-b border-outline-variant flex items-center justify-between"
           >
-            <div
-              class="p-gutter border-b border-outline-variant flex items-center justify-between"
+            <h3
+              class="font-label-caps text-on-surface-variant text-[11px] uppercase"
             >
-              <h3
-                class="font-label-caps text-on-surface-variant text-[11px] uppercase"
-              >
-                Error Detail
-              </h3>
-              <button
-                type="button"
-                id="closeErrorModal"
-                class="material-symbols-outlined text-outline hover:text-primary transition-colors"
-                aria-label="Close"
-              >
-                close
-              </button>
-            </div>
-            <div class="p-gutter overflow-y-auto custom-scrollbar">
-              <div id="errorModalContent" class="text-sm"></div>
-            </div>
+              Error Detail
+            </h3>
+            <button
+              type="button"
+              id="closeErrorModal"
+              class="material-symbols-outlined text-outline hover:text-primary transition-colors"
+              aria-label="Close"
+            >
+              close
+            </button>
+          </div>
+          <div class="p-gutter overflow-y-auto custom-scrollbar">
+            <div id="errorModalContent" class="text-sm"></div>
           </div>
         </div>
+      </div>
 
-        <!-- Allure-style Details Modal -->
+      <!-- Allure-style Details Modal -->
+      <div
+        id="allureModal"
+        class="modal-backdrop fixed inset-0 z-[60] hidden items-center justify-center bg-black/80 backdrop-blur-xl p-4 lg:p-10"
+      >
         <div
-          id="allureModal"
-          class="modal-backdrop fixed inset-0 z-[60] hidden items-center justify-center bg-black/80 backdrop-blur-xl p-4 lg:p-10"
+          class="modal-content bg-surface-container-low border border-outline-variant/30 rounded-xl w-full max-w-5xl h-full flex flex-col shadow-2xl relative overflow-hidden text-[#e4e6eb] font-body"
         >
-          <div class="modal-content bg-surface-container-low border border-outline-variant/30 rounded-xl w-full max-w-5xl h-full flex flex-col shadow-2xl relative overflow-hidden text-[#e4e6eb] font-body">
-            
-            <!-- Header section -->
-            <div class="px-8 pt-6 pb-0 border-b border-outline-variant/20 flex flex-col gap-5 bg-surface-container">
-              <!-- Top row: filepath + actions -->
-              <div class="flex items-center justify-between">
-                <div class="flex items-center gap-3 text-on-surface-variant font-mono text-xs">
-                  <span class="material-symbols-outlined text-[16px]">description</span>
-                  <span id="allureSuiteText"></span>
-                  <button class="material-symbols-outlined text-[14px] hover:text-primary" title="Copy">content_copy</button>
-                </div>
-                <div class="flex items-center gap-4">
-                  <div class="flex items-center gap-2 text-on-surface-variant text-sm">
-                    <button id="allureModalPrevBtn" class="material-symbols-outlined text-[20px] hover:text-primary transition-all disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:text-on-surface-variant hover:scale-110 active:scale-95 disabled:hover:scale-100">expand_less</button>
-                    <span id="allureModalCounter" class="font-mono text-[11px] w-12 text-center"></span>
-                    <button id="allureModalNextBtn" class="material-symbols-outlined text-[20px] hover:text-primary transition-all disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:text-on-surface-variant hover:scale-110 active:scale-95 disabled:hover:scale-100">expand_more</button>
-                  </div>
-                  <button type="button" onclick="closeAllureModal()" class="material-symbols-outlined text-outline hover:text-primary transition-all p-1 rounded-full hover:bg-white/5 hover:scale-110 active:scale-95">
-                    close
+          <!-- Header section -->
+          <div
+            class="px-8 pt-6 pb-0 border-b border-outline-variant/20 flex flex-col gap-5 bg-surface-container"
+          >
+            <!-- Top row: filepath + actions -->
+            <div class="flex items-center justify-between">
+              <div
+                class="flex items-center gap-3 text-on-surface-variant font-mono text-xs"
+              >
+                <span class="material-symbols-outlined text-[16px]"
+                  >description</span
+                >
+                <span id="allureSuiteText"></span>
+                <button
+                  class="material-symbols-outlined text-[14px] hover:text-primary"
+                  title="Copy"
+                >
+                  content_copy
+                </button>
+              </div>
+              <div class="flex items-center gap-4">
+                <div
+                  class="flex items-center gap-2 text-on-surface-variant text-sm"
+                >
+                  <button
+                    id="allureModalPrevBtn"
+                    class="material-symbols-outlined text-[20px] hover:text-primary transition-all disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:text-on-surface-variant hover:scale-110 active:scale-95 disabled:hover:scale-100"
+                  >
+                    expand_less
+                  </button>
+                  <span
+                    id="allureModalCounter"
+                    class="font-mono text-[11px] w-12 text-center"
+                  ></span>
+                  <button
+                    id="allureModalNextBtn"
+                    class="material-symbols-outlined text-[20px] hover:text-primary transition-all disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:text-on-surface-variant hover:scale-110 active:scale-95 disabled:hover:scale-100"
+                  >
+                    expand_more
                   </button>
                 </div>
-              </div>
-
-              <!-- Title -->
-              <h2 class="font-body text-xl md:text-3xl font-bold tracking-tight text-on-surface" id="allureTestName"></h2>
-              
-              <!-- Badges Row -->
-              <div class="flex flex-wrap items-center gap-4 text-[11px] font-medium">
-                <!-- Status -->
-                <div id="allureStatusBadge" class="flex items-center gap-1.5 px-2.5 py-1 rounded-full border">
-                  <span id="allureStatusIcon" class="material-symbols-outlined text-[14px]"></span>
-                  <span id="allureStatusText" class="font-bold"></span>
-                </div>
-                <!-- Timeline icon -->
-                <div class="flex items-center gap-1 text-on-surface-variant">
-                  <span class="material-symbols-outlined text-[16px]">linear_scale</span>
-                </div>
-                <!-- Priority -->
-                <div class="flex items-center gap-1.5 text-on-surface-variant">
-                  <span class="material-symbols-outlined text-[14px]">drag_handle</span>
-                  <span>Normal</span>
-                </div>
-                <!-- Duration -->
-                <div class="text-on-surface-variant font-mono" id="allureDurationText"></div>
-              </div>
-
-              <!-- Tabs Row -->
-              <div class="flex items-center gap-6 mt-2">
-                <button class="px-1 py-3 text-sm font-bold text-on-surface border-b-2 border-primary" data-allure-tab="resumen">Overview
-                </button>
-                <button class="px-1 py-3 text-sm font-medium text-on-surface-variant hover:text-on-surface transition-colors flex items-center gap-2" data-allure-tab="historial" id="allureHistorialTabBtn">History <span id="allureHistoryCountBadge" class="bg-surface-container-high text-on-surface text-[10px] px-1.5 py-0.5 rounded-full font-mono leading-none">0</span>
-                </button>
-                <button class="px-1 py-3 text-sm font-medium text-on-surface-variant hover:text-on-surface transition-colors flex items-center gap-2 hidden" id="allureReintentosTabBtn" data-allure-tab="reintentos">Retries <span id="allureAttemptsCountBadge" class="bg-surface-container-high text-on-surface text-[10px] px-1.5 py-0.5 rounded-full font-mono leading-none">0</span>
-                </button>
-                <button class="px-1 py-3 text-sm font-medium text-on-surface-variant hover:text-on-surface transition-colors flex items-center gap-2" data-allure-tab="adjuntos" id="allureAdjuntosTabBtn">Attachments <span id="allureAdjuntosCountBadge" class="bg-surface-container-high text-on-surface text-[10px] px-1.5 py-0.5 rounded-full font-mono leading-none hidden">0</span>
-                </button>
-                <button class="px-1 py-3 text-sm font-medium text-on-surface-variant hover:text-on-surface transition-colors flex items-center gap-2" data-allure-tab="entornos" id="allureEntornosTabBtn" style="display: none !important;">Environments
+                <button
+                  type="button"
+                  onclick="closeAllureModal()"
+                  class="material-symbols-outlined text-outline hover:text-primary transition-all p-1 rounded-full hover:bg-white/5 hover:scale-110 active:scale-95"
+                >
+                  close
                 </button>
               </div>
             </div>
 
-            <!-- Body Area -->
-            <div class="flex-1 overflow-y-auto custom-scrollbar p-8 bg-surface-container-low">
-              
-              
-              <!-- Tab: Resumen -->
-              <div id="allureTab-resumen" class="allure-tab-content flex flex-col gap-8 max-w-5xl transition-all duration-300 ease-in-out opacity-100 translate-y-0">
-                
-                <!-- Playwright Trace -->
-                <div>
-                  <div class="flex items-center gap-3 mb-4">
-                    <h3 class="text-sm font-bold text-on-surface">Playwright Trace</h3>
-                    <span class="bg-surface-container-high text-on-surface text-[10px] px-1.5 py-0.5 rounded-full font-mono leading-none">1</span>
+            <!-- Title -->
+            <h2
+              class="font-body text-xl md:text-3xl font-bold tracking-tight text-on-surface"
+              id="allureTestName"
+            ></h2>
+
+            <!-- Badges Row -->
+            <div
+              class="flex flex-wrap items-center gap-4 text-[11px] font-medium"
+            >
+              <!-- Status -->
+              <div
+                id="allureStatusBadge"
+                class="flex items-center gap-1.5 px-2.5 py-1 rounded-full border"
+              >
+                <span
+                  id="allureStatusIcon"
+                  class="material-symbols-outlined text-[14px]"
+                ></span>
+                <span id="allureStatusText" class="font-bold"></span>
+              </div>
+              <!-- Timeline icon -->
+              <div class="flex items-center gap-1 text-on-surface-variant">
+                <span class="material-symbols-outlined text-[16px]"
+                  >linear_scale</span
+                >
+              </div>
+              <!-- Priority -->
+              <div class="flex items-center gap-1.5 text-on-surface-variant">
+                <span class="material-symbols-outlined text-[14px]"
+                  >drag_handle</span
+                >
+                <span>Normal</span>
+              </div>
+              <!-- Duration -->
+              <div
+                class="text-on-surface-variant font-mono"
+                id="allureDurationText"
+              ></div>
+            </div>
+
+            <!-- Tabs Row -->
+            <div class="flex items-center gap-6 mt-2">
+              <button
+                class="px-1 py-3 text-sm font-bold text-on-surface border-b-2 border-primary"
+                data-allure-tab="resumen"
+              >
+                Overview
+              </button>
+              <button
+                class="px-1 py-3 text-sm font-medium text-on-surface-variant hover:text-on-surface transition-colors flex items-center gap-2"
+                data-allure-tab="historial"
+                id="allureHistorialTabBtn"
+              >
+                History
+                <span
+                  id="allureHistoryCountBadge"
+                  class="bg-surface-container-high text-on-surface text-[10px] px-1.5 py-0.5 rounded-full font-mono leading-none"
+                  >0</span
+                >
+              </button>
+              <button
+                class="px-1 py-3 text-sm font-medium text-on-surface-variant hover:text-on-surface transition-colors flex items-center gap-2 hidden"
+                id="allureReintentosTabBtn"
+                data-allure-tab="reintentos"
+              >
+                Retries
+                <span
+                  id="allureAttemptsCountBadge"
+                  class="bg-surface-container-high text-on-surface text-[10px] px-1.5 py-0.5 rounded-full font-mono leading-none"
+                  >0</span
+                >
+              </button>
+              <button
+                class="px-1 py-3 text-sm font-medium text-on-surface-variant hover:text-on-surface transition-colors flex items-center gap-2"
+                data-allure-tab="adjuntos"
+                id="allureAdjuntosTabBtn"
+              >
+                Attachments
+                <span
+                  id="allureAdjuntosCountBadge"
+                  class="bg-surface-container-high text-on-surface text-[10px] px-1.5 py-0.5 rounded-full font-mono leading-none hidden"
+                  >0</span
+                >
+              </button>
+              <button
+                class="px-1 py-3 text-sm font-medium text-on-surface-variant hover:text-on-surface transition-colors flex items-center gap-2"
+                data-allure-tab="entornos"
+                id="allureEntornosTabBtn"
+                style="display: none !important"
+              >
+                Environments
+              </button>
+            </div>
+          </div>
+
+          <!-- Body Area -->
+          <div
+            class="flex-1 overflow-y-auto custom-scrollbar p-8 bg-surface-container-low"
+          >
+            <!-- Tab: Resumen -->
+            <div
+              id="allureTab-resumen"
+              class="allure-tab-content flex flex-col gap-8 max-w-5xl transition-all duration-300 ease-in-out opacity-100 translate-y-0"
+            >
+              <!-- Playwright Trace -->
+              <div>
+                <div class="flex items-center gap-3 mb-4">
+                  <h3 class="text-sm font-bold text-on-surface">
+                    Playwright Trace
+                  </h3>
+                  <span
+                    class="bg-surface-container-high text-on-surface text-[10px] px-1.5 py-0.5 rounded-full font-mono leading-none"
+                    >1</span
+                  >
+                </div>
+                <div
+                  class="flex items-center justify-between text-[13px] bg-white/[0.02] p-2 rounded hover:bg-white/[0.06] transition-all duration-300 border border-transparent hover:border-outline-variant/50 group cursor-pointer hover:shadow-lg"
+                >
+                  <div class="flex items-center gap-3">
+                    <span
+                      class="material-symbols-outlined text-error text-[16px]"
+                      >bug_report</span
+                    >
+                    <span
+                      class="font-mono text-on-surface-variant group-hover:text-on-surface transition-colors"
+                      >1</span
+                    >
+                    <span class="text-on-surface font-medium">trace</span>
                   </div>
-                  <div class="flex items-center justify-between text-[13px] bg-white/[0.02] p-2 rounded hover:bg-white/[0.06] transition-all duration-300 border border-transparent hover:border-outline-variant/50 group cursor-pointer hover:shadow-lg">
-                    <div class="flex items-center gap-3">
-                      <span class="material-symbols-outlined text-error text-[16px]">bug_report</span>
-                      <span class="font-mono text-on-surface-variant group-hover:text-on-surface transition-colors">1</span>
-                      <span class="text-on-surface font-medium">trace</span>
-                    </div>
-                    <div class="flex items-center gap-4 text-on-surface-variant">
-                      <span class="font-mono text-[11px] opacity-70">application/vnd.allure.playwright-trace</span>
-                      <span class="font-mono text-[11px]">4.7 KiB</span>
-                      <span class="material-symbols-outlined text-[16px] hover:text-on-surface">open_in_full</span>
-                      <span class="material-symbols-outlined text-[16px] hover:text-on-surface">cloud_download</span>
-                    </div>
+                  <div class="flex items-center gap-4 text-on-surface-variant">
+                    <span class="font-mono text-[11px] opacity-70"
+                      >application/vnd.allure.playwright-trace</span
+                    >
+                    <span class="font-mono text-[11px]">4.7 KiB</span>
+                    <span
+                      class="material-symbols-outlined text-[16px] hover:text-on-surface"
+                      >open_in_full</span
+                    >
+                    <span
+                      class="material-symbols-outlined text-[16px] hover:text-on-surface"
+                      >cloud_download</span
+                    >
                   </div>
                 </div>
-
-                <hr class="border-outline-variant/30" />
-
-                <!-- Parameters -->
-                <div>
-                  <div class="flex items-center gap-3 mb-4">
-                    <h3 class="text-sm font-bold text-on-surface">Parameters</h3>
-                    <span class="bg-surface-container-high text-on-surface text-[10px] px-1.5 py-0.5 rounded-full font-mono leading-none">1</span>
-                  </div>
-                  <div class="grid grid-cols-[140px_1fr] items-center text-[13px] gap-y-3">
-                    <span class="text-on-surface-variant">Project</span>
-                    <span class="inline-flex"><span id="allureProjectText" class="bg-surface-container-highest text-on-surface/90 border border-outline-variant/30 px-2 py-0.5 rounded text-xs font-mono"></span></span>
-                  </div>
-                </div>
-
-                <hr class="border-outline-variant/30" />
-
-                <!-- Tags -->
-                <div>
-                  <div class="flex items-center gap-3 mb-4">
-                    <h3 class="text-sm font-bold text-on-surface">Tags</h3>
-                    <span id="allureTagsCountBadge" class="bg-surface-container-high text-on-surface text-[10px] px-1.5 py-0.5 rounded-full font-mono leading-none">0</span>
-                  </div>
-                  <div id="allureTagsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-3 text-[13px]">
-                    <!-- Populated via JS -->
-                  </div>
-                  <button id="allureTagsShowMoreBtn" class="mt-4 text-xs font-bold text-on-surface-variant hover:text-primary transition-colors hidden">Show more (+<span id="allureTagsHiddenCount">0</span>)</button>
-                </div>
-
-                <hr class="border-outline-variant/30" />
-
-                <!-- Test Body -->
-                <div>
-                  <div class="flex items-center gap-2 mb-4 cursor-pointer select-none" onclick="const b=document.getElementById('allureExecutionBody'); const i=this.querySelector('.material-symbols-outlined'); const h=b.style.display==='none'; b.style.display=h?'flex':'none'; i.style.transform=h?'rotate(0deg)':'rotate(-90deg)'">
-                    <span class="material-symbols-outlined text-[18px] text-on-surface-variant transition-transform" style="transform: rotate(0deg)">arrow_drop_down</span>
-                    <h3 class="text-sm font-bold text-on-surface">Test Body</h3>
-                    <span id="allureStepsCountBadge" class="bg-surface-container-high text-on-surface text-[10px] px-1.5 py-0.5 rounded-full font-mono leading-none">0</span>
-                  </div>
-                  <div id="allureExecutionBody" class="flex flex-col w-full pl-[26px]">
-                    <!-- Steps go here -->
-                  </div>
-                </div>
-
               </div>
 
-              <!-- Tab: Reintentos -->
-              <div id="allureTab-reintentos" class="allure-tab-content hidden opacity-0 translate-y-4 transition-all duration-300 ease-in-out">
-                <div id="allureReintentosBody" class="flex flex-col gap-4">
-                  <div class="text-sm text-on-surface-variant flex flex-col items-center justify-center py-20 gap-4">
-                    <span class="material-symbols-outlined text-[48px] opacity-50">history</span>
-                    <p>No retries for this test case.</p>
-                  </div>
+              <hr class="border-outline-variant/30" />
+
+              <!-- Parameters -->
+              <div>
+                <div class="flex items-center gap-3 mb-4">
+                  <h3 class="text-sm font-bold text-on-surface">Parameters</h3>
+                  <span
+                    class="bg-surface-container-high text-on-surface text-[10px] px-1.5 py-0.5 rounded-full font-mono leading-none"
+                    >1</span
+                  >
                 </div>
-              </div>
-              
-              <!-- Tab: Historial -->
-              <div id="allureTab-historial" class="allure-tab-content hidden opacity-0 translate-y-4 transition-all duration-300 ease-in-out">
-                <div id="allureHistorialBody" class="flex flex-col gap-3 max-w-4xl">
-                  <div class="text-sm text-on-surface-variant flex flex-col items-center justify-center py-20 gap-4">
-                    <span class="material-symbols-outlined text-[48px] opacity-50 text-primary">timeline</span>
-                    <p class="font-bold">No execution history recorded yet</p>
-                    <p class="text-xs opacity-70">Execute more test runs to build an execution timeline for this test.</p>
-                  </div>
-                </div>
-              </div>
-              
-              <!-- Tab: Adjuntos -->
-              <div id="allureTab-adjuntos" class="allure-tab-content hidden opacity-0 translate-y-4 transition-all duration-300 ease-in-out">
-                <div id="allureAdjuntosBody" class="flex flex-col gap-4">
-                  <div class="text-sm text-on-surface-variant flex flex-col items-center justify-center py-20 gap-4">
-                    <span class="material-symbols-outlined text-[48px] opacity-50">attachment</span>
-                    <p>No attachments for this test.</p>
-                  </div>
-                </div>
-              </div>
-              
-              <!-- Tab: Entornos -->
-              <div id="allureTab-entornos" class="allure-tab-content hidden opacity-0 translate-y-4 transition-all duration-300 ease-in-out">
-                <div class="text-sm text-on-surface-variant flex flex-col items-center justify-center py-20 gap-4">
-                  <span class="material-symbols-outlined text-[48px] opacity-50 text-primary">dns</span>
-                  <p class="font-bold">Environment Variables</p>
-                  <p class="text-xs opacity-70">This feature will be available in the next version of Grimoir.</p>
+                <div
+                  class="grid grid-cols-[140px_1fr] items-center text-[13px] gap-y-3"
+                >
+                  <span class="text-on-surface-variant">Project</span>
+                  <span class="inline-flex"
+                    ><span
+                      id="allureProjectText"
+                      class="bg-surface-container-highest text-on-surface/90 border border-outline-variant/30 px-2 py-0.5 rounded text-xs font-mono"
+                    ></span
+                  ></span>
                 </div>
               </div>
 
+              <hr class="border-outline-variant/30" />
+
+              <!-- Tags -->
+              <div>
+                <div class="flex items-center gap-3 mb-4">
+                  <h3 class="text-sm font-bold text-on-surface">Tags</h3>
+                  <span
+                    id="allureTagsCountBadge"
+                    class="bg-surface-container-high text-on-surface text-[10px] px-1.5 py-0.5 rounded-full font-mono leading-none"
+                    >0</span
+                  >
+                </div>
+                <div
+                  id="allureTagsGrid"
+                  class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-3 text-[13px]"
+                >
+                  <!-- Populated via JS -->
+                </div>
+                <button
+                  id="allureTagsShowMoreBtn"
+                  class="mt-4 text-xs font-bold text-on-surface-variant hover:text-primary transition-colors hidden"
+                >
+                  Show more (+<span id="allureTagsHiddenCount">0</span>)
+                </button>
+              </div>
+
+              <hr class="border-outline-variant/30" />
+
+              <!-- Test Body -->
+              <div>
+                <div
+                  class="flex items-center gap-2 mb-4 cursor-pointer select-none"
+                  onclick="
+                    const b = document.getElementById('allureExecutionBody');
+                    const i = this.querySelector('.material-symbols-outlined');
+                    const h = b.style.display === 'none';
+                    b.style.display = h ? 'flex' : 'none';
+                    i.style.transform = h ? 'rotate(0deg)' : 'rotate(-90deg)';
+                  "
+                >
+                  <span
+                    class="material-symbols-outlined text-[18px] text-on-surface-variant transition-transform"
+                    style="transform: rotate(0deg)"
+                    >arrow_drop_down</span
+                  >
+                  <h3 class="text-sm font-bold text-on-surface">Test Body</h3>
+                  <span
+                    id="allureStepsCountBadge"
+                    class="bg-surface-container-high text-on-surface text-[10px] px-1.5 py-0.5 rounded-full font-mono leading-none"
+                    >0</span
+                  >
+                </div>
+                <div
+                  id="allureExecutionBody"
+                  class="flex flex-col w-full pl-[26px]"
+                >
+                  <!-- Steps go here -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Tab: Reintentos -->
+            <div
+              id="allureTab-reintentos"
+              class="allure-tab-content hidden opacity-0 translate-y-4 transition-all duration-300 ease-in-out"
+            >
+              <div id="allureReintentosBody" class="flex flex-col gap-4">
+                <div
+                  class="text-sm text-on-surface-variant flex flex-col items-center justify-center py-20 gap-4"
+                >
+                  <span class="material-symbols-outlined text-[48px] opacity-50"
+                    >history</span
+                  >
+                  <p>No retries for this test case.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tab: Historial -->
+            <div
+              id="allureTab-historial"
+              class="allure-tab-content hidden opacity-0 translate-y-4 transition-all duration-300 ease-in-out"
+            >
+              <div
+                id="allureHistorialBody"
+                class="flex flex-col gap-3 max-w-4xl"
+              >
+                <div
+                  class="text-sm text-on-surface-variant flex flex-col items-center justify-center py-20 gap-4"
+                >
+                  <span
+                    class="material-symbols-outlined text-[48px] opacity-50 text-primary"
+                    >timeline</span
+                  >
+                  <p class="font-bold">No execution history recorded yet</p>
+                  <p class="text-xs opacity-70">
+                    Execute more test runs to build an execution timeline for
+                    this test.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tab: Adjuntos -->
+            <div
+              id="allureTab-adjuntos"
+              class="allure-tab-content hidden opacity-0 translate-y-4 transition-all duration-300 ease-in-out"
+            >
+              <div id="allureAdjuntosBody" class="flex flex-col gap-4">
+                <div
+                  class="text-sm text-on-surface-variant flex flex-col items-center justify-center py-20 gap-4"
+                >
+                  <span class="material-symbols-outlined text-[48px] opacity-50"
+                    >attachment</span
+                  >
+                  <p>No attachments for this test.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tab: Entornos -->
+            <div
+              id="allureTab-entornos"
+              class="allure-tab-content hidden opacity-0 translate-y-4 transition-all duration-300 ease-in-out"
+            >
+              <div
+                class="text-sm text-on-surface-variant flex flex-col items-center justify-center py-20 gap-4"
+              >
+                <span
+                  class="material-symbols-outlined text-[48px] opacity-50 text-primary"
+                  >dns</span
+                >
+                <p class="font-bold">Environment Variables</p>
+                <p class="text-xs opacity-70">
+                  This feature will be available in the next version of Grimoir.
+                </p>
+              </div>
             </div>
           </div>
         </div>
-
+      </div>
     </main>
 
     <!-- Tab switching script -->
     <script>
-__CUSTOM_SCRIPTS__
+      __CUSTOM_SCRIPTS__
     </script>
 
     <!-- Charts -->
-    
   </body>
 </html>
