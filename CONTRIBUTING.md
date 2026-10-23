@@ -45,8 +45,8 @@ By participating in this project, you agree to abide by our [Code of Conduct](CO
 ## Setting Up the Development Environment
 
 ### Requirements
-- Node.js 18+
-- npm 9+
+- [Bun](https://bun.com/) 1.0+ (Primary dev runtime, package manager & test runner)
+- Node.js 18+ (For validating production distribution compatibility)
 - Git
 
 ### Steps
@@ -59,13 +59,16 @@ git clone https://github.com/YOUR_USERNAME/grimoir.git
 cd grimoir
 
 # 3. Install dependencies
-npm install
+bun install
 
-# 4. Run tests to verify everything works
-npm test
+# 4. Run unit tests to verify everything works
+bun test
 
-# 5. Start development
-npm run dev
+# 5. Build the project
+bun run build
+
+# 6. Start development
+bun run dev -- -i ./test-results -o ./output
 ```
 
 ---
@@ -81,9 +84,11 @@ npm run dev
 
 2. **Make your changes** and write tests if applicable
 
-3. **Run the test suite** before submitting:
+3. **Run the test suite and type check** before submitting:
    ```bash
-   npm test
+   bun test
+   bun run lint
+   bun run build
    ```
 
 4. **Push your branch** and open a Pull Request against `main`
