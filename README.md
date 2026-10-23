@@ -10,11 +10,11 @@
 
 <p align="center">
   <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MIT-purple.svg" alt="License" /></a>
+  <a href="https://bun.com/"><img src="https://img.shields.io/badge/bun-%3E%3D1.0-FBF0DF.svg?logo=bun&logoColor=black" alt="Bun" /></a>
   <a href="https://nodejs.org/"><img src="https://img.shields.io/badge/node-%3E%3D18.0.0-8B5CF6.svg" alt="Node" /></a>
   <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/typescript-%5E5.0-3178C6.svg" alt="TypeScript" /></a>
   <a href="https://playwright.dev/"><img src="https://img.shields.io/badge/playwright-supported-2EAD33.svg" alt="Playwright" /></a>
   <a href="https://k6.io/"><img src="https://img.shields.io/badge/k6-supported-7D64FF.svg" alt="k6" /></a>
-  <a href="https://vitest.dev/"><img src="https://img.shields.io/badge/vitest-supported-FCC72B.svg" alt="Vitest" /></a>
 </p>
 
 ---
@@ -44,7 +44,8 @@ Instead of jumping between isolated reports and tools, software teams can assess
 
 | Category | Technology |
 | :--- | :--- |
-| **Runtime & Language** | Node.js (>=18) + TypeScript (Strict) |
+| **Development & Engine** | [Bun](https://bun.com/) (Fast Package Manager, Native TS Runner & Test Engine) |
+| **Target Runtime** | Node.js (>=18) & Bun universal compatibility |
 | **CLI Framework** | Commander.js |
 | **Report Architecture** | JSDOM + TailwindCSS + Custom Grimoire Design System |
 | **Charts & Motion** | Chart.js + Anime.js |
@@ -55,15 +56,23 @@ Instead of jumping between isolated reports and tools, software teams can assess
 
 ## 📦 Installation
 
-Install globally via npm:
+Install globally:
 
 ```bash
+# Using bun
+bun add -g grimoir
+
+# Or using npm
 npm install -g grimoir
 ```
 
 Or add it locally to your project:
 
 ```bash
+# Using bun
+bun add -d grimoir
+
+# Or using npm
 npm install -D grimoir
 ```
 

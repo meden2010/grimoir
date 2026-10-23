@@ -21,12 +21,12 @@
     "grimoir": "./dist/cli/index.js"
   },
   "scripts": {
-    "prepare": "npm run build",
+    "prepare": "bun run build",
     "build": "tsc",
     "postbuild": "copyfiles -u 1 src/**/*.html src/**/*.css src/**/*.js dist/",
-    "dev": "ts-node src/cli/index.ts",
-    "dev:watch": "tsx watch src/cli/index.ts",
-    "test": "vitest",
+    "dev": "bun src/cli/index.ts",
+    "dev:watch": "bun --watch src/cli/index.ts",
+    "test": "bun test",
     "test:e2e": "playwright test",
     "report": "grimoir generate --input ./test-results --output ./output",
     "lint": "tsc --noEmit"
@@ -56,11 +56,9 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.61.1",
+    "@types/bun": "latest",
     "@types/node": "^25.9.3",
     "copyfiles": "^2.4.1",
-    "ts-node": "^10.9.2",
-    "tsx": "^4.22.4",
-    "typescript": "^6.0.3",
-    "vitest": "^4.1.8"
+    "typescript": "^6.0.3"
   }
 }
