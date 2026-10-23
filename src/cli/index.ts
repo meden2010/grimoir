@@ -326,4 +326,6 @@ program
     console.log(`✨ Output folder ${options.output} cleaned successfully.`);
   });
 
-program.parse();
+if (process.env.NODE_ENV !== 'test') {
+  program.parse();
+}
