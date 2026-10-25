@@ -326,6 +326,6 @@ program
     console.log(`✨ Output folder ${options.output} cleaned successfully.`);
   });
 
-if (process.env.NODE_ENV !== 'test') {
+if (require.main === module) {
   program.parse();
 }
