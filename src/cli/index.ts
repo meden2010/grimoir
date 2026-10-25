@@ -326,4 +326,6 @@ program
     console.log(`✨ Output folder ${options.output} cleaned successfully.`);
   });
 
-program.parse();
+if (require.main === module) {
+  program.parse();
+}
