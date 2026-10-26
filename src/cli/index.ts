@@ -215,12 +215,14 @@ const buildReport = (inputPath: string, outputPath: string, clean: boolean = fal
   console.log(`   Duration: ${playwrightReport.stats.duration}ms`);
 
   if (k6Report) {
-    console.log(`\n✅ k6 Results:`);
-    console.log(`   Requests:      ${k6Report.stats.totalRequests}`);
-    console.log(`   Failed:        ${k6Report.stats.failedRequests}`);
-    console.log(`   Success Rate:  ${k6Report.stats.successRate}%`);
-    console.log(`   Avg Duration:  ${k6Report.metrics.httpReqDuration.avg}ms`);
-    console.log(`   P95:           ${k6Report.metrics.httpReqDuration.p95}ms`);
+    console.log(`\n🔮 k6 Performance (v1):`);
+    console.log(`   P95 Latency:   ${k6Report.metrics.p95LatencyMs !== null ? `${k6Report.metrics.p95LatencyMs}ms` : 'N/A'}`);
+    console.log(`   Error Rate:    ${k6Report.metrics.errorRatePercent !== null ? `${k6Report.metrics.errorRatePercent}%` : 'N/A'}`);
+    console.log(`   Throughput:    ${k6Report.metrics.throughputRps !== null ? `${k6Report.metrics.throughputRps} req/s` : 'N/A'}`);
+    console.log(`   Thresholds:    ${k6Report.thresholds.status.toUpperCase()} (${k6Report.thresholds.passed}/${k6Report.thresholds.total})`);
+    if (k6Report.warnings.length > 0) {
+      console.log(`   ⚠️ Warnings:   ${k6Report.warnings.join(' | ')}`);
+    }
   }
 
   return html;

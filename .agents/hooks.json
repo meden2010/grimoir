@@ -1,0 +1,17 @@
+{
+  "node-compat-guard": {
+    "enabled": true,
+    "PostToolUse": [
+      {
+        "matcher": "replace_file_content|write_to_file",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun scripts/audit-node-compat.ts --quiet",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}

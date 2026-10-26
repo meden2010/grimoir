@@ -1,0 +1,19 @@
+{
+  "metrics": {
+    "http_req_duration": {
+      "type": "trend",
+      "values": {
+        "avg": 120.5,
+        "min": 50.0,
+        "max": 400.0,
+        "p(90)": 180.0,
+        "p(95)": 210.5
+      },
+      "thresholds": {
+        "p(95)<300": {
+          "ok": true
+        }
+      }
+    }
+  }
+}

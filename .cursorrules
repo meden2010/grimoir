@@ -1,0 +1,4 @@
+# Cursor Rules — Grimoir Project
+
+All development workflows, architecture guidelines, Arcane Dark design system tokens, and Node.js/Bun compatibility standards are maintained in **[AGENTS.md](./AGENTS.md)**.
+Please follow all instructions and invariant rules specified in `AGENTS.md` strictly.

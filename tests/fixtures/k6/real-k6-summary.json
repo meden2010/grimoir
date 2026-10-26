@@ -1,0 +1,78 @@
+{
+  "root_group": {
+    "name": "",
+    "path": "",
+    "id": "d41d8cd98f00b204e9800998ecf8427e",
+    "groups": [],
+    "checks": [
+      {
+        "name": "is status 200",
+        "path": "::is status 200",
+        "id": "548d37ca5737d9c8828e629e571357b9",
+        "passes": 4950,
+        "fails": 50
+      }
+    ]
+  },
+  "metrics": {
+    "http_req_duration": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "avg": 154.28,
+        "min": 45.12,
+        "med": 130.40,
+        "max": 1240.85,
+        "p(90)": 230.15,
+        "p(95)": 345.60
+      },
+      "thresholds": {
+        "p(95)<500": {
+          "ok": true
+        }
+      }
+    },
+    "http_req_failed": {
+      "type": "rate",
+      "contains": "default",
+      "values": {
+        "rate": 0.01,
+        "passes": 50,
+        "fails": 4950
+      }
+    },
+    "http_reqs": {
+      "type": "counter",
+      "contains": "default",
+      "values": {
+        "count": 5000,
+        "rate": 166.66
+      }
+    },
+    "vus": {
+      "type": "gauge",
+      "contains": "default",
+      "values": {
+        "value": 25,
+        "min": 1,
+        "max": 50
+      }
+    },
+    "iterations": {
+      "type": "counter",
+      "contains": "default",
+      "values": {
+        "count": 5000,
+        "rate": 166.66
+      }
+    }
+  },
+  "scenarios": {
+    "api_load_scenario": {
+      "vus": 50,
+      "iterations": 5000,
+      "status": "passed"
+    }
+  },
+  "duration": 30000
+}

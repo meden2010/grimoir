@@ -1,0 +1,71 @@
+{
+  "duration": 45000,
+  "metrics": {
+    "http_req_duration": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "avg": 168.4,
+        "min": 42.1,
+        "max": 980.2,
+        "p(90)": 245.8,
+        "p(95)": 380.6
+      },
+      "thresholds": {
+        "p(95)<400": {
+          "ok": true
+        }
+      }
+    },
+    "http_req_failed": {
+      "type": "rate",
+      "values": {
+        "rate": 0.024,
+        "passes": 341,
+        "fails": 13859
+      },
+      "thresholds": {
+        "rate<0.05": {
+          "ok": true
+        }
+      }
+    },
+    "http_reqs": {
+      "type": "counter",
+      "values": {
+        "count": 14200,
+        "rate": 315.5
+      }
+    },
+    "vus": {
+      "type": "gauge",
+      "values": {
+        "value": 120,
+        "max": 200
+      }
+    },
+    "iterations": {
+      "type": "counter",
+      "values": {
+        "count": 14200
+      }
+    }
+  },
+  "scenarios": {
+    "sanctuary_portal_baseline": {
+      "vus": 50,
+      "iterations": 5000,
+      "status": "passed"
+    },
+    "high_council_stress_test": {
+      "vus": 120,
+      "iterations": 8000,
+      "status": "passed"
+    },
+    "unstable_leyline_burst": {
+      "vus": 200,
+      "iterations": 1200,
+      "status": "failed"
+    }
+  }
+}

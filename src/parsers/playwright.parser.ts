@@ -21,11 +21,13 @@ export interface PlaywrightResult {
 export interface PlaywrightJsonTest {
   projectName?: string;
   expectedStatus?: string;
+  status?: string;
   results: PlaywrightResult[];
 }
 
 export interface PlaywrightSpec {
   title: string;
+  ok?: boolean;
   tests?: PlaywrightJsonTest[];
 }
 

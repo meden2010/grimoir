@@ -29,7 +29,10 @@
     "test": "bun test",
     "test:e2e": "playwright test",
     "report": "grimoir generate --input ./test-results --output ./output",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "audit:compat": "bun scripts/audit-node-compat.ts",
+    "test:compat": "bun run build && bun scripts/generate-demo-data.ts && node dist/cli/index.js generate --input tests/fixtures/demo-output --output ./output --no-serve && node dist/cli/index.js clean --output ./output",
+    "dev:demo": "bun scripts/generate-demo-data.ts && bun src/cli/index.ts generate --input tests/fixtures/demo-output --output ./output"
   },
   "repository": {
     "type": "git",
