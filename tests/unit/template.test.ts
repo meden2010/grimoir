@@ -58,13 +58,21 @@ describe('generateHTML', () => {
       duration: 10
     },
     metrics: {
-      httpReqs: 100,
-      httpReqFailed: 0.05,
-      httpReqDuration: { avg: 200, min: 50, max: 800, p90: 300, p95: 400 }
+      p95LatencyMs: 400,
+      errorRatePercent: 5.0,
+      throughputRps: 100,
     },
+    thresholds: {
+      status: 'passed',
+      total: 1,
+      passed: 1,
+      failed: 0,
+      items: [{ name: 'p(95)<500', metric: 'http_req_duration', pass: true }]
+    },
+    warnings: [],
     scenarios: {
-      'Scenario 1': { name: 'Scenario 1', duration: 10, status: 'passed' },
-      'Scenario 2': { name: 'Scenario 2', duration: 10, status: 'failed' }
+      'Scenario 1': { vus: 10, iterations: 100, status: 'passed' },
+      'Scenario 2': { vus: 10, iterations: 100, status: 'failed' }
     }
   };
 

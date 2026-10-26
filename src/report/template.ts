@@ -82,27 +82,31 @@ const buildFailures = (playwright: PlaywrightReport, k6: K6Report | null): Failu
   const performanceFailures: Failure[] = [];
   if (k6) {
     // 1. Threshold failures from k6 summary
-    for (const t of k6.thresholds.items) {
-      if (!t.pass) {
-        performanceFailures.push({
-          type: 'Performance' as const,
-          suite: t.metric,
-          test: `Threshold: ${t.name}`,
-          error: `k6 threshold breached on metric '${t.metric}': '${t.name}' failed`,
-          duration: 0,
-        });
+    if (k6.thresholds && Array.isArray(k6.thresholds.items)) {
+      for (const t of k6.thresholds.items) {
+        if (!t.pass) {
+          performanceFailures.push({
+            type: 'Performance' as const,
+            suite: t.metric,
+            test: `Threshold: ${t.name}`,
+            error: `k6 threshold breached on metric '${t.metric}': '${t.name}' failed`,
+            duration: 0,
+          });
+        }
       }
     }
     // 2. Scenario failures if any
-    for (const [name, scenario] of Object.entries(k6.scenarios)) {
-      if (scenario.status === 'failed') {
-        performanceFailures.push({
-          type: 'Performance' as const,
-          suite: name,
-          test: name,
-          error: `k6 scenario '${name}' execution failed`,
-          duration: 0,
-        });
+    if (k6.scenarios) {
+      for (const [name, scenario] of Object.entries(k6.scenarios)) {
+        if (scenario && scenario.status === 'failed') {
+          performanceFailures.push({
+            type: 'Performance' as const,
+            suite: name,
+            test: name,
+            error: 'Performance scenario failed',
+            duration: 0,
+          });
+        }
       }
     }
   }
