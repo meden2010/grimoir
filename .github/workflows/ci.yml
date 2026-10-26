@@ -75,7 +75,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: Install production dependencies via npm
-        run: npm install --omit=dev
+        run: npm install --omit=dev --ignore-scripts
 
       - name: Verify CLI execution under Node ${{ matrix.node-version }}
         run: |
