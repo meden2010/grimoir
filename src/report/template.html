@@ -1003,7 +1003,7 @@
         >
           <!-- Left Pane: Tree Navigation -->
           <div
-            class="lg:w-1/3 bg-surface-container-lowest border border-outline-variant rounded-xl flex flex-col overflow-hidden card-hover min-h-0"
+            class="lg:w-1/3 bg-surface-container-lowest border border-outline-variant rounded-xl flex flex-col overflow-hidden min-h-0"
           >
             <!-- Search & Filters Header -->
             <div
@@ -1072,7 +1072,7 @@
 
           <!-- Right Pane: Test Details -->
           <div
-            class="lg:w-2/3 bg-surface-container-lowest border border-outline-variant rounded-xl flex flex-col overflow-hidden card-hover relative min-h-0"
+            class="lg:w-2/3 bg-surface-container-lowest border border-outline-variant rounded-xl flex flex-col overflow-hidden relative min-h-0"
             id="automatedDetailsContainer"
           >
             <!-- Empty State -->
@@ -1206,106 +1206,75 @@
         </div>
       </div>
 
-      <!-- ==================== PERFORMANCE TAB ==================== -->
+      <!-- ==================== PERFORMANCE TAB (v1) ==================== -->
       <div
         id="tab-perf"
         class="tab-panel hidden-panel hidden flex flex-col gap-gutter"
       >
-        <!-- Perf Stats -->
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-base">
+        <!-- 3 Core Metrics + Thresholds KPI Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-base">
+          <!-- Metric 1: Latencia p95 -->
           <div
-            class="bg-surface-container-lowest border border-outline-variant rounded-lg p-base text-center card-hover animate-fade-in-up delay-100"
+            class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter text-center card-hover animate-fade-in-up delay-100 relative overflow-hidden"
           >
-            <p class="font-label-caps text-outline text-[10px] uppercase">
-              Requests
+            <div class="flex items-center justify-between text-outline text-[10px] font-label-caps uppercase mb-1">
+              <span>P95 Latency</span>
+              <span class="text-tertiary">http_req_duration</span>
+            </div>
+            <p class="font-mono text-headline-md text-on-surface mt-2 font-bold tracking-tight">
+              __K6_P95_DISPLAY__
             </p>
-            <p
-              class="font-display text-headline-md text-on-surface mt-1 counter"
-              data-target="__K6_TOTAL_REQUESTS__"
-            >
-              0
-            </p>
+            <p class="text-[11px] font-body-md text-on-surface-variant mt-1">95th percentile response</p>
           </div>
+
+          <!-- Metric 2: Tasa de error -->
           <div
-            class="bg-surface-container-lowest border border-outline-variant rounded-lg p-base text-center card-hover animate-fade-in-up delay-200"
+            class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter text-center card-hover animate-fade-in-up delay-200 relative overflow-hidden"
           >
-            <p class="font-label-caps text-outline text-[10px] uppercase">
-              Success
+            <div class="flex items-center justify-between text-outline text-[10px] font-label-caps uppercase mb-1">
+              <span>Error Rate</span>
+              <span class="text-error">http_req_failed</span>
+            </div>
+            <p class="font-mono text-headline-md mt-2 font-bold tracking-tight __K6_ERROR_RATE_COLOR__">
+              __K6_ERROR_RATE_DISPLAY__
             </p>
-            <p class="font-display text-headline-md text-emerald-400 mt-1">
-              <span class="counter" data-target="__K6_SUCCESS_RATE__">0</span>%
-            </p>
+            <p class="text-[11px] font-body-md text-on-surface-variant mt-1">Failed requests ratio</p>
           </div>
+
+          <!-- Metric 3: Throughput -->
           <div
-            class="bg-surface-container-lowest border border-outline-variant rounded-lg p-base text-center card-hover animate-fade-in-up delay-300"
+            class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter text-center card-hover animate-fade-in-up delay-300 relative overflow-hidden"
           >
-            <p class="font-label-caps text-outline text-[10px] uppercase">
-              Failed
+            <div class="flex items-center justify-between text-outline text-[10px] font-label-caps uppercase mb-1">
+              <span>Throughput</span>
+              <span class="text-secondary">http_reqs</span>
+            </div>
+            <p class="font-mono text-headline-md text-on-surface mt-2 font-bold tracking-tight">
+              __K6_THROUGHPUT_DISPLAY__
             </p>
-            <p
-              class="font-display text-headline-md text-error mt-1 counter"
-              data-target="__K6_FAILED_REQUESTS__"
-            >
-              0
-            </p>
+            <p class="text-[11px] font-body-md text-on-surface-variant mt-1">Volume rate (req/s)</p>
           </div>
+
+          <!-- Metric 4: Thresholds Status -->
           <div
-            class="bg-surface-container-lowest border border-outline-variant rounded-lg p-base text-center card-hover animate-fade-in-up delay-400"
+            class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter text-center card-hover animate-fade-in-up delay-400 relative overflow-hidden"
           >
-            <p class="font-label-caps text-outline text-[10px] uppercase">
-              Avg
-            </p>
-            <p class="font-display text-headline-md text-primary mt-1">
-              <span
-                class="counter"
-                data-target="__K6_AVG_DURATION__"
-                data-is-duration="true"
-                >0</span
-              >
-            </p>
-          </div>
-          <div
-            class="bg-surface-container-lowest border border-outline-variant rounded-lg p-base text-center card-hover animate-fade-in-up delay-500"
-          >
-            <p class="font-label-caps text-outline text-[10px] uppercase">
-              P95
-            </p>
-            <p class="font-display text-headline-md text-tertiary mt-1">
-              <span
-                class="counter"
-                data-target="__K6_P95__"
-                data-is-duration="true"
-                >0</span
-              >
-            </p>
+            <div class="flex items-center justify-between text-outline text-[10px] font-label-caps uppercase mb-1">
+              <span>Thresholds</span>
+              <span class="text-primary font-mono">k6 rules</span>
+            </div>
+            <div class="mt-2 flex items-center justify-center">
+              __K6_THRESHOLDS_STATUS_BADGE__
+            </div>
+            <p class="text-[11px] font-body-md text-on-surface-variant mt-2 font-mono">__K6_THRESHOLDS_SUMMARY__</p>
           </div>
         </div>
 
-        <!-- Perf Chart + Table -->
-        <div
-          class="grid grid-cols-1 md:grid-cols-2 gap-gutter animate-fade-in-up delay-300"
-        >
-          <div
-            class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter card-hover"
-          >
-            <h3
-              class="font-label-caps text-on-surface-variant text-[11px] uppercase mb-base"
-            >
-              Response Times
-            </h3>
-            <div class="chart-wrap"><canvas id="perfChart"></canvas></div>
-          </div>
-          <div
-            class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter card-hover"
-          >
-            <h3
-              class="font-label-caps text-on-surface-variant text-[11px] uppercase mb-base"
-            >
-              Metrics
-            </h3>
-            <div class="space-y-base">__K6_METRICS_LIST__</div>
-          </div>
-        </div>
+        <!-- Ingestion Warnings Container (if any) -->
+        __K6_WARNINGS_CONTAINER__
+
+        <!-- Thresholds Detail Table (if any) -->
+        __K6_THRESHOLDS_TABLE__
       </div>
       <!-- Error Detail Modal -->
       <div

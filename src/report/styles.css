@@ -227,7 +227,6 @@
       }
 
       .card-hover {
-        will-change: transform, box-shadow;
         position: relative;
         transition:
           transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
@@ -236,7 +235,7 @@
           background-color 0.3s ease;
       }
       .card-hover:hover {
-        transform: translateY(-5px) scale(1.015);
+        transform: translateY(-4px);
         box-shadow:
           0 20px 45px -10px rgba(139, 92, 246, 0.25),
           0 10px 20px -5px rgba(0, 0, 0, 0.6);
