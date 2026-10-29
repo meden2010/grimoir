@@ -96,4 +96,111 @@ describe('Playwright Parser', () => {
     expect(result.stats.duration).toBe(0);
     expect(result.suites).toEqual([]);
   });
+
+  test('parsePlaywright should handle edge cases in extractTests (missing tests, empty results, legacy format, nested suites)', () => {
+    const mockJson = {
+      suites: [
+        {
+          title: 'Legacy Suite',
+          tests: [
+            { title: 'Legacy Test 1', status: 'passed', duration: 10 },
+            { title: 'Legacy Test 2', status: 'failed', duration: 20 },
+          ],
+        },
+        {
+          title: 'Suite with missing tests in spec',
+          specs: [
+            {
+              title: 'Spec without tests array',
+              // no tests field
+            }
+          ]
+        },
+        {
+          title: 'Suite with missing or empty results in test',
+          specs: [
+            {
+              title: 'Spec with empty results',
+              tests: [
+                { results: [] }, // empty results
+                { projectName: 'chromium' } // missing results completely
+              ]
+            }
+          ]
+        },
+        {
+          title: 'Nested Suites',
+          suites: [
+            {
+              title: 'Inner Suite',
+              suites: [
+                {
+                  title: 'Deep Inner Suite',
+                  tests: [
+                    { title: 'Deep Legacy Test', status: 'skipped', duration: 5 }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          title: 'Test with multiple results (overall status logic)',
+          specs: [
+            {
+              title: 'Retry test failing then passing',
+              tests: [
+                {
+                  projectName: 'firefox',
+                  results: [
+                    { status: 'failed', duration: 10 },
+                    { status: 'passed', duration: 15 } // lastResult is passed, but one failed earlier
+                  ]
+                }
+              ]
+            },
+            {
+              title: 'Retry test passing both times',
+              tests: [
+                {
+                  projectName: 'firefox',
+                  results: [
+                    { status: 'passed', duration: 10 },
+                    { status: 'passed', duration: 15 }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    };
+
+    const result = parsePlaywright(mockJson);
+
+    // Legacy tests: 2
+    // Missing specs tests: 0
+    // Empty results: 0
+    // Deep nested legacy tests: 1
+    // Multiple results: 2
+    // Total extracted tests: 5
+    expect(result.stats.total).toBe(5);
+
+    // Passed: Legacy Test 1, Retry test passing both times -> 2
+    expect(result.stats.passed).toBe(2);
+
+    // Failed: Legacy Test 2, Retry test failing then passing (since one result is failed, overallStatus becomes failed) -> 2
+    expect(result.stats.failed).toBe(2);
+
+    // Skipped: Deep Legacy Test -> 1
+    expect(result.stats.skipped).toBe(1);
+
+    // Duration sum:
+    // Legacy: 10 + 20
+    // Deep nested: 5
+    // Multiple results 1: 10 + 15 = 25
+    // Multiple results 2: 10 + 15 = 25
+    // Total duration: 10 + 20 + 5 + 25 + 25 = 85
+    expect(result.stats.duration).toBe(85);
+  });
 });
