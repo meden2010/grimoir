@@ -159,11 +159,22 @@ export function parsePlaywright(rawJson: Record<string, unknown>): PlaywrightRep
 
   const stats = {
     total: tests.length,
-    passed: tests.filter(t => t.status === 'passed').length,
-    failed: tests.filter(t => t.status === 'failed').length,
-    skipped: tests.filter(t => t.status === 'skipped').length,
-    duration: tests.reduce((acc, t) => acc + (t.duration || 0), 0),
+    passed: 0,
+    failed: 0,
+    skipped: 0,
+    duration: 0,
   };
+
+  // ⚡ Bolt Optimization:
+  // Merged 3 `.filter()` passes and 1 `.reduce()` pass into a single loop.
+  // Reduces CPU overhead and eliminates multiple intermediate array allocations.
+  // Expected savings: O(N) instead of O(4N) iterations over the tests array.
+  for (const t of tests) {
+    if (t.status === 'passed') stats.passed++;
+    else if (t.status === 'failed') stats.failed++;
+    else if (t.status === 'skipped') stats.skipped++;
+    stats.duration += (t.duration || 0);
+  }
 
   return {
     type: 'playwright',
