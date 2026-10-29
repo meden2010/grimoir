@@ -105,6 +105,23 @@ function extractTests(suites: PlaywrightSuite[]): PlaywrightTest[] {
           if (!test.results || test.results.length === 0) continue;
           
           const results = test.results;
+
+          // Normalize attachment bodies if they are serialized Buffers
+          for (const result of results) {
+            if (result.attachments) {
+              for (const att of result.attachments) {
+                if (
+                  att.body &&
+                  typeof att.body === 'object' &&
+                  (att.body as any).type === 'Buffer' &&
+                  Array.isArray((att.body as any).data)
+                ) {
+                  att.body = Buffer.from((att.body as any).data).toString('base64');
+                }
+              }
+            }
+          }
+
           const lastResult = results[results.length - 1];
           
           // Determine overall status

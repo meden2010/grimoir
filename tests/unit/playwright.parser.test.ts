@@ -203,4 +203,49 @@ describe('Playwright Parser', () => {
     // Total duration: 10 + 20 + 5 + 25 + 25 = 85
     expect(result.stats.duration).toBe(85);
   });
+
+  test('parsePlaywright should normalize serialized Buffer attachments to base64 strings', () => {
+    const mockJson = {
+      suites: [
+        {
+          title: 'Attachment Suite',
+          specs: [
+            {
+              title: 'Test with serialized buffer attachment',
+              tests: [
+                {
+                  projectName: 'chromium',
+                  results: [
+                    {
+                      status: 'passed',
+                      duration: 100,
+                      errors: [],
+                      attachments: [
+                        {
+                          name: 'screenshot.png',
+                          contentType: 'image/png',
+                          body: { type: 'Buffer', data: [137, 80, 78, 71, 13, 10, 26, 10] } // fake PNG signature
+                        },
+                        {
+                          name: 'log.txt',
+                          contentType: 'text/plain',
+                          body: 'Already a string'
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    };
+
+    const result = parsePlaywright(mockJson);
+    const attachments = result.suites[0].specs![0].tests![0].results![0].attachments!;
+
+    expect(attachments[0].body).toBe(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]).toString('base64'));
+    expect(attachments[1].body).toBe('Already a string');
+  });
 });
