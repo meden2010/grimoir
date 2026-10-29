@@ -76,23 +76,15 @@ const buildReport = (inputPath: string, outputPath: string, clean: boolean = fal
 
   const processAttachments = (suites: any[]) => {
     for (const suite of suites) {
-      if (suite.specs) {
-        for (const spec of suite.specs) {
-          if (spec.tests) {
-            for (const test of spec.tests) {
-              if (test.results) {
-                for (const result of test.results) {
-                  if (result.attachments) {
-                    for (const attachment of result.attachments) {
-                      if (attachment.path && existsSync(attachment.path)) {
-                        const fileName = `${Date.now()}-${basename(attachment.path)}`;
-                        const destPath = join(dataDir, fileName);
-                        copyFileSync(attachment.path, destPath);
-                        attachment.path = `./data/${fileName}`;
-                      }
-                    }
-                  }
-                }
+      for (const spec of suite.specs || []) {
+        for (const test of spec.tests || []) {
+          for (const result of test.results || []) {
+            for (const attachment of result.attachments || []) {
+              if (attachment.path && existsSync(attachment.path)) {
+                const fileName = `${Date.now()}-${basename(attachment.path)}`;
+                const destPath = join(dataDir, fileName);
+                copyFileSync(attachment.path, destPath);
+                attachment.path = `./data/${fileName}`;
               }
             }
           }
@@ -153,45 +145,41 @@ const buildReport = (inputPath: string, outputPath: string, clean: boolean = fal
   const recordTestHistory = (suites: any[], parentPath: string = '') => {
     for (const suite of suites) {
       const suitePath = parentPath ? `${parentPath} > ${suite.title}` : suite.title;
-      if (suite.specs) {
-        for (const spec of suite.specs) {
-          if (spec.tests) {
-            for (const test of spec.tests) {
-              if (test.results && test.results.length > 0) {
-                const results = test.results;
-                const lastResult = results[results.length - 1];
-                const isFailed = results.some((r: any) => {
-                  const s = (r.status || '').toLowerCase();
-                  return s === 'failed' || s === 'timedout' || s === 'interrupted';
-                });
-                const testStatus: 'passed' | 'failed' | 'skipped' = isFailed
-                  ? 'failed'
-                  : ((lastResult.status === 'passed' || lastResult.status === 'expected' || lastResult.status === 'flaky')
-                      ? 'passed'
-                      : 'skipped');
-                
-                const duration = results.reduce((acc: number, r: any) => acc + (r.duration || 0), 0);
-                const rawError = lastResult.error?.message || lastResult.errors?.[0]?.message || (typeof lastResult.error === 'string' ? lastResult.error : undefined);
-                const errorSnippet = truncateString(rawError, 200);
+      for (const spec of suite.specs || []) {
+        for (const test of spec.tests || []) {
+          if (!test.results || test.results.length === 0) continue;
 
-                const testKey = `${suitePath} > ${spec.title}`;
+          const results = test.results;
+          const lastResult = results[results.length - 1];
+          const isFailed = results.some((r: any) => {
+            const s = (r.status || '').toLowerCase();
+            return s === 'failed' || s === 'timedout' || s === 'interrupted';
+          });
+          const testStatus: 'passed' | 'failed' | 'skipped' = isFailed
+            ? 'failed'
+            : ((lastResult.status === 'passed' || lastResult.status === 'expected' || lastResult.status === 'flaky')
+                ? 'passed'
+                : 'skipped');
 
-                if (!historyData.tests[testKey]) {
-                  historyData.tests[testKey] = [];
-                }
+          const duration = results.reduce((acc: number, r: any) => acc + (r.duration || 0), 0);
+          const rawError = lastResult.error?.message || lastResult.errors?.[0]?.message || (typeof lastResult.error === 'string' ? lastResult.error : undefined);
+          const errorSnippet = truncateString(rawError, 200);
 
-                historyData.tests[testKey].push({
-                  date: currentRun.date,
-                  status: testStatus,
-                  duration,
-                  error: errorSnippet
-                });
+          const testKey = `${suitePath} > ${spec.title}`;
 
-                if (historyData.tests[testKey].length > 20) {
-                  historyData.tests[testKey] = historyData.tests[testKey].slice(historyData.tests[testKey].length - 20);
-                }
-              }
-            }
+          if (!historyData.tests[testKey]) {
+            historyData.tests[testKey] = [];
+          }
+
+          historyData.tests[testKey].push({
+            date: currentRun.date,
+            status: testStatus,
+            duration,
+            error: errorSnippet
+          });
+
+          if (historyData.tests[testKey].length > 20) {
+            historyData.tests[testKey] = historyData.tests[testKey].slice(historyData.tests[testKey].length - 20);
           }
         }
       }
