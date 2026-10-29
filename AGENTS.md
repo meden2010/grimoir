@@ -86,16 +86,16 @@ For AI agents supporting modular skills and plugin architectures:
   - [grimoir-report-designer](file:///Users/saul.sosa/Desktop/Proyectos/grimoir/.agents/skills/grimoir-report-designer/SKILL.md): Runbook for editing report HTML/CSS/JS and live previewing.
   - [grimoir-compat-verifier](file:///Users/saul.sosa/Desktop/Proyectos/grimoir/.agents/skills/grimoir-compat-verifier/SKILL.md): Static audit and real multi-version Node execution procedures.
 - **Specialized Roles (`.agents/plugins/grimoir-devkit/agents/`):**
-  - [lifecycle-orchestrator](file:///Users/saul.sosa/Desktop/Proyectos/grimoir/.agents/plugins/grimoir-devkit/agents/lifecycle-orchestrator/AGENT.md): Tech lead and end-to-end delivery pipeline orchestrator.
-  - [product-planner](file:///Users/saul.sosa/Desktop/Proyectos/grimoir/.agents/plugins/grimoir-devkit/agents/product-planner/AGENT.md): Feature specifications, acceptance criteria, and implementation planning.
-  - [architect](file:///Users/saul.sosa/Desktop/Proyectos/grimoir/.agents/plugins/grimoir-devkit/agents/architect/AGENT.md): System boundaries, data schemas, parser contracts, and ADRs.
-  - [backend-engineer](file:///Users/saul.sosa/Desktop/Proyectos/grimoir/.agents/plugins/grimoir-devkit/agents/backend-engineer/AGENT.md): CLI, parsers (Playwright/Vitest), bundler (`template.ts`), and core utilities.
-  - [frontend-engineer](file:///Users/saul.sosa/Desktop/Proyectos/grimoir/.agents/plugins/grimoir-devkit/agents/frontend-engineer/AGENT.md): Arcane Dark design, report templates, and Anime.js animations.
-  - [performance-engineer](file:///Users/saul.sosa/Desktop/Proyectos/grimoir/.agents/plugins/grimoir-devkit/agents/performance-engineer/AGENT.md): k6 parsers, performance metrics, and threshold visualization.
-  - [qa-engineer](file:///Users/saul.sosa/Desktop/Proyectos/grimoir/.agents/plugins/grimoir-devkit/agents/qa-engineer/AGENT.md): Test suites, edge-case fixtures, Node.js compatibility, and pre-PR quality gate.
-  - [secure-reviewer](file:///Users/saul.sosa/Desktop/Proyectos/grimoir/.agents/plugins/grimoir-devkit/agents/secure-reviewer/AGENT.md): Multi-axis code review, HTML escaping/XSS audit, and security hardening.
-  - [bug-triager](file:///Users/saul.sosa/Desktop/Proyectos/grimoir/.agents/plugins/grimoir-devkit/agents/bug-triager/AGENT.md): Systematic root cause isolation, failing regression tests, and minimal fixes.
-  - [release-engineer](file:///Users/saul.sosa/Desktop/Proyectos/grimoir/.agents/plugins/grimoir-devkit/agents/release-engineer/AGENT.md): Semantic versioning, changelog, GitHub Actions CI workflows, and release prep.
+  - [lifecycle-orchestrator](file:///Users/saul.sosa/Desktop/Proyectos/grimoir/.agents/plugins/grimoir-devkit/agents/lifecycle-orchestrator.md): Tech lead and end-to-end delivery pipeline orchestrator.
+  - [product-planner](file:///Users/saul.sosa/Desktop/Proyectos/grimoir/.agents/plugins/grimoir-devkit/agents/product-planner.md): Feature specifications, acceptance criteria, and implementation planning.
+  - [architect](file:///Users/saul.sosa/Desktop/Proyectos/grimoir/.agents/plugins/grimoir-devkit/agents/architect.md): System boundaries, data schemas, parser contracts, and ADRs.
+  - [backend-engineer](file:///Users/saul.sosa/Desktop/Proyectos/grimoir/.agents/plugins/grimoir-devkit/agents/backend-engineer.md): CLI, parsers (Playwright/Vitest), bundler (`template.ts`), and core utilities.
+  - [frontend-engineer](file:///Users/saul.sosa/Desktop/Proyectos/grimoir/.agents/plugins/grimoir-devkit/agents/frontend-engineer.md): Arcane Dark design, report templates, and Anime.js animations.
+  - [performance-engineer](file:///Users/saul.sosa/Desktop/Proyectos/grimoir/.agents/plugins/grimoir-devkit/agents/performance-engineer.md): k6 parsers, performance metrics, and threshold visualization.
+  - [qa-engineer](file:///Users/saul.sosa/Desktop/Proyectos/grimoir/.agents/plugins/grimoir-devkit/agents/qa-engineer.md): Test suites, edge-case fixtures, Node.js compatibility, and pre-PR quality gate.
+  - [secure-reviewer](file:///Users/saul.sosa/Desktop/Proyectos/grimoir/.agents/plugins/grimoir-devkit/agents/secure-reviewer.md): Multi-axis code review, HTML escaping/XSS audit, and security hardening.
+  - [bug-triager](file:///Users/saul.sosa/Desktop/Proyectos/grimoir/.agents/plugins/grimoir-devkit/agents/bug-triager.md): Systematic root cause isolation, failing regression tests, and minimal fixes.
+  - [release-engineer](file:///Users/saul.sosa/Desktop/Proyectos/grimoir/.agents/plugins/grimoir-devkit/agents/release-engineer.md): Semantic versioning, changelog, GitHub Actions CI workflows, and release prep.
 
 ---
 
