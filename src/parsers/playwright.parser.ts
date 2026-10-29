@@ -1,3 +1,10 @@
+export interface PlaywrightAttachment {
+  name: string;
+  contentType: string;
+  path?: string;
+  body?: string;
+}
+
 export interface PlaywrightErrorDetails {
   message?: string;
   stack?: string;
@@ -15,7 +22,7 @@ export interface PlaywrightResult {
   error?: PlaywrightErrorDetails;
   errors: PlaywrightErrorDetails[];
   steps?: any[];
-  attachments?: any[];
+  attachments?: PlaywrightAttachment[];
 }
 
 export interface PlaywrightJsonTest {
@@ -46,7 +53,7 @@ export interface PlaywrightTest {
   duration: number;
   error?: PlaywrightErrorDetails | string;
   steps?: PlaywrightTestStep[];
-  attachments?: any[];
+  attachments?: PlaywrightAttachment[];
   projectName?: string;
   results?: PlaywrightResult[];
 }
