@@ -32,7 +32,8 @@
     "lint": "tsc --noEmit",
     "audit:compat": "bun scripts/audit-node-compat.ts",
     "test:compat": "bun run build && bun scripts/generate-demo-data.ts && node dist/cli/index.js generate --input tests/fixtures/demo-output --output ./output --no-serve && node dist/cli/index.js clean --output ./output",
-    "dev:demo": "bun scripts/generate-demo-data.ts && bun src/cli/index.ts generate --input tests/fixtures/demo-output --output ./output"
+    "dev:demo": "bun scripts/generate-demo-data.ts && bun src/cli/index.ts generate --input tests/fixtures/demo-output --output ./output",
+    "gate": "bun test && bun run lint && bun run audit:compat && bun run test:compat && bun run build"
   },
   "repository": {
     "type": "git",

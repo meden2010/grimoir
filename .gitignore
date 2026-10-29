@@ -147,3 +147,9 @@ test-results/
 
 # IDE files
 .vscode/
+
+# Impeccable local artifacts & cache
+.impeccable/design.json
+.impeccable/critique/
+.impeccable/config.local.json
+
