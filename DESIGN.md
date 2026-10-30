@@ -56,6 +56,10 @@ typography:
     fontSize: "13px"
     fontWeight: 400
     lineHeight: 1.5
+  icon:
+    fontFamily: "Material Symbols Outlined"
+    fontSize: "24px"
+    fontWeight: 400
 rounded:
   sm: "6px"
   md: "8px"
