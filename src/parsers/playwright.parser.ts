@@ -21,7 +21,7 @@ export interface PlaywrightResult {
   duration: number;
   error?: PlaywrightErrorDetails;
   errors: PlaywrightErrorDetails[];
-  steps?: any[];
+  steps?: PlaywrightTestStep[];
   attachments?: PlaywrightAttachment[];
 }
 
@@ -40,7 +40,7 @@ export interface PlaywrightSpec {
 
 export interface PlaywrightTestStep {
   title: string;
-  category: string;
+  category?: string;
   duration: number;
   startTime?: string;
   error?: string;
