@@ -82,20 +82,20 @@ const buildReport = (inputPath: string, outputPath: string, clean: boolean = fal
 
   const processAttachments = (suites: any[]) => {
     for (const suite of suites) {
-      for (const spec of suite.specs || []) {
-        for (const test of spec.tests || []) {
-          for (const result of test.results || []) {
-            for (const attachment of result.attachments || []) {
-              if (attachment.path && existsSync(attachment.path)) {
-                const fileName = `${Date.now()}-${basename(attachment.path)}`;
-                const destPath = join(dataDir, fileName);
-                copyFileSync(attachment.path, destPath);
-                attachment.path = `./data/${fileName}`;
-              }
-            }
-          }
+      const attachments = (suite.specs || [])
+        .flatMap((spec: any) => spec.tests || [])
+        .flatMap((test: any) => test.results || [])
+        .flatMap((result: any) => result.attachments || []);
+
+      for (const attachment of attachments) {
+        if (attachment.path && existsSync(attachment.path)) {
+          const fileName = `${Date.now()}-${basename(attachment.path)}`;
+          const destPath = join(dataDir, fileName);
+          copyFileSync(attachment.path, destPath);
+          attachment.path = `./data/${fileName}`;
         }
       }
+
       if (suite.suites) {
         processAttachments(suite.suites);
       }
