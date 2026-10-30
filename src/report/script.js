@@ -796,6 +796,7 @@
       // Counter animation for KPI numbers using anime.js spring with manual fallback
       (function () {
         const counters = document.querySelectorAll(".counter");
+        const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
         function animateCounterManual(counter, target, isFloat, isDuration) {
           const duration = 1200;
@@ -827,7 +828,14 @@
           const isFloat = target % 1 !== 0;
           const isDuration = counter.hasAttribute("data-is-duration");
 
-          if (typeof anime !== "undefined") {
+          if (reducedMotion) {
+            // Respect prefers-reduced-motion by skipping the counter animation
+            if (isDuration) {
+              counter.textContent = formatDuration(target);
+            } else {
+              counter.textContent = isFloat ? target.toFixed(2) : Math.round(target).toString();
+            }
+          } else if (typeof anime !== "undefined") {
             const animObj = { value: 0 };
             anime({
               targets: animObj,
@@ -862,6 +870,8 @@
         );
         if (Number.isNaN(arcLength) || Number.isNaN(targetOffset)) return;
 
+        const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
         function animateGaugeManual() {
           const duration = 1200;
           const startTime = performance.now();
@@ -878,7 +888,9 @@
           requestAnimationFrame(update);
         }
 
-        if (typeof anime !== "undefined") {
+        if (reducedMotion) {
+          gaugeArc.setAttribute("stroke-dashoffset", targetOffset);
+        } else if (typeof anime !== "undefined") {
           anime({
             targets: gaugeArc,
             strokeDashoffset: [arcLength, targetOffset],

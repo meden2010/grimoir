@@ -443,3 +443,21 @@
       .allure-tab-content {
         transition: opacity 0.3s ease, transform 0.3s ease;
       }
+
+/* Accessibility: Respect prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Keyboard Accessibility */
+*:focus-visible {
+  outline: 2px solid #8A4FFF;
+  outline-offset: 2px;
+}
