@@ -7,6 +7,7 @@ import { createServer, IncomingMessage, ServerResponse } from 'http';
 import { parsePlaywright, PlaywrightReport } from '../parsers/playwright.parser';
 import { parseK6, K6Report } from '../parsers/k6.parser';
 import { generateHTML } from '../report/template';
+import { truncateString } from '../utils/string.util';
 
 export interface HistoricalRun {
   date: string;
@@ -171,7 +172,7 @@ const buildReport = (inputPath: string, outputPath: string, clean: boolean = fal
                 
                 const duration = results.reduce((acc: number, r: any) => acc + (r.duration || 0), 0);
                 const rawError = lastResult.error?.message || lastResult.errors?.[0]?.message || (typeof lastResult.error === 'string' ? lastResult.error : undefined);
-                const errorSnippet = rawError ? (rawError.length > 200 ? rawError.slice(0, 200) + '...' : rawError) : undefined;
+                const errorSnippet = truncateString(rawError, 200);
 
                 const testKey = `${suitePath} > ${spec.title}`;
 

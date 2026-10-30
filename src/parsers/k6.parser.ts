@@ -1,3 +1,9 @@
+export const K6_METRIC_KEYS = {
+  HTTP_REQ_DURATION: 'http_req_duration',
+  HTTP_REQ_FAILED: 'http_req_failed',
+  HTTP_REQS: 'http_reqs',
+} as const;
+
 export interface K6ThresholdStatus {
   name: string;
   metric: string;
@@ -110,13 +116,13 @@ export function parseK6(rawJson: Record<string, unknown>): K6Report {
   let minLatencyMs: number | null = null;
   let maxLatencyMs: number | null = null;
   let p90LatencyMs: number | null = null;
-  const durationValues = extractValues(metricsObj['http_req_duration']);
+  const durationValues = extractValues(metricsObj[K6_METRIC_KEYS.HTTP_REQ_DURATION]);
   if (durationValues) {
     const p95 = durationValues['p(95)'] ?? durationValues['p95'];
     if (typeof p95 === 'number' && !Number.isNaN(p95)) {
       p95LatencyMs = Number(p95.toFixed(2));
     } else {
-      warnings.push("Missing metric: http_req_duration.values['p(95)']");
+      warnings.push(`Missing metric: ${K6_METRIC_KEYS.HTTP_REQ_DURATION}.values['p(95)']`);
     }
     const avg = durationValues['avg'];
     if (typeof avg === 'number' && !Number.isNaN(avg)) avgLatencyMs = Number(avg.toFixed(2));
@@ -127,7 +133,7 @@ export function parseK6(rawJson: Record<string, unknown>): K6Report {
     const p90 = durationValues['p(90)'] ?? durationValues['p90'];
     if (typeof p90 === 'number' && !Number.isNaN(p90)) p90LatencyMs = Number(p90.toFixed(2));
   } else {
-    warnings.push('Missing metric: http_req_duration (p95 latency is unavailable)');
+    warnings.push(`Missing metric: ${K6_METRIC_KEYS.HTTP_REQ_DURATION} (p95 latency is unavailable)`);
   }
 
   // Virtual Users (vus)
@@ -143,30 +149,30 @@ export function parseK6(rawJson: Record<string, unknown>): K6Report {
 
   // 2. Tasa de error (http_req_failed) en %
   let errorRatePercent: number | null = null;
-  const failedValues = extractValues(metricsObj['http_req_failed']);
+  const failedValues = extractValues(metricsObj[K6_METRIC_KEYS.HTTP_REQ_FAILED]);
   if (failedValues) {
     const rate = failedValues['rate'];
     if (typeof rate === 'number' && !Number.isNaN(rate)) {
       errorRatePercent = Number((rate * 100).toFixed(2));
     } else {
-      warnings.push('Missing metric: http_req_failed.values.rate');
+      warnings.push(`Missing metric: ${K6_METRIC_KEYS.HTTP_REQ_FAILED}.values.rate`);
     }
   } else {
-    warnings.push('Missing metric: http_req_failed (error rate is unavailable)');
+    warnings.push(`Missing metric: ${K6_METRIC_KEYS.HTTP_REQ_FAILED} (error rate is unavailable)`);
   }
 
   // 3. Throughput (http_reqs) en req/s
   let throughputRps: number | null = null;
-  const reqsValues = extractValues(metricsObj['http_reqs']);
+  const reqsValues = extractValues(metricsObj[K6_METRIC_KEYS.HTTP_REQS]);
   if (reqsValues) {
     const rate = reqsValues['rate'];
     if (typeof rate === 'number' && !Number.isNaN(rate)) {
       throughputRps = Number(rate.toFixed(2));
     } else {
-      warnings.push('Missing metric: http_reqs.values.rate');
+      warnings.push(`Missing metric: ${K6_METRIC_KEYS.HTTP_REQS}.values.rate`);
     }
   } else {
-    warnings.push('Missing metric: http_reqs (throughput req/s is unavailable)');
+    warnings.push(`Missing metric: ${K6_METRIC_KEYS.HTTP_REQS} (throughput req/s is unavailable)`);
   }
 
   // Thresholds extraction
