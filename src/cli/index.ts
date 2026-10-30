@@ -195,7 +195,9 @@ const buildReport = async (inputPath: string, outputPath: string, clean: boolean
   await fsPromises.writeFile(historyPath, JSON.stringify(historyData, null, 2), 'utf-8');
 
   const html: string = generateHTML(playwrightReport, k6Report, historyData);
-  await fsPromises.writeFile(join(outputPath, 'index.html'), html, 'utf-8');
+  const tempHtmlPath = join(outputPath, `index.html.tmp.${Date.now()}`);
+  await fsPromises.writeFile(tempHtmlPath, html, 'utf-8');
+  await fsPromises.rename(tempHtmlPath, join(outputPath, 'index.html'));
 
   console.log(`\n✅ Playwright Results:`);
   console.log(`   Total:   ${playwrightReport.stats.total}`);
@@ -266,17 +268,31 @@ program
           console.log(`   Press Ctrl+C to stop\n`);
 
           let isBuilding = false;
-          watch(options.input, async (_event: string, filename: string | null): Promise<void> => {
-            if (filename && filename.endsWith('.json') && !isBuilding) {
-              isBuilding = true;
-              try {
-                console.log(`\n🔄 Change detected in ${filename} — regenerating...`);
-                await buildReport(options.input, options.output);
-              } catch {
-                console.log(`   ⚠️  Error regenerating, waiting for next change...`);
-              } finally {
-                isBuilding = false;
+          let pendingRebuild = false;
+
+          const triggerRebuild = async (): Promise<void> => {
+            if (isBuilding) {
+              pendingRebuild = true;
+              return;
+            }
+            isBuilding = true;
+            try {
+              await buildReport(options.input, options.output);
+            } catch {
+              console.log(`   ⚠️  Error regenerating, waiting for next change...`);
+            } finally {
+              isBuilding = false;
+              if (pendingRebuild) {
+                pendingRebuild = false;
+                await triggerRebuild();
               }
+            }
+          };
+
+          watch(options.input, async (_event: string, filename: string | null): Promise<void> => {
+            if (filename && filename.endsWith('.json')) {
+              console.log(`\n🔄 Change detected in ${filename} — regenerating...`);
+              await triggerRebuild();
             }
           });
         } else {
@@ -323,5 +339,8 @@ program
   });
 
 if (require.main === module) {
-  program.parse();
+  program.parseAsync().catch((err: unknown) => {
+    console.error('Execution error:', err);
+    process.exit(1);
+  });
 }
