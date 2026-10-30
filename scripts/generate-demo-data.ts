@@ -24,6 +24,45 @@ const mockPlaywright = {
                   status: 'passed',
                   duration: 1240,
                   retry: 0,
+                  steps: [
+                    {
+                      title: 'Before Hooks',
+                      duration: 220,
+                      steps: [
+                        { title: 'fixture: browser', duration: 120 },
+                        { title: 'fixture: context', duration: 40 },
+                        { title: 'fixture: page', duration: 60 },
+                      ],
+                    },
+                    {
+                      title: 'page.goto(https://grimoir.dev/login)',
+                      duration: 410,
+                    },
+                    {
+                      title: 'page.fill(input#acolyte-email, "novice@grimoir.dev")',
+                      duration: 110,
+                    },
+                    {
+                      title: 'page.fill(input#arcane-token, "••••••••••••")',
+                      duration: 90,
+                    },
+                    {
+                      title: 'page.click(button#invoke-ritual)',
+                      duration: 210,
+                    },
+                    {
+                      title: 'expect(locator(".sanctuary-dashboard")).toBeVisible()',
+                      duration: 120,
+                    },
+                    {
+                      title: 'After Hooks',
+                      duration: 80,
+                      steps: [
+                        { title: 'fixture: page', duration: 30 },
+                        { title: 'fixture: context', duration: 30 },
+                      ],
+                    },
+                  ],
                 },
               ],
             },
@@ -40,6 +79,41 @@ const mockPlaywright = {
                   status: 'passed',
                   duration: 890,
                   retry: 0,
+                  steps: [
+                    {
+                      title: 'Before Hooks',
+                      duration: 160,
+                      steps: [
+                        { title: 'fixture: browser', duration: 80 },
+                        { title: 'fixture: context', duration: 30 },
+                        { title: 'fixture: page', duration: 50 },
+                      ],
+                    },
+                    {
+                      title: 'page.goto(https://grimoir.dev/vault)',
+                      duration: 320,
+                    },
+                    {
+                      title: 'page.fill(input#glyph-sigil, "corrupt-rune-x")',
+                      duration: 80,
+                    },
+                    {
+                      title: 'page.click(button#unlock-seal)',
+                      duration: 140,
+                    },
+                    {
+                      title: 'expect(locator(".corrupted-warning")).toHaveText("Forbidden glyph rejected")',
+                      duration: 110,
+                    },
+                    {
+                      title: 'After Hooks',
+                      duration: 80,
+                      steps: [
+                        { title: 'fixture: page', duration: 30 },
+                        { title: 'fixture: context', duration: 30 },
+                      ],
+                    },
+                  ],
                 },
               ],
             },
@@ -65,6 +139,42 @@ const mockPlaywright = {
                     },
                     snippet: '  86 |   await page.waitForTimeout(5000);\n  87 |   const state = await getSessionState(token);\n> 88 |   expect(state).toBe("revoked");\n     |                 ^',
                   },
+                  steps: [
+                    {
+                      title: 'Before Hooks',
+                      duration: 190,
+                      steps: [
+                        { title: 'fixture: browser', duration: 90 },
+                        { title: 'fixture: context', duration: 40 },
+                        { title: 'fixture: page', duration: 60 },
+                      ],
+                    },
+                    {
+                      title: 'page.goto(https://grimoir.dev/session-vault)',
+                      duration: 410,
+                    },
+                    {
+                      title: 'await page.waitForTimeout(5000)',
+                      duration: 2500,
+                    },
+                    {
+                      title: 'const state = await getSessionState(token)',
+                      duration: 280,
+                    },
+                    {
+                      title: 'expect(state).toBe("revoked")',
+                      duration: 680,
+                      error: 'Error: expect(received).toBe(expected)\n\nExpected: "revoked"\nReceived: "active"',
+                    },
+                    {
+                      title: 'After Hooks',
+                      duration: 150,
+                      steps: [
+                        { title: 'fixture: page', duration: 60 },
+                        { title: 'fixture: context', duration: 50 },
+                      ],
+                    },
+                  ],
                 },
               ],
             },
@@ -82,11 +192,60 @@ const mockPlaywright = {
                   duration: 2100,
                   retry: 0,
                   error: { message: 'Timeout 2000ms exceeded while waiting for selector' },
+                  steps: [
+                    {
+                      title: 'Before Hooks',
+                      duration: 150,
+                      steps: [
+                        { title: 'fixture: browser', duration: 70 },
+                        { title: 'fixture: page', duration: 60 },
+                      ],
+                    },
+                    {
+                      title: 'page.goto(https://grimoir.dev/leyline)',
+                      duration: 420,
+                    },
+                    {
+                      title: 'page.waitForResponse("**/stream")',
+                      duration: 1450,
+                      error: 'Timeout 2000ms exceeded while waiting for selector',
+                    },
+                    {
+                      title: 'After Hooks',
+                      duration: 80,
+                    },
+                  ],
                 },
                 {
                   status: 'passed',
                   duration: 1540,
                   retry: 1,
+                  steps: [
+                    {
+                      title: 'Before Hooks',
+                      duration: 140,
+                      steps: [
+                        { title: 'fixture: browser', duration: 60 },
+                        { title: 'fixture: page', duration: 50 },
+                      ],
+                    },
+                    {
+                      title: 'page.goto(https://grimoir.dev/leyline)',
+                      duration: 380,
+                    },
+                    {
+                      title: 'page.waitForResponse("**/stream")',
+                      duration: 410,
+                    },
+                    {
+                      title: 'expect(page.locator(".rune-stream")).toBeVisible()',
+                      duration: 520,
+                    },
+                    {
+                      title: 'After Hooks',
+                      duration: 90,
+                    },
+                  ],
                 },
               ],
             },
@@ -109,6 +268,32 @@ const mockPlaywright = {
                   status: 'passed',
                   duration: 1420,
                   retry: 0,
+                  steps: [
+                    {
+                      title: 'Before Hooks',
+                      duration: 180,
+                      steps: [
+                        { title: 'fixture: browser', duration: 90 },
+                        { title: 'fixture: page', duration: 60 },
+                      ],
+                    },
+                    {
+                      title: 'page.goto(https://grimoir.dev/spellbook)',
+                      duration: 450,
+                    },
+                    {
+                      title: 'page.click(button[data-school="sorcery"])',
+                      duration: 210,
+                    },
+                    {
+                      title: 'expect(page.locator(".spell-card")).toHaveCount(12)',
+                      duration: 480,
+                    },
+                    {
+                      title: 'After Hooks',
+                      duration: 100,
+                    },
+                  ],
                 },
               ],
             },
@@ -125,6 +310,32 @@ const mockPlaywright = {
                   status: 'passed',
                   duration: 1980,
                   retry: 0,
+                  steps: [
+                    {
+                      title: 'Before Hooks',
+                      duration: 170,
+                      steps: [
+                        { title: 'fixture: browser', duration: 80 },
+                        { title: 'fixture: page', duration: 60 },
+                      ],
+                    },
+                    {
+                      title: 'page.goto(https://grimoir.dev/scrolls)',
+                      duration: 520,
+                    },
+                    {
+                      title: 'page.evaluate(() => document.fonts.ready)',
+                      duration: 350,
+                    },
+                    {
+                      title: 'expect(page.locator("canvas#magicDust")).toBeVisible()',
+                      duration: 820,
+                    },
+                    {
+                      title: 'After Hooks',
+                      duration: 120,
+                    },
+                  ],
                 },
               ],
             },

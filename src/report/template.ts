@@ -1,4 +1,4 @@
-import { readFileSync } from 'fs';
+import { readFileSync, existsSync } from 'fs';
 import { join } from 'path';
 import { PlaywrightReport, PlaywrightTest, PlaywrightSuite, normalizeStatus } from '../parsers/playwright.parser';
 import { K6Report } from '../parsers/k6.parser';
@@ -27,15 +27,36 @@ const loadTemplate = (): string => {
     // Optional JS missing
   }
 
+  try {
+    let logoPath = join(__dirname, 'assets', 'grimoir-logo.png');
+    if (!existsSync(logoPath)) {
+      logoPath = join(__dirname, '..', '..', 'src', 'report', 'assets', 'grimoir-logo.png');
+    }
+    if (existsSync(logoPath)) {
+      const logoBase64 = readFileSync(logoPath).toString('base64');
+      template = template.replace('__GRIMOIR_LOGO_SRC__', `data:image/png;base64,${logoBase64}`);
+    } else {
+      template = template.replace('__GRIMOIR_LOGO_SRC__', '');
+    }
+  } catch (e) {
+    template = template.replace('__GRIMOIR_LOGO_SRC__', '');
+  }
+
   return template;
 };
 
+// ⚡ Bolt Optimization:
+// Merged N regex replacements into a single pass over the HTML template string.
+// Reduces time complexity from O(N * L) to O(L) where N is number of placeholders and L is template length.
 const replacePlaceholders = (template: string, placeholders: Placeholders): string => {
-  return Object.entries(placeholders).reduce((result, [key, value]) => {
+  const map: Record<string, string> = {};
+  for (const [key, value] of Object.entries(placeholders)) {
     const snakeKey = key.replace(/([A-Z])/g, '_$1').toUpperCase();
-    const pattern = new RegExp(`__${snakeKey}__`, 'g');
-    return result.replace(pattern, String(value));
-  }, template);
+    map[`__${snakeKey}__`] = String(value);
+  }
+  return template.replace(/__[A-Z0-9_]+__/g, (match) => {
+    return map[match] !== undefined ? map[match] : match;
+  });
 };
 
 const formatDuration = (ms: number | null | undefined): string => {
@@ -127,7 +148,7 @@ const generateFailureRows = (failures: Failure[]): string => {
 
   return failures.map(({ type, suite, test, error, location, snippet, duration }, index) => {
     const typeColor = type === 'Automated'
-      ? 'bg-primary/10 text-primary border-primary/30'
+      ? 'bg-primary/15 text-primary-container border-primary/35'
       : 'bg-secondary/10 text-secondary border-secondary/30';
     const dotColor = type === 'Automated' ? 'bg-primary' : 'bg-secondary';
     const durationText = duration > 0 ? formatDuration(duration) : '—';
@@ -156,21 +177,22 @@ const generateFailureRows = (failures: Failure[]): string => {
     }
 
     return `
-              <tr class="hover:bg-error/5 transition-colors group failure-row relative" data-index="${index}">
+              <tr class="hover:bg-error/5 transition-colors duration-500 group failure-row relative" data-index="${index}">
                 <td class="p-gutter pl-4 relative">
-                  <div class="absolute left-0 top-0 bottom-0 w-1 bg-error"></div>
-                  <span class="inline-flex items-center gap-1 px-2 py-0.5 ${typeColor} text-[10px] font-bold rounded-full border">
-                    <span class="w-1 h-1 ${dotColor} rounded-full"></span> ${typeLabel}
+                  <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 ${typeColor} text-xs font-bold rounded-full border">
+                    <span class="w-1.5 h-1.5 ${dotColor} rounded-full" aria-hidden="true"></span> ${typeLabel}
                   </span>
                 </td>
-                <td class="p-gutter font-body-md text-on-surface font-semibold text-sm">${test}</td>
+                <td class="p-gutter font-body-md text-on-surface font-semibold text-sm">${escapeHtml(test)}</td>
                 <td class="p-gutter max-w-[320px]">
-                  <div class="flex items-center gap-2 min-w-0">
-                    <span class="font-mono text-sm text-error/80 truncate">${firstLineError}</span>
-                    <button type="button" class="view-error-btn material-symbols-outlined text-outline hover:text-primary transition-colors text-sm shrink-0" data-error-html="${escapeHtml(fullErrorHtml)}" aria-label="View full error">open_in_full</button>
+                  <div class="flex items-center justify-between gap-2 min-w-0">
+                    <span class="font-mono text-sm text-error/90 truncate hidden md:inline">${escapeHtml(firstLineError)}</span>
+                    <button type="button" class="view-error-btn inline-flex items-center justify-center w-8 h-8 text-on-surface-variant hover:text-primary active:scale-[0.96] transition-[color,border-color,background-color,transform] duration-500 rounded-lg border border-outline-variant/40 hover:border-primary/50 bg-surface-container shrink-0" data-error-html="${escapeHtml(fullErrorHtml)}" aria-label="View full error for ${escapeHtml(test)}" title="View full diagnostic">
+                      <span class="material-symbols-outlined text-base" aria-hidden="true">open_in_full</span>
+                    </button>
                   </div>
                 </td>
-                <td class="p-gutter font-mono text-sm text-on-surface-variant text-right">${durationText}</td>
+                <td class="p-gutter font-mono text-sm text-on-surface-variant text-right tabular-nums">${durationText}</td>
               </tr>`;
   }).join('');
 };
@@ -256,22 +278,22 @@ const generateAutomatedTestRows = (playwright: PlaywrightReport): string => {
     
     switch (row.status) {
       case 'passed':
-        statusBadge = '<span class="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-950/40 text-emerald-400 text-[10px] font-bold rounded-full border border-emerald-500/30"><span class="w-1 h-1 bg-emerald-400 rounded-full"></span>Passed</span>';
+        statusBadge = '<span class="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-950/40 text-emerald-400 text-xs font-bold rounded-full border border-emerald-500/30"><span class="w-1.5 h-1.5 bg-emerald-400 rounded-full"></span>Passed</span>';
         break;
       case 'failed':
-        statusBadge = '<span class="inline-flex items-center gap-1 px-2 py-0.5 bg-error/10 text-error text-[10px] font-bold rounded-full border border-error/30"><span class="w-1 h-1 bg-error rounded-full"></span>Failed</span>';
+        statusBadge = '<span class="inline-flex items-center gap-1 px-2 py-0.5 bg-error/10 text-error text-xs font-bold rounded-full border border-error/30"><span class="w-1.5 h-1.5 bg-error rounded-full"></span>Failed</span>';
         statusClass = 'hover:bg-error/5';
         break;
       case 'flaky':
-        statusBadge = '<span class="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-950/40 text-amber-400 text-[10px] font-bold rounded-full border border-amber-500/30"><span class="w-1 h-1 bg-amber-400 rounded-full"></span>Flaky</span>';
+        statusBadge = '<span class="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-950/40 text-amber-400 text-xs font-bold rounded-full border border-amber-500/30"><span class="w-1.5 h-1.5 bg-amber-400 rounded-full"></span>Flaky</span>';
         break;
       case 'skipped':
-        statusBadge = '<span class="inline-flex items-center gap-1 px-2 py-0.5 bg-surface-container text-outline text-[10px] font-bold rounded-full border border-outline-variant"><span class="w-1 h-1 bg-outline rounded-full"></span>Skipped</span>';
+        statusBadge = '<span class="inline-flex items-center gap-1 px-2 py-0.5 bg-surface-container text-outline text-xs font-bold rounded-full border border-outline-variant"><span class="w-1.5 h-1.5 bg-outline rounded-full"></span>Skipped</span>';
         break;
     }
 
     return `
-      <tr class="border-b border-outline-variant/30 hover:bg-surface-container/30 transition-colors ${statusClass}">
+      <tr class="border-b border-outline-variant/30 hover:bg-surface-container/30 transition-colors duration-500 ${statusClass}">
         <td class="p-gutter font-mono text-xs text-outline max-w-[200px] truncate" title="${escapeHtml(row.suite)}">${escapeHtml(row.suite)}</td>
         <td class="p-gutter font-body-md text-sm text-on-surface font-medium">${escapeHtml(row.test)}</td>
         <td class="p-gutter">${statusBadge}</td>
@@ -282,19 +304,22 @@ const generateAutomatedTestRows = (playwright: PlaywrightReport): string => {
 
 const generateCoverageChips = (isAutomatedActive: boolean, isPerformanceActive: boolean): string => {
   const types = [
-    { label: 'Automated', active: isAutomatedActive, dot: 'bg-primary' },
-    { label: 'Performance', active: isPerformanceActive, dot: 'bg-secondary' },
-    { label: 'API', active: false, dot: 'bg-outline' },
-    { label: 'Unit', active: false, dot: 'bg-outline' },
+    { label: 'Automated', active: isAutomatedActive },
+    { label: 'Performance', active: isPerformanceActive },
+    { label: 'API', active: false },
+    { label: 'Unit', active: false },
   ];
 
   return types.map(type => {
-    const dotClass = type.active ? type.dot : 'bg-outline-variant';
-    const textClass = type.active ? 'text-on-surface' : 'text-outline';
+    const ledClass = type.active ? 'led-on-emerald' : 'led-off';
+    const chipBorder = type.active
+      ? 'border-primary/40 bg-surface-container/90 shadow-[inset_0_1px_0_0_rgba(229,197,131,0.18)]'
+      : 'border-outline-variant/25 bg-surface-container-low/50 opacity-75';
+    const textClass = type.active ? 'text-on-surface font-semibold' : 'text-outline font-medium';
     return `
-            <div class="flex items-center gap-1.5 px-2.5 py-1.5 bg-surface-container rounded-md border border-outline-variant/30">
-              <span class="w-2 h-2 rounded-full ${dotClass}" aria-hidden="true"></span>
-              <span class="font-body-md ${textClass} text-xs font-medium">${type.label}</span>
+            <div class="inline-flex items-center gap-2.5 px-3 py-1.5 rounded-lg border transition-colors duration-500 ${chipBorder}">
+              <span class="led-indicator ${ledClass}" aria-hidden="true"></span>
+              <span class="font-body-md ${textClass} text-xs tracking-wide">${type.label}</span>
             </div>`;
   }).join('');
 };
@@ -393,10 +418,16 @@ export const generateHTML = (playwright: PlaywrightReport, k6: K6Report | null, 
     totalSkipped,
   ]);
 
-  const k6DurationMs: number = k6Stats.duration * 1000;
+  // k6Stats.duration is documented and normalized in milliseconds by k6 parser
+  const k6DurationMs: number = Math.round(k6Stats.duration || 0);
+
+  // Convert durations to seconds with 1 decimal place for clear, proportional chart visualization
+  const playwrightDurationSec: number = Number((playwrightDurationMs / 1000).toFixed(1));
+  const k6DurationSec: number = Number((k6DurationMs / 1000).toFixed(1));
+
   const durationTypes = [
-    { label: 'Automated', value: playwrightDurationMs, color: '#8B5CF6' },
-    { label: 'Performance', value: k6DurationMs, color: '#FBBF24' },
+    { label: 'Automated', value: playwrightDurationSec, color: '#8B5CF6' },
+    { label: 'Performance', value: k6DurationSec, color: '#FBBF24' },
     { label: 'API', value: 0, color: '#7A7580' },
     { label: 'Unit', value: 0, color: '#3b3742' },
   ].filter(type => type.value > 0);
@@ -417,6 +448,28 @@ export const generateHTML = (playwright: PlaywrightReport, k6: K6Report | null, 
   const k6P95Display = p95Val !== null && p95Val !== undefined
     ? `${p95Val} ms`
     : 'N/A';
+
+  const avgVal = k6?.metrics?.avgLatencyMs;
+  const k6AvgDisplay = avgVal !== null && avgVal !== undefined ? `${avgVal} ms` : 'N/A';
+  const minVal = k6?.metrics?.minLatencyMs;
+  const k6MinDisplay = minVal !== null && minVal !== undefined ? `${minVal} ms` : 'N/A';
+  const maxVal = k6?.metrics?.maxLatencyMs;
+  const k6MaxDisplay = maxVal !== null && maxVal !== undefined ? `${maxVal} ms` : 'N/A';
+  const p90Val = k6?.metrics?.p90LatencyMs;
+  const k6P90Display = p90Val !== null && p90Val !== undefined ? `${p90Val} ms` : 'N/A';
+
+  const vusVal = k6?.metrics?.vus ?? null;
+  const vusMaxVal = k6?.metrics?.vusMax ?? null;
+  const k6VusDisplay = vusVal !== null && vusVal !== undefined ? `${vusVal}` : 'N/A';
+  const k6VusMaxDisplay = vusMaxVal !== null && vusMaxVal !== undefined ? `Peak: ${vusMaxVal} VUs` : 'N/A';
+
+  const k6DataArray = JSON.stringify([
+    avgVal ?? null,
+    minVal ?? null,
+    maxVal ?? null,
+    p90Val ?? null,
+    p95Val ?? null,
+  ]);
 
   const errRateVal = k6?.metrics?.errorRatePercent;
   const k6ErrorRateDisplay = errRateVal !== null && errRateVal !== undefined
@@ -454,9 +507,9 @@ export const generateHTML = (playwright: PlaywrightReport, k6: K6Report | null, 
   if (k6 && k6.warnings && k6.warnings.length > 0) {
     const items = k6.warnings.map(w => `<li class="text-xs font-mono text-amber-200/90 py-0.5">${escapeHtml(w)}</li>`).join('');
     k6WarningsContainer = `
-      <div class="bg-amber-950/20 border border-amber-500/40 rounded-xl p-gutter mt-base">
+      <div class="bg-amber-950/20 border border-amber-500/40 rounded-xl p-gutter mt-base" role="alert">
         <div class="flex items-center gap-2 text-amber-400 font-label-caps text-xs uppercase mb-2">
-          <span class="material-symbols-outlined text-sm">warning</span>
+          <span class="material-symbols-outlined text-sm" aria-hidden="true">warning</span>
           <span>Performance Ingestion Warnings (${k6.warnings.length})</span>
         </div>
         <ul class="list-disc list-inside space-y-1">
@@ -469,30 +522,67 @@ export const generateHTML = (playwright: PlaywrightReport, k6: K6Report | null, 
   if (k6 && k6.thresholds && k6.thresholds.items.length > 0) {
     const rows = k6.thresholds.items.map(t => {
       const badge = t.pass
-        ? `<span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-950/40 text-emerald-400 border border-emerald-500/30">PASS</span>`
-        : `<span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-error/10 text-error border border-error/30">FAIL</span>`;
+        ? `<span class="px-2 py-0.5 rounded text-xs font-mono font-bold bg-emerald-950/40 text-emerald-400 border border-emerald-500/30">PASS</span>`
+        : `<span class="px-2 py-0.5 rounded text-xs font-mono font-bold bg-error/10 text-error border border-error/30">FAIL</span>`;
       return `
-        <tr class="border-b border-outline-variant/30 hover:bg-surface-container/30 transition-colors">
+        <tr class="border-b border-outline-variant/30 hover:bg-surface-container/30 transition-colors perf-metric-row">
           <td class="p-gutter font-mono text-xs text-on-surface">${escapeHtml(t.name)}</td>
-          <td class="p-gutter font-mono text-xs text-outline">${escapeHtml(t.metric)}</td>
+          <td class="p-gutter font-mono text-xs text-on-surface-variant">${escapeHtml(t.metric)}</td>
           <td class="p-gutter text-right">${badge}</td>
         </tr>`;
     }).join('');
 
     k6ThresholdsTable = `
       <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter mt-base">
-        <h3 class="font-label-caps text-on-surface-variant text-[11px] uppercase mb-base">Threshold Rule Details</h3>
-        <div class="overflow-x-auto">
+        <h3 class="font-display text-base font-semibold text-on-surface tracking-wide uppercase mb-base">Threshold Rule Details</h3>
+        <div class="overflow-x-auto" tabindex="0" role="region" aria-label="k6 Threshold Rules">
           <table class="w-full text-left border-collapse">
             <thead>
-              <tr class="bg-surface-container-low/50 border-b border-outline-variant text-[10px] font-label-caps uppercase text-on-surface-variant">
-                <th class="p-gutter">Rule / Threshold</th>
-                <th class="p-gutter">Metric Target</th>
-                <th class="p-gutter text-right">Status</th>
+              <tr class="bg-surface-container-low/50 border-b border-outline-variant text-xs font-label-caps uppercase text-on-surface-variant">
+                <th scope="col" class="p-gutter">Rule / Threshold</th>
+                <th scope="col" class="p-gutter">Metric Target</th>
+                <th scope="col" class="p-gutter text-right">Status</th>
               </tr>
             </thead>
             <tbody>
               ${rows}
+            </tbody>
+          </table>
+        </div>
+      </div>`;
+  }
+
+  let k6ScenariosTable = '';
+  if (k6 && k6.scenarios && Object.keys(k6.scenarios).length > 0) {
+    const sRows = Object.entries(k6.scenarios).map(([name, sc]) => {
+      const isPassed = sc.status === 'passed';
+      const badge = isPassed
+        ? `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-emerald-950/40 text-emerald-400 border border-emerald-500/30"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400" aria-hidden="true"></span>PASSED</span>`
+        : `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-error/10 text-error border border-error/30"><span class="w-1.5 h-1.5 rounded-full bg-error" aria-hidden="true"></span>FAILED</span>`;
+      return `
+        <tr class="border-b border-outline-variant/30 hover:bg-surface-container/30 transition-colors perf-metric-row">
+          <td class="p-gutter font-mono text-xs text-on-surface font-semibold">${escapeHtml(name)}</td>
+          <td class="p-gutter font-mono text-xs text-on-surface-variant">${sc.vus} VUs</td>
+          <td class="p-gutter font-mono text-xs text-on-surface-variant">${sc.iterations.toLocaleString()} iterations</td>
+          <td class="p-gutter text-right">${badge}</td>
+        </tr>`;
+    }).join('');
+
+    k6ScenariosTable = `
+      <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter mt-base">
+        <h3 class="font-display text-base font-semibold text-on-surface tracking-wide uppercase mb-base">Scenario Runs</h3>
+        <div class="overflow-x-auto" tabindex="0" role="region" aria-label="k6 Scenario Runs">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-surface-container-low/50 border-b border-outline-variant text-xs font-label-caps uppercase text-on-surface-variant">
+                <th scope="col" class="p-gutter">Scenario</th>
+                <th scope="col" class="p-gutter">Virtual Users</th>
+                <th scope="col" class="p-gutter">Iterations</th>
+                <th scope="col" class="p-gutter text-right">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${sRows}
             </tbody>
           </table>
         </div>
@@ -538,6 +628,13 @@ export const generateHTML = (playwright: PlaywrightReport, k6: K6Report | null, 
     failedRequests,
     requestSuccessRate,
     k6P95Display,
+    k6AvgDisplay,
+    k6MinDisplay,
+    k6MaxDisplay,
+    k6P90Display,
+    k6VusDisplay,
+    k6VusMaxDisplay,
+    k6DataArray,
     k6ErrorRateDisplay,
     k6ErrorRateColor,
     k6ThroughputDisplay,
@@ -545,6 +642,7 @@ export const generateHTML = (playwright: PlaywrightReport, k6: K6Report | null, 
     k6ThresholdsSummary,
     k6WarningsContainer,
     k6ThresholdsTable,
+    k6ScenariosTable,
     overallStatusArray,
     durationLabels,
     durationData,

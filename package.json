@@ -23,7 +23,7 @@
   "scripts": {
     "prepare": "bun run build",
     "build": "tsc",
-    "postbuild": "copyfiles -u 1 src/**/*.html src/**/*.css src/**/*.js dist/",
+    "postbuild": "copyfiles -u 1 src/**/*.html src/**/*.css src/**/*.js src/**/*.png src/**/*.ico dist/",
     "dev": "bun src/cli/index.ts",
     "dev:watch": "bun --watch src/cli/index.ts",
     "test": "bun test",
