@@ -3,11 +3,38 @@ import { join } from 'path';
 import { PlaywrightReport, PlaywrightTest, PlaywrightSuite, normalizeStatus } from '../parsers/playwright.parser';
 import { K6Report } from '../parsers/k6.parser';
 
-interface Placeholders {
-  [key: string]: string | number;
+
+class SafeString {
+  constructor(public value: string) {}
+  toString() { return this.value; }
 }
 
+const safe = (val: string) => new SafeString(val);
+
+const escapeHtml = (unsafe: string): string => {
+  return unsafe
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+};
+
+interface Placeholders {
+  [key: string]: string | number | SafeString;
+}
+
+// ⚡ Bolt Optimization:
+// Caching the loaded template in memory after the first read.
+// This eliminates repetitive file I/O operations (reading template.html, styles.css, script.js, and the logo)
+// for each report generation, saving significant computational time and memory allocations on hot paths.
+let cachedTemplate: string | null = null;
+
 const loadTemplate = (): string => {
+  if (cachedTemplate !== null) {
+    return cachedTemplate;
+  }
+
   const templatePath = join(__dirname, 'template.html');
   let template = readFileSync(templatePath, 'utf-8');
   
@@ -42,6 +69,7 @@ const loadTemplate = (): string => {
     template = template.replace('__GRIMOIR_LOGO_SRC__', '');
   }
 
+  cachedTemplate = template;
   return template;
 };
 
@@ -52,7 +80,11 @@ const replacePlaceholders = (template: string, placeholders: Placeholders): stri
   const map: Record<string, string> = {};
   for (const [key, value] of Object.entries(placeholders)) {
     const snakeKey = key.replace(/([A-Z])/g, '_$1').toUpperCase();
-    map[`__${snakeKey}__`] = String(value);
+    if (value instanceof SafeString) {
+      map[`__${snakeKey}__`] = value.toString();
+    } else {
+      map[`__${snakeKey}__`] = typeof value === 'string' ? escapeHtml(value) : String(value);
+    }
   }
   return template.replace(/__[A-Z0-9_]+__/g, (match) => {
     return map[match] !== undefined ? map[match] : match;
@@ -195,15 +227,6 @@ const generateFailureRows = (failures: Failure[]): string => {
                 <td class="p-gutter font-mono text-sm text-on-surface-variant text-right tabular-nums">${durationText}</td>
               </tr>`;
   }).join('');
-};
-
-const escapeHtml = (unsafe: string): string => {
-  return unsafe
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
 };
 
 const stripAnsi = (str: string): string => {
@@ -634,28 +657,28 @@ export const generateHTML = (playwright: PlaywrightReport, k6: K6Report | null, 
     k6P90Display,
     k6VusDisplay,
     k6VusMaxDisplay,
-    k6DataArray,
+    k6DataArray: safe(k6DataArray),
     k6ErrorRateDisplay,
     k6ErrorRateColor,
     k6ThroughputDisplay,
-    k6ThresholdsStatusBadge,
+    k6ThresholdsStatusBadge: safe(k6ThresholdsStatusBadge),
     k6ThresholdsSummary,
-    k6WarningsContainer,
-    k6ThresholdsTable,
-    k6ScenariosTable,
-    overallStatusArray,
-    durationLabels,
-    durationData,
-    durationColors,
-    playwrightDataArray,
-    failureRows: generateFailureRows(buildFailures(playwright, k6)),
-    automatedTestRows: generateAutomatedTestRows(playwright),
-    playwrightSuitesJson: JSON.stringify(playwright.suites).replace(/</g, '\\u003c'),
-    coverageChips: generateCoverageChips(isAutomatedActive, isPerformanceActive),
+    k6WarningsContainer: safe(k6WarningsContainer),
+    k6ThresholdsTable: safe(k6ThresholdsTable),
+    k6ScenariosTable: safe(k6ScenariosTable),
+    overallStatusArray: safe(overallStatusArray),
+    durationLabels: safe(durationLabels),
+    durationData: safe(durationData),
+    durationColors: safe(durationColors),
+    playwrightDataArray: safe(playwrightDataArray),
+    failureRows: safe(generateFailureRows(buildFailures(playwright, k6))),
+    automatedTestRows: safe(generateAutomatedTestRows(playwright)),
+    playwrightSuitesJson: safe(JSON.stringify(playwright.suites).replace(/</g, '\\u003c')),
+    coverageChips: safe(generateCoverageChips(isAutomatedActive, isPerformanceActive)),
     automatedCasesVisible: isAutomatedActive ? '' : 'hidden',
     performanceRequestsVisible: isPerformanceActive ? '' : 'hidden',
     automatedTabVisible: isAutomatedActive ? '' : 'hidden',
     performanceTabVisible: isPerformanceActive ? '' : 'hidden',
-    historyData: JSON.stringify(history).replace(/</g, '\\u003c'),
+    historyData: safe(JSON.stringify(history).replace(/</g, '\\u003c')),
   });
 };

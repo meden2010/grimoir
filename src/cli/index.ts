@@ -4,7 +4,7 @@ import { Command } from 'commander';
 import { readFileSync, writeFileSync, mkdirSync, watch, existsSync, copyFileSync, rmSync, promises as fsPromises } from 'fs';
 import { join, basename } from 'path';
 import { createServer, IncomingMessage, ServerResponse } from 'http';
-import { parsePlaywright, PlaywrightReport } from '../parsers/playwright.parser';
+import { parsePlaywright, PlaywrightReport, PlaywrightSuite, PlaywrightResult } from '../parsers/playwright.parser';
 import { parseK6, K6Report } from '../parsers/k6.parser';
 import { generateHTML } from '../report/template';
 import { truncateString } from '../utils/string.util';
@@ -17,6 +17,12 @@ export interface HistoricalRun {
   skipped: number;
   duration: number;
 }
+
+const resolveTestStatus = (isFailed: boolean, lastResultStatus: string): 'passed' | 'failed' | 'skipped' => {
+  if (isFailed) return 'failed';
+  if (['passed', 'expected', 'flaky'].includes(lastResultStatus)) return 'passed';
+  return 'skipped';
+};
 
 export interface TestHistoryItem {
   date: string;
@@ -74,28 +80,28 @@ const buildReport = async (inputPath: string, outputPath: string, clean: boolean
     mkdirSync(dataDir, { recursive: true });
   }
 
-  const processAttachments = (suites: any[]) => {
+  const processAttachments = (suites: PlaywrightSuite[]) => {
     for (const suite of suites) {
-      for (const spec of suite.specs || []) {
-        for (const test of spec.tests || []) {
-          for (const result of test.results || []) {
-            for (const attachment of result.attachments || []) {
-              if (attachment.path && existsSync(attachment.path)) {
-                const fileName = `${Date.now()}-${basename(attachment.path)}`;
-                const destPath = join(dataDir, fileName);
-                copyFileSync(attachment.path, destPath);
-                attachment.path = `./data/${fileName}`;
-              }
-            }
-          }
+      const attachments = (suite.specs || [])
+        .flatMap((spec: any) => spec.tests || [])
+        .flatMap((test: any) => test.results || [])
+        .flatMap((result: any) => result.attachments || []);
+
+      for (const attachment of attachments) {
+        if (attachment.path && existsSync(attachment.path)) {
+          const fileName = `${Date.now()}-${basename(attachment.path)}`;
+          const destPath = join(dataDir, fileName);
+          copyFileSync(attachment.path, destPath);
+          attachment.path = `./data/${fileName}`;
         }
       }
+
       if (suite.suites) {
         processAttachments(suite.suites);
       }
     }
   };
-  processAttachments((playwrightRaw['suites'] as any[]) || []);
+  processAttachments((playwrightRaw['suites'] as PlaywrightSuite[]) || []);
 
   const playwrightReport: PlaywrightReport = parsePlaywright(playwrightRaw);
 
@@ -143,7 +149,7 @@ const buildReport = async (inputPath: string, outputPath: string, clean: boolean
   }
 
   // Record individual test histories
-  const recordTestHistory = (suites: any[], parentPath: string = '') => {
+  const recordTestHistory = (suites: PlaywrightSuite[], parentPath: string = '') => {
     for (const suite of suites) {
       const suitePath = parentPath ? `${parentPath} > ${suite.title}` : suite.title;
       for (const spec of suite.specs || []) {
@@ -152,14 +158,10 @@ const buildReport = async (inputPath: string, outputPath: string, clean: boolean
 
           const results = test.results;
           const lastResult = results[results.length - 1];
-          const isFailed = results.some((r: any) => ['failed', 'timedout', 'interrupted'].includes((r.status || '').toLowerCase()));
-          const testStatus: 'passed' | 'failed' | 'skipped' = isFailed
-            ? 'failed'
-            : (['passed', 'expected', 'flaky'].includes(lastResult.status)
-                ? 'passed'
-                : 'skipped');
+          const isFailed = results.some((r: PlaywrightResult) => ['failed', 'timedout', 'interrupted'].includes((r.status || '').toLowerCase()));
+          const testStatus = resolveTestStatus(isFailed, lastResult.status);
 
-          const duration = results.reduce((acc: number, r: any) => acc + (r.duration || 0), 0);
+          const duration = results.reduce((acc: number, r: PlaywrightResult) => acc + (r.duration || 0), 0);
           const rawError = lastResult.error?.message || lastResult.errors?.[0]?.message || (typeof lastResult.error === 'string' ? lastResult.error : undefined);
           const errorSnippet = truncateString(rawError, 200);
 
@@ -187,7 +189,7 @@ const buildReport = async (inputPath: string, outputPath: string, clean: boolean
     }
   };
 
-  recordTestHistory((playwrightRaw['suites'] as any[]) || []);
+  recordTestHistory((playwrightRaw['suites'] as PlaywrightSuite[]) || []);
 
   // ⚡ Bolt: Use async writing to avoid blocking event loop when saving large history
   await fsPromises.writeFile(historyPath, JSON.stringify(historyData, null, 2), 'utf-8');
