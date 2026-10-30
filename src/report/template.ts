@@ -24,7 +24,17 @@ interface Placeholders {
   [key: string]: string | number | SafeString;
 }
 
+// ⚡ Bolt Optimization:
+// Caching the loaded template in memory after the first read.
+// This eliminates repetitive file I/O operations (reading template.html, styles.css, script.js, and the logo)
+// for each report generation, saving significant computational time and memory allocations on hot paths.
+let cachedTemplate: string | null = null;
+
 const loadTemplate = (): string => {
+  if (cachedTemplate !== null) {
+    return cachedTemplate;
+  }
+
   const templatePath = join(__dirname, 'template.html');
   let template = readFileSync(templatePath, 'utf-8');
   
@@ -59,6 +69,7 @@ const loadTemplate = (): string => {
     template = template.replace('__GRIMOIR_LOGO_SRC__', '');
   }
 
+  cachedTemplate = template;
   return template;
 };
 
