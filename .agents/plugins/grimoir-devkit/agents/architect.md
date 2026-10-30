@@ -37,5 +37,4 @@ You are the **Software Architect & System Modeler** for Grimoir. Your responsibi
   - `archify` & `diagram-design` (Creating architectural, sequence, and data-flow diagrams).
 
 ## Primary Commands
-- Run typecheck & lint: `bun run lint`
-- Inspect compatibility audit: `bun run audit:compat`
+- Verification and audit checks (`bun run lint`, `bun run audit:compat`) are delegated to `qa-engineer`.

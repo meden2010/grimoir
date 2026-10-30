@@ -34,5 +34,4 @@ You are the **Product & Requirements Planner** for Grimoir. Your responsibility 
   - `qa-test-planner`, `risk-based-testing`, `shift-left-testing` (Defining testable acceptance criteria).
 
 ## Primary Commands
-- Inspect current CLI commands: `bun src/cli/index.ts --help`
-- Validate project state: `git status`
+- CLI inspection (`bun src/cli/index.ts --help`) and repository state checks (`git status`) are delegated to execution-authorized agents.

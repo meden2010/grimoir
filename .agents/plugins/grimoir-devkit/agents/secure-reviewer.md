@@ -38,6 +38,4 @@ You are the **Code Quality, Security & Hardening Reviewer** for Grimoir. Your re
   - `verification-before-completion` (Pre-merge verification checklist).
 
 ## Primary Commands
-- Inspect Git diff: `git diff`
-- Run static audit: `bun run audit:compat`
-- Verify lint and types: `bun run lint`
+- Execution checks (`git diff`, `bun run audit:compat`, `bun run lint`) are delegated to execution-authorized agents like `qa-engineer`.
