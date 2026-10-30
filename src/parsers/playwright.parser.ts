@@ -79,10 +79,10 @@ export interface PlaywrightReport {
 }
 
 export function normalizeStatus(status: string): PlaywrightTest['status'] {
-  if (status === 'passed' || status === 'expected') {
+  if (['passed', 'expected'].includes(status)) {
     return 'passed';
   }
-  if (status === 'failed' || status === 'timedOut' || status === 'interrupted' || status === 'unexpected' || status === 'flaky') {
+  if (['failed', 'timedOut', 'interrupted', 'unexpected', 'flaky'].includes(status)) {
     return 'failed';
   }
   return 'skipped';
@@ -125,10 +125,9 @@ function extractTests(suites: PlaywrightSuite[]): PlaywrightTest[] {
           const lastResult = results[results.length - 1];
           
           // Determine overall status
-          const overallStatus = results.some(r => {
-            const s = r.status;
-            return s === 'failed' || s === 'timedOut' || s === 'interrupted';
-          }) ? 'failed' : normalizeStatus(lastResult.status);
+          const overallStatus = results.some(r => ['failed', 'timedOut', 'interrupted'].includes(r.status))
+            ? 'failed'
+            : normalizeStatus(lastResult.status);
 
           tests.push({
             title: spec.title,
