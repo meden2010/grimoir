@@ -412,10 +412,8 @@ export const generateHTML = (playwright: PlaywrightReport, k6: K6Report | null, 
     totalSkipped,
   ]);
 
-  // Normalize k6 duration to milliseconds (k6 summary duration may already be in ms or seconds)
-  const k6DurationMs: number = k6Stats.duration > 300
-    ? Math.round(k6Stats.duration)
-    : Math.round(k6Stats.duration * 1000);
+  // k6Stats.duration is documented and normalized in milliseconds by k6 parser
+  const k6DurationMs: number = Math.round(k6Stats.duration || 0);
 
   // Convert durations to seconds with 1 decimal place for clear, proportional chart visualization
   const playwrightDurationSec: number = Number((playwrightDurationMs / 1000).toFixed(1));
@@ -454,20 +452,17 @@ export const generateHTML = (playwright: PlaywrightReport, k6: K6Report | null, 
   const p90Val = k6?.metrics?.p90LatencyMs;
   const k6P90Display = p90Val !== null && p90Val !== undefined ? `${p90Val} ms` : 'N/A';
 
-  const scenarioVusMax = k6?.scenarios
-    ? Object.values(k6.scenarios).reduce((acc, s) => Math.max(acc, s?.vus || 0), 0)
-    : 0;
-  const vusVal = k6?.metrics?.vus ?? (scenarioVusMax > 0 ? scenarioVusMax : null);
-  const vusMaxVal = k6?.metrics?.vusMax ?? (scenarioVusMax > 0 ? scenarioVusMax : null);
+  const vusVal = k6?.metrics?.vus ?? null;
+  const vusMaxVal = k6?.metrics?.vusMax ?? null;
   const k6VusDisplay = vusVal !== null && vusVal !== undefined ? `${vusVal}` : 'N/A';
-  const k6VusMaxDisplay = vusMaxVal !== null && vusMaxVal !== undefined ? `Peak: ${vusMaxVal} VUs` : 'Virtual Users';
+  const k6VusMaxDisplay = vusMaxVal !== null && vusMaxVal !== undefined ? `Peak: ${vusMaxVal} VUs` : 'N/A';
 
   const k6DataArray = JSON.stringify([
-    avgVal ?? 0,
-    minVal ?? 0,
-    maxVal ?? 0,
-    p90Val ?? 0,
-    p95Val ?? 0,
+    avgVal ?? null,
+    minVal ?? null,
+    maxVal ?? null,
+    p90Val ?? null,
+    p95Val ?? null,
   ]);
 
   const errRateVal = k6?.metrics?.errorRatePercent;

@@ -3,15 +3,12 @@ name: secure-reviewer
 description: "You are the **Code Quality, Security & Hardening Reviewer** for Grimoir. Your responsibility is to audit pull requests, diffs, and proposed changes across multiple axes: security vulnerabilities (XSS, path traversal, injection), code quality, architectural consistency, and compliance with Grimoir's invariant rules. "
 tools:
   - view_file
-  - write_to_file
-  - replace_file_content
   - grep_search
   - find_by_name
   - list_dir
-  - run_command
 mainAgent: true
 subagent: true
-commandExecutionPolicy: auto
+commandExecutionPolicy: off
 ---
 
 # Secure Reviewer — Grimoir Agent

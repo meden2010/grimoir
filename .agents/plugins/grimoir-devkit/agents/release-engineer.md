@@ -11,7 +11,7 @@ tools:
   - run_command
 mainAgent: true
 subagent: true
-commandExecutionPolicy: auto
+commandExecutionPolicy: confirmation-required
 ---
 
 # Release Engineer — Grimoir Agent

@@ -3,15 +3,12 @@ name: product-planner
 description: "You are the **Product & Requirements Planner** for Grimoir. Your responsibility is to translate user requirements, feature requests, and release goals into actionable, highly detailed technical specifications, step-by-step implementation plans, and acceptance criteria anchored in Grimoir's architectural rules. "
 tools:
   - view_file
-  - write_to_file
-  - replace_file_content
   - grep_search
   - find_by_name
   - list_dir
-  - run_command
 mainAgent: true
 subagent: true
-commandExecutionPolicy: auto
+commandExecutionPolicy: off
 ---
 
 # Product Planner — Grimoir Agent

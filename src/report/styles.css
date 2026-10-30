@@ -145,9 +145,9 @@
         border-left: 1px solid rgba(138, 79, 255, 0.1);
       }
       ::-webkit-scrollbar-thumb {
-        background: linear-gradient(180deg, #261F38 0%, #32284A 100%);
+        background: linear-gradient(180deg, #42365C 0%, #524273 100%);
         border-radius: 9999px;
-        border: 1px solid rgba(138, 79, 255, 0.32);
+        border: 1px solid rgba(179, 136, 255, 0.45);
       }
       ::-webkit-scrollbar-thumb:hover,
       ::-webkit-scrollbar-thumb:active {
@@ -441,6 +441,11 @@
         line-height: 1.4;
         letter-spacing: 0.01em;
         color: #F0ECE1;
+      }
+      @media (pointer: coarse) {
+        .grimoir-search-input {
+          min-height: 44px;
+        }
       }
       .grimoir-search-input::placeholder {
         color: #B0B7C3;
