@@ -40,7 +40,7 @@ export interface PlaywrightSpec {
 
 export interface PlaywrightTestStep {
   title: string;
-  category: string;
+  category?: string;
   duration: number;
   startTime?: string;
   error?: string;
