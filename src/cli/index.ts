@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { Command } from 'commander';
-import { readFileSync, writeFileSync, mkdirSync, watch, existsSync, copyFileSync, rmSync } from 'fs';
+import { readFileSync, writeFileSync, mkdirSync, watch, existsSync, copyFileSync, rmSync, promises as fsPromises } from 'fs';
 import { join, basename } from 'path';
 import { createServer, IncomingMessage, ServerResponse } from 'http';
 import { parsePlaywright, PlaywrightReport } from '../parsers/playwright.parser';
@@ -61,7 +61,7 @@ export const cleanOutput = (outputPath: string): void => {
   }
 };
 
-const buildReport = (inputPath: string, outputPath: string, clean: boolean = false): string => {
+const buildReport = async (inputPath: string, outputPath: string, clean: boolean = false): Promise<string> => {
   if (clean) {
     cleanOutput(outputPath);
   }
@@ -113,7 +113,8 @@ const buildReport = (inputPath: string, outputPath: string, clean: boolean = fal
   
   if (existsSync(historyPath)) {
     try {
-      const parsed = JSON.parse(readFileSync(historyPath, 'utf-8'));
+      // ⚡ Bolt: Use async reading to avoid blocking event loop on large histories
+      const parsed = JSON.parse(await fsPromises.readFile(historyPath, 'utf-8'));
       if (Array.isArray(parsed)) {
         historyData = { runs: parsed, tests: {} };
       } else if (parsed && typeof parsed === 'object') {
@@ -188,10 +189,11 @@ const buildReport = (inputPath: string, outputPath: string, clean: boolean = fal
 
   recordTestHistory((playwrightRaw['suites'] as any[]) || []);
 
-  writeFileSync(historyPath, JSON.stringify(historyData, null, 2), 'utf-8');
+  // ⚡ Bolt: Use async writing to avoid blocking event loop when saving large history
+  await fsPromises.writeFile(historyPath, JSON.stringify(historyData, null, 2), 'utf-8');
 
   const html: string = generateHTML(playwrightReport, k6Report, historyData);
-  writeFileSync(join(outputPath, 'index.html'), html, 'utf-8');
+  await fsPromises.writeFile(join(outputPath, 'index.html'), html, 'utf-8');
 
   console.log(`\n✅ Playwright Results:`);
   console.log(`   Total:   ${playwrightReport.stats.total}`);
@@ -228,10 +230,10 @@ program
   .option('-c, --clean', 'Clean previous execution history before generating report')
   .option('--no-serve', 'Do not start the report server')
   .option('-w, --watch', 'Watch input folder and regenerate on changes')
-  .action((options: GenerateOptions): void => {
+  .action(async (options: GenerateOptions): Promise<void> => {
     console.log(`📖 Grimoir - Generating report...`);
 
-    buildReport(options.input, options.output, !!options.clean);
+    await buildReport(options.input, options.output, !!options.clean);
 
     console.log(`\n🔮 Report saved at: ${join(options.output, 'index.html')}`);
 
@@ -261,13 +263,17 @@ program
           console.log(`   👀 Watching: ${options.input}/`);
           console.log(`   Press Ctrl+C to stop\n`);
 
-          watch(options.input, (_event: string, filename: string | null): void => {
-            if (filename && filename.endsWith('.json')) {
+          let isBuilding = false;
+          watch(options.input, async (_event: string, filename: string | null): Promise<void> => {
+            if (filename && filename.endsWith('.json') && !isBuilding) {
+              isBuilding = true;
               try {
                 console.log(`\n🔄 Change detected in ${filename} — regenerating...`);
-                buildReport(options.input, options.output);
+                await buildReport(options.input, options.output);
               } catch {
                 console.log(`   ⚠️  Error regenerating, waiting for next change...`);
+              } finally {
+                isBuilding = false;
               }
             }
           });
