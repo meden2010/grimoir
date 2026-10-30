@@ -4,7 +4,7 @@ import { Command } from 'commander';
 import { readFileSync, writeFileSync, mkdirSync, watch, existsSync, copyFileSync, rmSync } from 'fs';
 import { join, basename } from 'path';
 import { createServer, IncomingMessage, ServerResponse } from 'http';
-import { parsePlaywright, PlaywrightReport } from '../parsers/playwright.parser';
+import { parsePlaywright, PlaywrightReport, PlaywrightSuite, PlaywrightResult } from '../parsers/playwright.parser';
 import { parseK6, K6Report } from '../parsers/k6.parser';
 import { generateHTML } from '../report/template';
 import { truncateString } from '../utils/string.util';
@@ -74,7 +74,7 @@ const buildReport = (inputPath: string, outputPath: string, clean: boolean = fal
     mkdirSync(dataDir, { recursive: true });
   }
 
-  const processAttachments = (suites: any[]) => {
+  const processAttachments = (suites: PlaywrightSuite[]) => {
     for (const suite of suites) {
       for (const spec of suite.specs || []) {
         for (const test of spec.tests || []) {
@@ -95,7 +95,7 @@ const buildReport = (inputPath: string, outputPath: string, clean: boolean = fal
       }
     }
   };
-  processAttachments((playwrightRaw['suites'] as any[]) || []);
+  processAttachments((playwrightRaw['suites'] as PlaywrightSuite[]) || []);
 
   const playwrightReport: PlaywrightReport = parsePlaywright(playwrightRaw);
 
@@ -142,7 +142,7 @@ const buildReport = (inputPath: string, outputPath: string, clean: boolean = fal
   }
 
   // Record individual test histories
-  const recordTestHistory = (suites: any[], parentPath: string = '') => {
+  const recordTestHistory = (suites: PlaywrightSuite[], parentPath: string = '') => {
     for (const suite of suites) {
       const suitePath = parentPath ? `${parentPath} > ${suite.title}` : suite.title;
       for (const spec of suite.specs || []) {
@@ -151,14 +151,14 @@ const buildReport = (inputPath: string, outputPath: string, clean: boolean = fal
 
           const results = test.results;
           const lastResult = results[results.length - 1];
-          const isFailed = results.some((r: any) => ['failed', 'timedout', 'interrupted'].includes((r.status || '').toLowerCase()));
+          const isFailed = results.some((r: PlaywrightResult) => ['failed', 'timedout', 'interrupted'].includes((r.status || '').toLowerCase()));
           const testStatus: 'passed' | 'failed' | 'skipped' = isFailed
             ? 'failed'
             : (['passed', 'expected', 'flaky'].includes(lastResult.status)
                 ? 'passed'
                 : 'skipped');
 
-          const duration = results.reduce((acc: number, r: any) => acc + (r.duration || 0), 0);
+          const duration = results.reduce((acc: number, r: PlaywrightResult) => acc + (r.duration || 0), 0);
           const rawError = lastResult.error?.message || lastResult.errors?.[0]?.message || (typeof lastResult.error === 'string' ? lastResult.error : undefined);
           const errorSnippet = truncateString(rawError, 200);
 
@@ -186,7 +186,7 @@ const buildReport = (inputPath: string, outputPath: string, clean: boolean = fal
     }
   };
 
-  recordTestHistory((playwrightRaw['suites'] as any[]) || []);
+  recordTestHistory((playwrightRaw['suites'] as PlaywrightSuite[]) || []);
 
   writeFileSync(historyPath, JSON.stringify(historyData, null, 2), 'utf-8');
 
