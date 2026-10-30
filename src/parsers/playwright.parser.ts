@@ -21,7 +21,7 @@ export interface PlaywrightResult {
   duration: number;
   error?: PlaywrightErrorDetails;
   errors: PlaywrightErrorDetails[];
-  steps?: any[];
+  steps?: PlaywrightTestStep[];
   attachments?: PlaywrightAttachment[];
 }
 
