@@ -3,14 +3,24 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Grimoir — Test Report</title>
-    <link rel="icon" type="image/png" sizes="16x16" href="./assets/favicon-16x16.png" />
-    <link rel="icon" type="image/png" sizes="32x32" href="./assets/favicon-32x32.png" />
+    <title>Grimoir — Unified Test Report</title>
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="./assets/favicon-16x16.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="./assets/favicon-32x32"
+    />
     <link rel="alternate icon" href="./assets/favicon.ico" />
     <link rel="apple-touch-icon" href="./assets/apple-touch-icon.png" />
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:wght@500;600;700&family=Cinzel:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&family=Cinzel:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
     <link
@@ -25,39 +35,40 @@
         theme: {
           extend: {
             colors: {
-              surface: "#15121b",
-              "surface-dim": "#15121b",
-              "surface-container-lowest": "#0f0d15",
-              "surface-container-low": "#1d1a23",
-              "surface-container": "#211e27",
-              "surface-container-high": "#2c2832",
-              "surface-bright": "#3b3742",
-              "on-surface": "#e7e0ed",
-              "on-surface-variant": "#cbc3d7",
-              primary: "#8B5CF6",
+              surface: "#0B0C10",
+              "surface-dim": "#0B0C10",
+              "surface-container-lowest": "#13171F",
+              "surface-container-low": "#171C26",
+              "surface-container": "#1F2833",
+              "surface-container-high": "#263140",
+              "surface-container-highest": "#2E3B4E",
+              "surface-bright": "#37465B",
+              "on-surface": "#F0ECE1",
+              "on-surface-variant": "#C4C9D4",
+              primary: "#8A4FFF",
               "on-primary": "#ffffff",
-              "primary-container": "#8B5CF6",
-              "on-primary-container": "#ffffff",
-              secondary: "#FBBF24",
-              "on-secondary": "#1a1a1a",
-              "secondary-container": "#FBBF24",
-              tertiary: "#B06B00",
-              error: "#ef4444",
+              "primary-container": "#B388FF",
+              "on-primary-container": "#0B0C10",
+              secondary: "#C5A059",
+              "on-secondary": "#0B0C10",
+              "secondary-container": "#E5C583",
+              tertiary: "#45A29E",
+              error: "#FF6E6E",
               "error-container": "#7f1d1d",
               "on-error": "#ffffff",
               "on-error-container": "#fecaca",
-              outline: "#7A7580",
-              "outline-variant": "#3d3a40",
-              background: "#15121b",
-              "on-background": "#e7e0ed",
+              outline: "#A3ACB9",
+              "outline-variant": "rgba(138, 79, 255, 0.25)",
+              background: "#0B0C10",
+              "on-background": "#F0ECE1",
             },
             borderRadius: {
               DEFAULT: "0.5rem",
               lg: "0.75rem",
-              xl: "1rem",
+              xl: "0.875rem",
               full: "9999px",
             },
-            spacing: { gutter: "16px", base: "8px", section: "25px" },
+            spacing: { gutter: "16px", base: "8px", section: "28px" },
             fontFamily: {
               display: ["Cinzel", "serif"],
               title: ["Playfair Display", "serif"],
@@ -66,15 +77,21 @@
             },
             fontSize: {
               "display-lg": [
-                "48px",
+                "44px",
                 {
-                  lineHeight: "1.2",
-                  letterSpacing: "-0.02em",
+                  lineHeight: "1.15",
+                  letterSpacing: "0.02em",
                   fontWeight: "700",
                 },
               ],
-              "headline-lg": ["32px", { lineHeight: "1.3", fontWeight: "600" }],
-              "headline-md": ["24px", { lineHeight: "1.4", fontWeight: "500" }],
+              "headline-lg": [
+                "32px",
+                { lineHeight: "1.25", fontWeight: "700" },
+              ],
+              "headline-md": [
+                "24px",
+                { lineHeight: "1.35", fontWeight: "600" },
+              ],
               "body-lg": ["18px", { lineHeight: "1.6", fontWeight: "400" }],
               "body-md": ["16px", { lineHeight: "1.5", fontWeight: "400" }],
               "code-sm": ["13px", { lineHeight: "1.5", fontWeight: "400" }],
@@ -82,7 +99,7 @@
                 "12px",
                 {
                   lineHeight: "1.2",
-                  letterSpacing: "0.1em",
+                  letterSpacing: "0.08em",
                   fontWeight: "600",
                 },
               ],
@@ -98,6 +115,11 @@
   <body
     class="bg-surface text-on-surface font-body font-body-md relative overflow-x-hidden min-h-screen selection:bg-primary/30"
   >
+    <!-- Accessibility Skip Link -->
+    <a href="#mainContent" class="skip-link visually-hidden"
+      >Skip to main content</a
+    >
+
     <!-- Grimoire Background Elements -->
     <div class="grimoire-texture" aria-hidden="true"></div>
     <svg
@@ -204,105 +226,197 @@
 
     <!-- Ambient Background Glows -->
     <div
-      class="fixed top-[-10%] left-[-5%] w-[500px] h-[500px] bg-primary/10 rounded-full blur-[140px] pointer-events-none -z-10 animate-float"
+      class="fixed top-[-10%] left-[-5%] w-[560px] h-[560px] bg-primary/15 rounded-full blur-[150px] pointer-events-none -z-10 animate-float"
       aria-hidden="true"
     ></div>
     <div
-      class="fixed bottom-[-10%] right-[-5%] w-[600px] h-[600px] bg-secondary/10 rounded-full blur-[160px] pointer-events-none -z-10 animate-float delay-500"
+      class="fixed bottom-[-10%] right-[-5%] w-[620px] h-[620px] bg-primary/10 rounded-full blur-[170px] pointer-events-none -z-10 animate-float delay-500"
+      aria-hidden="true"
+    ></div>
+    <div
+      class="fixed top-[35%] right-[15%] w-[420px] h-[420px] bg-secondary/10 rounded-full blur-[160px] pointer-events-none -z-10"
       aria-hidden="true"
     ></div>
 
-    <!-- Lomo de Libro / Spine Track -->
+    <!-- Book Spine Track -->
     <div id="scrollTrack" aria-hidden="true"></div>
     <div id="scrollProgress" aria-hidden="true"></div>
 
     <!-- Main Content -->
-    <main class="max-w-[1440px] mx-auto px-gutter py-12">
+    <main
+      id="mainContent"
+      tabindex="-1"
+      class="max-w-[1440px] mx-auto px-gutter py-10 md:py-12"
+    >
       <!-- Header -->
-      <div class="flex items-center justify-between mb-gutter animate-fade-in">
-        <div>
-          <h1
-            class="font-title text-display-lg bg-gradient-to-r from-primary via-amber-300 to-purple-500 bg-clip-text text-transparent tracking-tight text-balance font-bold title-grimoir"
-            id="grimoireTitle"
+      <header
+        class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 animate-fade-in"
+      >
+        <div class="flex items-center gap-3.5">
+          <div
+            class="flex items-center justify-center shrink-0"
+            aria-hidden="true"
           >
-            Grimoir
-          </h1>
-          <p
-            class="font-label-caps text-outline text-[10px] uppercase mt-base flex items-center gap-2"
-          >
-            Unified Test Report — __GENERATED_AT__
-          </p>
+            <img
+              src="__GRIMOIR_LOGO_SRC__"
+              alt="Grimoir Emblem"
+              class="w-20 h-20 object-contain drop-shadow-[0_4px_16px_rgba(138,79,255,0.4)] transition-transform duration-300 hover:scale-105"
+              onerror="
+                this.style.display = 'none';
+                this.nextElementSibling.style.display = 'inline-block';
+              "
+            />
+            <span
+              class="material-symbols-outlined text-4xl text-secondary-container"
+              style="display: none"
+              >auto_stories</span
+            >
+          </div>
+          <div>
+            <h1
+              class="font-display text-4xl md:text-display-lg tracking-wider font-bold title-grimoir"
+              id="grimoireTitle"
+            >
+              Grimoir
+            </h1>
+            <p
+              class="font-title italic text-on-surface-variant text-sm mt-1 flex items-center gap-2"
+            >
+              <span>Unified Test Report</span>
+              <span class="text-secondary-container" aria-hidden="true">•</span>
+              <span class="font-mono text-xs not-italic text-outline"
+                >__GENERATED_AT__</span
+              >
+            </p>
+          </div>
         </div>
-        <div class="flex items-center gap-base">
+        <div class="flex items-center gap-2 self-start sm:self-auto">
           <button
-            class="material-symbols-outlined text-outline hover:text-primary transition-colors"
-            aria-label="Download report"
+            type="button"
+            id="btnDownloadReport"
+            class="w-9 h-9 inline-flex items-center justify-center rounded-lg bg-surface-container-lowest border border-outline-variant text-on-surface-variant hover:text-secondary-container hover:border-primary hover:bg-primary/10 active:scale-[0.96] transition-[color,background-color,border-color,transform,box-shadow] duration-500"
+            aria-label="Print or save report as PDF"
+            title="Print or save report"
           >
-            download
+            <span
+              class="material-symbols-outlined text-[18px]"
+              aria-hidden="true"
+              >print</span
+            >
           </button>
           <button
-            class="material-symbols-outlined text-outline hover:text-primary transition-colors"
-            aria-label="Share report"
+            type="button"
+            id="btnShareReport"
+            class="w-9 h-9 inline-flex items-center justify-center rounded-lg bg-surface-container-lowest border border-outline-variant text-on-surface-variant hover:text-secondary-container hover:border-primary hover:bg-primary/10 active:scale-[0.96] transition-[color,background-color,border-color,transform,box-shadow] duration-500"
+            aria-label="Copy report summary to clipboard"
+            title="Copy summary to clipboard"
           >
-            share
+            <span
+              class="material-symbols-outlined text-[18px]"
+              id="shareIcon"
+              aria-hidden="true"
+              >share</span
+            >
           </button>
         </div>
-      </div>
+      </header>
 
       <!-- Tab Navigation -->
-      <nav
-        class="flex items-center gap-gutter border-b border-outline-variant mb-section animate-fade-in delay-100"
+      <div
+        class="flex items-center gap-6 border-b border-outline-variant mb-section animate-fade-in delay-100 overflow-x-auto"
         id="tabNav"
+        role="tablist"
+        aria-label="Report Sections"
       >
         <button
-          class="font-label-caps text-sm pb-gutter tab-active"
+          type="button"
+          role="tab"
+          id="tab-btn-overview"
+          aria-selected="true"
+          aria-controls="tab-overview"
+          tabindex="0"
+          class="font-display font-semibold tracking-wider uppercase text-sm pb-3 px-1 flex items-center gap-2 tab-active transition-colors duration-500 whitespace-nowrap"
           data-tab="overview"
         >
-          <span class="material-symbols-outlined text-sm align-middle"
+          <span
+            class="material-symbols-outlined text-base text-secondary-container"
+            aria-hidden="true"
             >auto_awesome</span
-          >Overview
+          >
+          <span>Overview</span>
         </button>
         <button
-          class="font-label-caps text-sm pb-gutter text-on-surface-variant hover:text-[#8B5CF6] transition-colors __AUTOMATED_TAB_VISIBLE__"
+          type="button"
+          role="tab"
+          id="tab-btn-automated"
+          aria-selected="false"
+          aria-controls="tab-automated"
+          tabindex="-1"
+          class="font-display font-semibold tracking-wider uppercase text-sm pb-3 px-1 flex items-center gap-2 text-on-surface-variant hover:text-primary-container transition-colors duration-500 whitespace-nowrap __AUTOMATED_TAB_VISIBLE__"
           data-tab="automated"
         >
-          <span class="material-symbols-outlined text-sm align-middle"
+          <span
+            class="material-symbols-outlined text-base text-secondary-container"
+            aria-hidden="true"
             >bolt</span
           >
-          Automated
+          <span>Automated</span>
+          <span
+            class="font-mono text-xs px-1.5 py-0.5 rounded bg-surface-container text-on-surface-variant tabular-nums"
+            >__TOTAL_AUTOMATED_CASES__</span
+          >
         </button>
         <button
-          class="font-label-caps text-sm pb-gutter text-on-surface-variant hover:text-[#8B5CF6] transition-colors __PERFORMANCE_TAB_VISIBLE__"
+          type="button"
+          role="tab"
+          id="tab-btn-perf"
+          aria-selected="false"
+          aria-controls="tab-perf"
+          tabindex="-1"
+          class="font-display font-semibold tracking-wider uppercase text-sm pb-3 px-1 flex items-center gap-2 text-on-surface-variant hover:text-primary-container transition-colors duration-500 whitespace-nowrap __PERFORMANCE_TAB_VISIBLE__"
           data-tab="perf"
         >
-          <span class="material-symbols-outlined text-sm align-middle"
+          <span
+            class="material-symbols-outlined text-base text-secondary-container"
+            aria-hidden="true"
             >insights</span
           >
-          Performance
+          <span>Performance</span>
+          <span
+            class="font-mono text-xs px-1.5 py-0.5 rounded bg-surface-container text-on-surface-variant tabular-nums"
+            >__TOTAL_PERFORMANCE_SCENARIOS__</span
+          >
         </button>
-      </nav>
+      </div>
 
       <!-- ==================== OVERVIEW TAB ==================== -->
       <div
         id="tab-overview"
+        role="tabpanel"
+        aria-labelledby="tab-btn-overview"
         class="tab-panel active-panel flex flex-col gap-section"
       >
         <!-- Execution Overview -->
-        <section class="flex flex-col gap-base animate-fade-in-up delay-200">
-          <h2 class="font-label-caps text-outline text-sm uppercase mb-2">
+        <section class="flex flex-col gap-3 animate-fade-in-up delay-200">
+          <h2
+            class="font-display text-2xl font-bold text-on-surface tracking-wider uppercase"
+          >
             Execution Overview
           </h2>
 
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-base">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-gutter">
             <div
-              class="md:col-span-1 bg-surface-container-lowest border border-outline-variant rounded-xl p-6 shadow-sm card-hover animate-fade-in-up delay-200 flex flex-col items-center justify-center text-center"
+              class="md:col-span-1 bg-surface-container-lowest border border-outline-variant rounded-xl p-6 card-hover animate-fade-in-up delay-200 flex flex-col items-center justify-center text-center"
             >
               <div class="flex items-center justify-center gap-2 mb-2">
-                <span class="material-symbols-outlined text-primary text-xl"
+                <span
+                  class="material-symbols-outlined text-secondary-container text-xl"
+                  aria-hidden="true"
                   >analytics</span
                 >
-                <span class="font-label-caps text-outline text-xs uppercase"
-                  >Total Execution</span
+                <span
+                  class="font-label-caps text-on-surface-variant text-xs uppercase"
+                  >Total Execution Units</span
                 >
               </div>
               <div
@@ -312,11 +426,11 @@
                 0
               </div>
               <div
-                class="flex items-center justify-center gap-4 border-t border-outline-variant/30 pt-3 w-full"
+                class="flex items-center justify-center gap-4 border-t border-outline-variant pt-3 w-full"
               >
                 <div>
                   <span
-                    class="font-body-md text-on-surface text-sm font-semibold"
+                    class="font-mono text-on-surface text-sm font-semibold tabular-nums"
                     >__TOTAL_AUTOMATED_CASES__</span
                   >
                   <span
@@ -324,10 +438,13 @@
                     >Automated</span
                   >
                 </div>
-                <div class="h-3 w-px bg-outline-variant/40"></div>
+                <div
+                  class="h-3 w-px bg-outline-variant"
+                  aria-hidden="true"
+                ></div>
                 <div>
                   <span
-                    class="font-body-md text-on-surface text-sm font-semibold"
+                    class="font-mono text-on-surface text-sm font-semibold tabular-nums"
                     >__TOTAL_PERFORMANCE_SCENARIOS__</span
                   >
                   <span
@@ -338,14 +455,17 @@
               </div>
             </div>
             <div
-              class="md:col-span-2 bg-surface-container-lowest border border-outline-variant rounded-xl p-6 shadow-sm flex flex-col justify-between card-hover animate-fade-in-up delay-300"
+              class="md:col-span-2 bg-surface-container-lowest border border-outline-variant rounded-xl p-6 flex flex-col justify-between card-hover animate-fade-in-up delay-300"
             >
               <div class="flex items-center gap-2 mb-2">
-                <span class="material-symbols-outlined text-primary text-xl"
+                <span
+                  class="material-symbols-outlined text-secondary-container text-xl"
+                  aria-hidden="true"
                   >monitor_heart</span
                 >
-                <span class="font-label-caps text-outline text-xs uppercase"
-                  >Health Score</span
+                <span
+                  class="font-label-caps text-on-surface-variant text-xs uppercase"
+                  >Release Health Score</span
                 >
               </div>
               <div
@@ -354,6 +474,7 @@
                 <svg
                   viewBox="0 0 200 110"
                   class="w-[220px] shrink-0"
+                  role="img"
                   aria-label="Health Score __HEALTH_SCORE__%"
                 >
                   <defs>
@@ -369,27 +490,14 @@
                         dy="0"
                         stdDeviation="4"
                         flood-color="__HEALTH_SCORE_COLOR_HEX__"
-                        flood-opacity="0.5"
-                      >
-                        <animate
-                          attributeName="stdDeviation"
-                          values="4; 10; 4"
-                          dur="2s"
-                          repeatCount="indefinite"
-                        />
-                        <animate
-                          attributeName="flood-opacity"
-                          values="0.4; 0.9; 0.4"
-                          dur="2s"
-                          repeatCount="indefinite"
-                        />
-                      </feDropShadow>
+                        flood-opacity="0.45"
+                      />
                     </filter>
                   </defs>
                   <path
                     d="M 20 95 A 80 80 0 0 1 180 95"
                     fill="none"
-                    stroke="#3b3742"
+                    stroke="#1F2833"
                     stroke-width="14"
                     stroke-linecap="round"
                   />
@@ -418,7 +526,7 @@
                     x="132"
                     y="76"
                     text-anchor="start"
-                    class="font-display text-base fill-outline/60 font-medium"
+                    class="font-display text-base fill-outline font-medium"
                   >
                     %
                   </text>
@@ -428,10 +536,11 @@
                     class="flex items-center justify-center sm:justify-start gap-2 mb-1"
                   >
                     <span
-                      class="w-3 h-3 __HEALTH_COLOR__ rounded-full shrink-0 shadow-[0_0_8px_rgba(255,255,255,0.2)]"
+                      class="w-3 h-3 __HEALTH_COLOR__ rounded-full shrink-0"
+                      aria-hidden="true"
                     ></span>
                     <span
-                      class="font-label-caps text-xl font-bold tracking-wide"
+                      class="font-display text-xl font-bold tracking-wider"
                       style="color: __HEALTH_SCORE_COLOR_HEX__"
                       >__HEALTH_STATUS__</span
                     >
@@ -440,9 +549,8 @@
                     class="font-body-md text-on-surface-variant text-sm font-medium"
                     >__HEALTH_LABEL__</span
                   >
-                  <span
-                    class="font-label-caps text-outline text-[11px] uppercase mt-2 font-mono"
-                    >Last run __GENERATED_AT__</span
+                  <span class="font-mono text-outline text-xs mt-2"
+                    >Last run: __GENERATED_AT__</span
                   >
                 </div>
               </div>
@@ -451,23 +559,24 @@
 
           <!-- Coverage -->
           <div
-            class="bg-surface-container-lowest border border-outline-variant rounded-xl p-4 shadow-sm animate-fade-in-up delay-300 flex flex-col gap-2"
+            class="bg-surface-container-lowest border border-outline-variant rounded-xl p-4 animate-fade-in-up delay-300 flex flex-col sm:flex-row sm:items-center justify-between gap-3 card-hover"
           >
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-2">
-                <span class="material-symbols-outlined text-primary text-sm"
-                  >widgets</span
-                >
-                <span class="font-label-caps text-outline text-xs uppercase"
-                  >Framework Coverage</span
-                >
-              </div>
+            <div class="flex items-center gap-2">
               <span
-                class="font-label-caps text-primary text-xs font-semibold uppercase"
-                >__COVERAGE_TYPES__ / __TOTAL_COVERAGE__ Active Suites</span
+                class="material-symbols-outlined text-secondary-container text-base"
+                aria-hidden="true"
+                >widgets</span
+              >
+              <span
+                class="font-display text-sm font-semibold text-on-surface uppercase tracking-wider"
+                >Framework Coverage</span
+              >
+              <span
+                class="font-mono text-on-surface-variant text-xs font-semibold ml-2"
+                >(__COVERAGE_TYPES__ / __TOTAL_COVERAGE__ Active Suites)</span
               >
             </div>
-            <div class="flex flex-wrap gap-2.5 pt-1">__COVERAGE_CHIPS__</div>
+            <div class="flex flex-wrap gap-2.5">__COVERAGE_CHIPS__</div>
           </div>
         </section>
 
@@ -479,25 +588,28 @@
             class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter card-hover"
           >
             <h3
-              class="font-label-caps text-on-surface-variant text-[11px] uppercase mb-base"
+              class="font-display text-lg font-semibold text-on-surface tracking-wide uppercase mb-base"
             >
-              Execution Status
+              Execution Status Distribution
             </h3>
             <div class="flex flex-col md:flex-row items-center gap-4">
               <div
-                class="chart-wrap flex-1 min-w-[200px] animate-float flex justify-center items-center"
+                class="chart-wrap flex-1 min-w-[200px] flex justify-center items-center"
               >
-                <!-- Explicit 320x320 square container to force exact alignment -->
-                <div class="relative w-[320px] h-[320px] flex-shrink-0">
+                <div
+                  class="relative w-[280px] h-[280px] sm:w-[300px] sm:h-[300px] flex-shrink-0"
+                >
                   <canvas
                     id="overviewStatusChart"
+                    aria-label="Pie chart showing execution status breakdown"
+                    role="img"
                     class="relative z-10 w-full h-full"
                   ></canvas>
                 </div>
               </div>
               <div
                 id="customPieLegend"
-                class="flex flex-col justify-center gap-3 w-full md:w-[160px] md:shrink-0"
+                class="flex flex-col justify-center gap-2.5 w-full md:w-[175px] md:shrink-0"
               ></div>
             </div>
           </div>
@@ -505,49 +617,72 @@
             class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter card-hover"
           >
             <h3
-              class="font-label-caps text-on-surface-variant text-[11px] uppercase mb-base"
+              class="font-display text-lg font-semibold text-on-surface tracking-wide uppercase mb-base"
             >
-              Execution Duration by Type
+              Execution Duration by Suite Type
             </h3>
             <div class="chart-wrap">
-              <canvas id="overviewDurationChart"></canvas>
+              <canvas
+                id="overviewDurationChart"
+                aria-label="Bar chart showing execution duration by test type"
+                role="img"
+              ></canvas>
             </div>
           </div>
         </section>
 
-        <!-- Failures Table -->
+        <!-- Failures Table (Global Failure Drawer) -->
         <section
-          class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-sm animate-fade-in-up delay-500"
+          class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden animate-fade-in-up delay-500"
         >
           <div
             class="p-gutter border-b border-outline-variant flex flex-col sm:flex-row sm:items-center justify-between gap-3"
           >
             <div class="flex items-center gap-3">
               <h3
-                class="font-label-caps text-on-surface-variant text-[11px] uppercase"
+                id="failuresTableHeading"
+                class="font-display text-lg font-semibold text-on-surface tracking-wide uppercase"
               >
-                Failures
+                Global Failure Drawer
               </h3>
               <span
                 id="failuresCountBadge"
-                class="bg-error/10 text-error text-[10px] font-bold px-2 py-0.5 rounded-full border border-error/20 hidden"
+                aria-live="polite"
+                class="bg-error/15 text-error text-xs font-mono font-bold px-2.5 py-0.5 rounded-full border border-error/30 hidden"
                 >0</span
               >
             </div>
 
             <div class="flex items-center gap-2">
-              <div class="relative flex-1 sm:w-48 search-wrapper">
+              <label class="grimoir-search-box flex-1 sm:w-64">
+                <span class="visually-hidden">Filter failures</span>
                 <span
-                  class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-outline text-sm pointer-events-none"
+                  class="material-symbols-outlined grimoir-search-icon"
+                  aria-hidden="true"
                   >search</span
                 >
                 <input
-                  type="text"
+                  type="search"
                   id="failureSearch"
                   placeholder="Filter failures..."
-                  class="w-full bg-surface-container border border-outline-variant/40 rounded-lg pl-8 pr-3 py-1 text-xs text-on-surface placeholder:text-outline search-input-custom"
+                  autocomplete="off"
+                  spellcheck="false"
+                  class="grimoir-search-input search-input-custom"
                 />
-              </div>
+                <button
+                  type="button"
+                  id="clearFailureSearch"
+                  aria-label="Clear failure search filter"
+                  title="Clear filter (Esc)"
+                  class="hidden grimoir-search-clear"
+                >
+                  <span
+                    class="material-symbols-outlined text-sm block"
+                    aria-hidden="true"
+                    >close</span
+                  >
+                </button>
+              </label>
 
               <div
                 id="failuresPagination"
@@ -556,47 +691,57 @@
                 <button
                   type="button"
                   id="failuresPrev"
-                  class="px-2 py-1 rounded bg-surface-container text-outline hover:text-primary transition-colors text-xs font-label-caps disabled:opacity-40 disabled:cursor-not-allowed"
+                  class="px-2.5 py-1.5 min-h-[32px] rounded bg-surface-container text-on-surface-variant hover:text-primary-container active:scale-[0.98] transition-[color,transform] duration-500 text-xs font-label-caps disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   Previous
                 </button>
                 <span
                   id="failuresPageInfo"
-                  class="text-xs text-on-surface-variant font-mono"
+                  aria-live="polite"
+                  class="text-xs text-on-surface-variant font-mono tabular-nums"
                 ></span>
                 <button
                   type="button"
                   id="failuresNext"
-                  class="px-2 py-1 rounded bg-surface-container text-outline hover:text-primary transition-colors text-xs font-label-caps disabled:opacity-40 disabled:cursor-not-allowed"
+                  class="px-2.5 py-1.5 min-h-[32px] rounded bg-surface-container text-on-surface-variant hover:text-primary-container active:scale-[0.98] transition-[color,transform] duration-500 text-xs font-label-caps disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   Next
                 </button>
               </div>
             </div>
           </div>
-          <div class="overflow-x-auto">
+          <div
+            class="overflow-x-auto custom-scrollbar"
+            tabindex="0"
+            role="region"
+            aria-labelledby="failuresTableHeading"
+          >
             <table class="w-full text-left border-collapse">
               <thead>
                 <tr
-                  class="bg-surface-container-low/50 border-b border-outline-variant"
+                  class="bg-surface-container-low border-b border-outline-variant"
                 >
                   <th
-                    class="p-gutter font-label-caps text-on-surface-variant text-[10px] uppercase"
+                    scope="col"
+                    class="p-gutter font-label-caps text-on-surface-variant text-xs uppercase"
                   >
                     Type
                   </th>
                   <th
-                    class="p-gutter font-label-caps text-on-surface-variant text-[10px] uppercase"
+                    scope="col"
+                    class="p-gutter font-label-caps text-on-surface-variant text-xs uppercase"
                   >
-                    Test
+                    Test / Scenario
                   </th>
                   <th
-                    class="p-gutter font-label-caps text-on-surface-variant text-[10px] uppercase hidden md:table-cell"
+                    scope="col"
+                    class="p-gutter font-label-caps text-on-surface-variant text-xs uppercase"
                   >
-                    Error
+                    Diagnostic
                   </th>
                   <th
-                    class="p-gutter font-label-caps text-on-surface-variant text-[10px] uppercase text-right"
+                    scope="col"
+                    class="p-gutter font-label-caps text-on-surface-variant text-xs uppercase text-right"
                   >
                     Duration
                   </th>
@@ -604,7 +749,7 @@
               </thead>
               <tbody
                 id="failuresTableBody"
-                class="divide-y divide-outline-variant/30"
+                class="divide-y divide-outline-variant/40"
               >
                 __FAILURE_ROWS__
               </tbody>
@@ -613,12 +758,12 @@
         </section>
 
         <!-- Historical Trends -->
-        <section class="mt-gutter mb-gutter animate-fade-in-up delay-450">
+        <section class="animate-fade-in-up delay-500">
           <div
             class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter card-hover"
           >
             <h3
-              class="font-label-caps text-on-surface-variant text-[11px] uppercase mb-base"
+              class="font-display text-lg font-semibold text-on-surface tracking-wide uppercase mb-base"
             >
               Historical Trends (Last 20 Runs)
             </h3>
@@ -631,222 +776,286 @@
           </div>
         </section>
 
-        <!-- Automated Cases KPIs -->
+        <!-- Automated Cases KPIs (Flattened Hierarchy - No Nested Cards) -->
         <section
-          class="flex flex-col gap-base collapsible-section __AUTOMATED_CASES_VISIBLE__ animate-fade-in-up delay-500"
+          class="flex flex-col gap-3 collapsible-section __AUTOMATED_CASES_VISIBLE__ animate-fade-in-up delay-500"
           data-expanded="true"
         >
           <div
-            class="bg-surface-container border border-outline-variant rounded-xl p-gutter"
+            class="flex items-center justify-between border-b border-outline-variant pb-2"
           >
             <h2
-              class="font-label-caps text-outline text-sm uppercase mb-2 collapsible-header cursor-pointer select-none flex items-center justify-between hover:text-primary transition-colors"
+              class="font-display text-2xl font-bold text-on-surface tracking-wider uppercase flex-1"
             >
-              <span>Automated Cases</span>
-              <span
-                class="material-symbols-outlined toggle-icon text-xl transition-transform"
-                >expand_more</span
+              <button
+                type="button"
+                aria-expanded="true"
+                class="collapsible-header w-full text-left cursor-pointer select-none flex items-center justify-between hover:text-primary transition-colors py-1"
               >
+                <span class="flex items-center gap-2">
+                  <span
+                    class="material-symbols-outlined text-secondary-container text-lg"
+                    aria-hidden="true"
+                    >bolt</span
+                  >
+                  <span>Automated Test Suite Summary</span>
+                </span>
+                <span
+                  class="material-symbols-outlined toggle-icon text-xl transition-transform"
+                  aria-hidden="true"
+                  >expand_more</span
+                >
+              </button>
             </h2>
+          </div>
+          <div
+            class="collapsible-content grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-gutter items-stretch pt-1"
+          >
             <div
-              class="collapsible-content grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-gutter items-stretch"
+              class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter flex flex-col h-full card-hover"
             >
-              <div
-                class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter flex flex-col h-full card-hover"
-              >
-                <span class="material-symbols-outlined text-primary"
+              <div class="flex items-center justify-between">
+                <span
+                  class="font-label-caps text-on-surface-variant text-xs uppercase"
+                  >Total Cases</span
+                >
+                <span
+                  class="material-symbols-outlined text-secondary-container text-lg"
+                  aria-hidden="true"
                   >science</span
                 >
-                <p
-                  class="font-label-caps text-outline text-[10px] uppercase mt-2"
-                >
-                  Total
-                </p>
-                <p
-                  class="font-display text-headline-lg text-on-surface tabular-nums mt-1 counter"
-                  data-target="__TOTAL_TEST_CASES__"
-                >
-                  0
-                </p>
-                <p class="font-body-md text-on-surface-variant text-sm mt-auto">
-                  __PASSED_TEST_CASES__ passed · __FAILED_TEST_CASES__ failed ·
-                  __SKIPPED_TEST_CASES__ skipped
-                </p>
               </div>
-              <div
-                class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter flex flex-col h-full card-hover"
+              <p
+                class="font-display text-headline-lg text-on-surface tabular-nums mt-2 counter"
+                data-target="__TOTAL_TEST_CASES__"
               >
-                <span class="material-symbols-outlined text-emerald-400"
+                0
+              </p>
+              <p class="font-mono text-on-surface-variant text-xs mt-auto pt-2">
+                __PASSED_TEST_CASES__ passed · __FAILED_TEST_CASES__ failed ·
+                __SKIPPED_TEST_CASES__ skipped
+              </p>
+            </div>
+            <div
+              class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter flex flex-col h-full card-hover"
+            >
+              <div class="flex items-center justify-between">
+                <span
+                  class="font-label-caps text-on-surface-variant text-xs uppercase"
+                  >Pass Rate</span
+                >
+                <span
+                  class="material-symbols-outlined text-emerald-400 text-lg"
+                  aria-hidden="true"
                   >check_circle</span
                 >
-                <p
-                  class="font-label-caps text-outline text-[10px] uppercase mt-2"
-                >
-                  Pass Rate
-                </p>
-                <p
-                  class="font-display text-headline-lg text-emerald-400 tabular-nums mt-1"
-                >
-                  <span class="counter" data-target="__TEST_CASE_PASS_RATE__"
-                    >0</span
-                  >%
-                </p>
-                <p class="font-body-md text-on-surface-variant text-sm mt-auto">
-                  Automated cases pass rate
-                </p>
               </div>
-              <div
-                class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter flex flex-col h-full card-hover"
+              <p
+                class="font-display text-headline-lg text-emerald-400 tabular-nums mt-2"
               >
-                <span class="material-symbols-outlined text-error">error</span>
-                <p
-                  class="font-label-caps text-outline text-[10px] uppercase mt-2"
+                <span class="counter" data-target="__TEST_CASE_PASS_RATE__"
+                  >0</span
+                >%
+              </p>
+              <p
+                class="font-body-md text-on-surface-variant text-xs mt-auto pt-2"
+              >
+                Automated cases sanctified
+              </p>
+            </div>
+            <div
+              class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter flex flex-col h-full card-hover"
+            >
+              <div class="flex items-center justify-between">
+                <span
+                  class="font-label-caps text-on-surface-variant text-xs uppercase"
+                  >Failure Rate</span
                 >
-                  Failure Rate
-                </p>
-                <p
-                  class="font-display text-headline-lg text-error tabular-nums mt-1"
+                <span
+                  class="material-symbols-outlined text-error text-lg"
+                  aria-hidden="true"
+                  >error</span
                 >
-                  <span class="counter" data-target="__FAILURE_RATE__">0</span>%
-                </p>
-                <p class="font-body-md text-on-surface-variant text-sm mt-auto">
-                  Automated cases failure rate
-                </p>
               </div>
-              <div
-                class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter flex flex-col h-full card-hover"
+              <p
+                class="font-display text-headline-lg text-error tabular-nums mt-2"
               >
-                <span class="material-symbols-outlined text-tertiary"
+                <span class="counter" data-target="__FAILURE_RATE__">0</span>%
+              </p>
+              <p
+                class="font-body-md text-on-surface-variant text-xs mt-auto pt-2"
+              >
+                Automated cases corrupted
+              </p>
+            </div>
+            <div
+              class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter flex flex-col h-full card-hover"
+            >
+              <div class="flex items-center justify-between">
+                <span
+                  class="font-label-caps text-on-surface-variant text-xs uppercase"
+                  >Duration</span
+                >
+                <span
+                  class="material-symbols-outlined text-secondary-container text-lg"
+                  aria-hidden="true"
                   >timer</span
                 >
-                <p
-                  class="font-label-caps text-outline text-[10px] uppercase mt-2"
-                >
-                  Duration
-                </p>
-                <p
-                  class="font-display text-headline-lg text-on-surface tabular-nums mt-1"
-                >
-                  <span
-                    class="counter"
-                    data-target="__PLAYWRIGHT_DURATION_MS__"
-                    data-is-duration="true"
-                    >0</span
-                  >
-                </p>
-                <p class="font-body-md text-on-surface-variant text-sm mt-auto">
-                  Execution time
-                </p>
               </div>
+              <p
+                class="font-display text-headline-lg text-on-surface tabular-nums mt-2"
+              >
+                <span
+                  class="counter"
+                  data-target="__PLAYWRIGHT_DURATION_MS__"
+                  data-is-duration="true"
+                  >0</span
+                >
+              </p>
+              <p
+                class="font-body-md text-on-surface-variant text-xs mt-auto pt-2"
+              >
+                Total suite execution time
+              </p>
             </div>
           </div>
         </section>
 
-        <!-- Performance Request KPIs -->
+        <!-- Performance Request KPIs (Flattened Hierarchy - No Nested Cards) -->
         <section
-          class="flex flex-col gap-base collapsible-section __PERFORMANCE_REQUESTS_VISIBLE__ animate-fade-in-up delay-600"
+          class="flex flex-col gap-3 collapsible-section __PERFORMANCE_REQUESTS_VISIBLE__ animate-fade-in-up delay-600"
           data-expanded="true"
         >
           <div
-            class="bg-surface-container border border-outline-variant rounded-xl p-gutter"
+            class="flex items-center justify-between border-b border-outline-variant pb-2"
           >
             <h2
-              class="font-label-caps text-outline text-sm uppercase mb-2 collapsible-header cursor-pointer select-none flex items-center justify-between hover:text-primary transition-colors"
+              class="font-display text-2xl font-bold text-on-surface tracking-wider uppercase flex-1"
             >
-              <span>Performance Requests</span>
-              <span
-                class="material-symbols-outlined toggle-icon text-xl transition-transform"
-                >expand_more</span
+              <button
+                type="button"
+                aria-expanded="true"
+                class="collapsible-header w-full text-left cursor-pointer select-none flex items-center justify-between hover:text-primary transition-colors py-1"
               >
+                <span class="flex items-center gap-2">
+                  <span
+                    class="material-symbols-outlined text-secondary-container text-lg"
+                    aria-hidden="true"
+                    >insights</span
+                  >
+                  <span>Performance Load Summary</span>
+                </span>
+                <span
+                  class="material-symbols-outlined toggle-icon text-xl transition-transform"
+                  aria-hidden="true"
+                  >expand_more</span
+                >
+              </button>
             </h2>
+          </div>
+          <div
+            class="collapsible-content grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-gutter items-stretch pt-1"
+          >
             <div
-              class="collapsible-content grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-gutter items-stretch"
+              class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter flex flex-col h-full card-hover"
             >
-              <div
-                class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter flex flex-col h-full card-hover"
-              >
-                <span class="material-symbols-outlined text-secondary"
+              <div class="flex items-center justify-between">
+                <span
+                  class="font-label-caps text-on-surface-variant text-xs uppercase"
+                  >Scenarios</span
+                >
+                <span
+                  class="material-symbols-outlined text-secondary-container text-lg"
+                  aria-hidden="true"
                   >route</span
                 >
-                <p
-                  class="font-label-caps text-outline text-[10px] uppercase mt-2"
-                >
-                  Scenarios
-                </p>
-                <p
-                  class="font-display text-headline-lg text-on-surface tabular-nums mt-1 counter"
-                  data-target="__TOTAL_PERFORMANCE_SCENARIOS__"
-                >
-                  0
-                </p>
-                <p class="font-body-md text-on-surface-variant text-sm mt-auto">
-                  __PASSED_PERFORMANCE_SCENARIOS__ passed ·
-                  __FAILED_PERFORMANCE_SCENARIOS__ failed
-                </p>
               </div>
-              <div
-                class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter flex flex-col h-full card-hover"
+              <p
+                class="font-display text-headline-lg text-on-surface tabular-nums mt-2 counter"
+                data-target="__TOTAL_PERFORMANCE_SCENARIOS__"
               >
-                <span class="material-symbols-outlined text-secondary"
+                0
+              </p>
+              <p class="font-mono text-on-surface-variant text-xs mt-auto pt-2">
+                __PASSED_PERFORMANCE_SCENARIOS__ passed ·
+                __FAILED_PERFORMANCE_SCENARIOS__ failed
+              </p>
+            </div>
+            <div
+              class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter flex flex-col h-full card-hover"
+            >
+              <div class="flex items-center justify-between">
+                <span
+                  class="font-label-caps text-on-surface-variant text-xs uppercase"
+                  >Total Requests</span
+                >
+                <span
+                  class="material-symbols-outlined text-secondary-container text-lg"
+                  aria-hidden="true"
                   >insights</span
                 >
-                <p
-                  class="font-label-caps text-outline text-[10px] uppercase mt-2"
-                >
-                  Requests
-                </p>
-                <p
-                  class="font-display text-headline-lg text-on-surface tabular-nums mt-1 counter"
-                  data-target="__TOTAL_REQUESTS__"
-                >
-                  0
-                </p>
-                <p class="font-body-md text-on-surface-variant text-sm mt-auto">
-                  k6 requests executed
-                </p>
               </div>
-              <div
-                class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter flex flex-col h-full card-hover"
+              <p
+                class="font-display text-headline-lg text-on-surface tabular-nums mt-2 counter"
+                data-target="__TOTAL_REQUESTS__"
               >
-                <span class="material-symbols-outlined text-emerald-400"
+                0
+              </p>
+              <p
+                class="font-body-md text-on-surface-variant text-xs mt-auto pt-2"
+              >
+                k6 requests executed
+              </p>
+            </div>
+            <div
+              class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter flex flex-col h-full card-hover"
+            >
+              <div class="flex items-center justify-between">
+                <span
+                  class="font-label-caps text-on-surface-variant text-xs uppercase"
+                  >Request Success</span
+                >
+                <span
+                  class="material-symbols-outlined text-emerald-400 text-lg"
+                  aria-hidden="true"
                   >check_circle</span
                 >
-                <p
-                  class="font-label-caps text-outline text-[10px] uppercase mt-2"
-                >
-                  Request Success
-                </p>
-                <p
-                  class="font-display text-headline-lg text-emerald-400 tabular-nums mt-1"
-                >
-                  <span class="counter" data-target="__REQUEST_SUCCESS_RATE__"
-                    >0</span
-                  >%
-                </p>
-                <p class="font-body-md text-on-surface-variant text-sm mt-auto">
-                  __SUCCESSFUL_REQUESTS__ succeeded · __FAILED_REQUESTS__ failed
-                </p>
               </div>
-              <div
-                class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter flex flex-col h-full card-hover"
+              <p
+                class="font-display text-headline-lg text-emerald-400 tabular-nums mt-2"
               >
-                <span class="material-symbols-outlined text-error">error</span>
-                <p
-                  class="font-label-caps text-outline text-[10px] uppercase mt-2"
+                <span class="counter" data-target="__REQUEST_SUCCESS_RATE__"
+                  >0</span
+                >%
+              </p>
+              <p class="font-mono text-on-surface-variant text-xs mt-auto pt-2">
+                __SUCCESSFUL_REQUESTS__ ok · __FAILED_REQUESTS__ failed
+              </p>
+            </div>
+            <div
+              class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter flex flex-col h-full card-hover"
+            >
+              <div class="flex items-center justify-between">
+                <span
+                  class="font-label-caps text-on-surface-variant text-xs uppercase"
+                  >Request Failure</span
                 >
-                  Request Failure
-                </p>
-                <p
-                  class="font-display text-headline-lg text-error tabular-nums mt-1"
+                <span
+                  class="material-symbols-outlined text-error text-lg"
+                  aria-hidden="true"
+                  >error</span
                 >
-                  <span class="counter" data-target="__REQUEST_FAILURE_RATE__"
-                    >0</span
-                  >%
-                </p>
-                <p class="font-body-md text-on-surface-variant text-sm mt-auto">
-                  __FAILED_REQUESTS__ failed requests
-                </p>
               </div>
+              <p
+                class="font-display text-headline-lg text-error tabular-nums mt-2"
+              >
+                <span class="counter" data-target="__REQUEST_FAILURE_RATE__"
+                  >0</span
+                >%
+              </p>
+              <p class="font-mono text-on-surface-variant text-xs mt-auto pt-2">
+                __FAILED_REQUESTS__ failed requests
+              </p>
             </div>
           </div>
         </section>
@@ -855,74 +1064,88 @@
       <!-- ==================== Automated TAB ==================== -->
       <div
         id="tab-automated"
+        role="tabpanel"
+        aria-labelledby="tab-btn-automated"
         class="tab-panel hidden-panel hidden flex flex-col gap-gutter"
       >
         <!-- Automated Stats -->
         <div
-          class="flex flex-col md:flex-row gap-gutter items-center justify-between mb-gutter"
+          class="flex flex-col md:flex-row gap-gutter items-center justify-between mb-2"
         >
           <div
             class="flex-1 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-base w-full"
           >
             <div
-              class="bg-surface-container-lowest border border-outline-variant rounded-lg p-base text-center card-hover animate-fade-in-up delay-100"
+              class="bg-surface-container-lowest border border-outline-variant rounded-lg p-3 text-center card-hover tab-anim-item"
             >
-              <p class="font-label-caps text-outline text-[10px] uppercase">
+              <p
+                class="font-label-caps text-on-surface-variant text-xs uppercase"
+              >
                 Total
               </p>
               <p
-                class="font-display text-headline-md text-on-surface mt-1 counter"
+                class="font-display text-headline-md text-on-surface mt-1 tabular-nums counter"
                 data-target="__PLAYWRIGHT_TOTAL__"
               >
                 0
               </p>
             </div>
             <div
-              class="bg-surface-container-lowest border border-outline-variant rounded-lg p-base text-center card-hover animate-fade-in-up delay-200"
+              class="bg-surface-container-lowest border border-outline-variant rounded-lg p-3 text-center card-hover tab-anim-item"
             >
-              <p class="font-label-caps text-outline text-[10px] uppercase">
+              <p
+                class="font-label-caps text-on-surface-variant text-xs uppercase"
+              >
                 Passed
               </p>
               <p
-                class="font-display text-headline-md text-emerald-400 mt-1 counter"
+                class="font-display text-headline-md text-emerald-400 mt-1 tabular-nums counter"
                 data-target="__PLAYWRIGHT_PASSED__"
               >
                 0
               </p>
             </div>
             <div
-              class="bg-surface-container-lowest border border-outline-variant rounded-lg p-base text-center card-hover animate-fade-in-up delay-300"
+              class="bg-surface-container-lowest border border-outline-variant rounded-lg p-3 text-center card-hover tab-anim-item"
             >
-              <p class="font-label-caps text-outline text-[10px] uppercase">
+              <p
+                class="font-label-caps text-on-surface-variant text-xs uppercase"
+              >
                 Failed
               </p>
               <p
-                class="font-display text-headline-md text-error mt-1 counter"
+                class="font-display text-headline-md text-error mt-1 tabular-nums counter"
                 data-target="__PLAYWRIGHT_FAILED__"
               >
                 0
               </p>
             </div>
             <div
-              class="bg-surface-container-lowest border border-outline-variant rounded-lg p-base text-center card-hover animate-fade-in-up delay-400"
+              class="bg-surface-container-lowest border border-outline-variant rounded-lg p-3 text-center card-hover tab-anim-item"
             >
-              <p class="font-label-caps text-outline text-[10px] uppercase">
+              <p
+                class="font-label-caps text-on-surface-variant text-xs uppercase"
+              >
                 Skipped
               </p>
               <p
-                class="font-display text-headline-md text-outline mt-1 counter"
+                class="font-display text-headline-md text-outline mt-1 tabular-nums counter"
                 data-target="__PLAYWRIGHT_SKIPPED__"
               >
                 0
               </p>
             </div>
             <div
-              class="bg-surface-container-lowest border border-outline-variant rounded-lg p-base text-center card-hover animate-fade-in-up delay-500"
+              class="bg-surface-container-lowest border border-outline-variant rounded-lg p-3 text-center card-hover tab-anim-item col-span-2 sm:col-span-1"
             >
-              <p class="font-label-caps text-outline text-[10px] uppercase">
+              <p
+                class="font-label-caps text-on-surface-variant text-xs uppercase"
+              >
                 Duration
               </p>
-              <p class="font-display text-headline-md text-primary mt-1">
+              <p
+                class="font-display text-headline-md text-secondary-container mt-1 tabular-nums"
+              >
                 <span
                   class="counter"
                   data-target="__PLAYWRIGHT_DURATION__"
@@ -935,15 +1158,17 @@
 
           <!-- Standalone Large Donut -->
           <div
-            class="flex-shrink-0 flex flex-col items-center justify-center w-20 h-20 lg:w-24 lg:h-24 mr-4 md:mr-8 animate-fade-in-up delay-500"
+            class="flex-shrink-0 flex flex-col items-center justify-center w-20 h-20 lg:w-24 lg:h-24 mr-2 md:mr-4 tab-anim-item"
           >
             <div class="relative w-full h-full" title="Execution Distribution">
               <svg
                 viewBox="0 0 36 36"
-                class="w-full h-full transform -rotate-90 filter drop-shadow-md"
+                class="w-full h-full transform -rotate-90"
+                role="img"
+                aria-label="Automated Pass Rate Donut"
               >
                 <path
-                  class="text-outline-variant/30"
+                  class="text-surface-container"
                   stroke-width="4"
                   stroke="currentColor"
                   fill="none"
@@ -951,7 +1176,7 @@
                 />
                 <path
                   id="donutSkipped"
-                  class="text-outline transition-all duration-1000 ease-out"
+                  class="text-outline transition-[stroke-dasharray,stroke-dashoffset] duration-1000 ease-out"
                   stroke-width="4"
                   stroke-linecap="butt"
                   stroke="currentColor"
@@ -962,7 +1187,7 @@
                 />
                 <path
                   id="donutFailed"
-                  class="text-error transition-all duration-1000 ease-out"
+                  class="text-error transition-[stroke-dasharray,stroke-dashoffset] duration-1000 ease-out"
                   stroke-width="4"
                   stroke-linecap="butt"
                   stroke="currentColor"
@@ -973,7 +1198,7 @@
                 />
                 <path
                   id="donutPassed"
-                  class="text-emerald-400 transition-all duration-1000 ease-out"
+                  class="text-emerald-400 transition-[stroke-dasharray,stroke-dashoffset] duration-1000 ease-out"
                   stroke-width="4"
                   stroke-linecap="butt"
                   stroke="currentColor"
@@ -987,7 +1212,7 @@
                 class="absolute inset-0 flex flex-col items-center justify-center leading-none"
               >
                 <span
-                  class="text-lg lg:text-xl font-display font-bold text-on-surface antialiased"
+                  class="text-lg lg:text-xl font-display font-bold text-on-surface antialiased tabular-nums"
                   id="sidebarPassRateText"
                   >0%</span
                 >
@@ -998,73 +1223,112 @@
 
         <!-- Automated Split Pane (Allure Style) -->
         <div
-          class="flex flex-col lg:flex-row h-[calc(100vh-440px)] min-h-[400px] gap-gutter animate-fade-in-up delay-200"
+          class="flex flex-col lg:flex-row lg:h-[calc(100dvh-340px)] min-h-[520px] gap-gutter tab-anim-item"
           id="automatedSplitPane"
         >
           <!-- Left Pane: Tree Navigation -->
           <div
-            class="lg:w-1/3 bg-surface-container-lowest border border-outline-variant rounded-xl flex flex-col overflow-hidden min-h-0"
+            class="lg:w-5/12 bg-surface-container-lowest border border-outline-variant rounded-xl flex flex-col overflow-hidden min-h-[320px] lg:min-h-0 card-hover"
           >
             <!-- Search & Filters Header -->
             <div
-              class="p-3 border-b border-outline-variant/50 bg-surface-container/30"
+              class="p-3 border-b border-outline-variant bg-surface-container-low"
             >
-              <div class="relative mb-3 search-wrapper">
+              <div class="grimoir-search-box mb-2.5">
+                <label for="automatedSearch" class="visually-hidden"
+                  >Search suites or tests</label
+                >
                 <span
-                  class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-outline text-sm pointer-events-none"
+                  class="material-symbols-outlined grimoir-search-icon"
+                  aria-hidden="true"
                   >search</span
                 >
                 <input
-                  type="text"
+                  type="search"
                   id="automatedSearch"
                   placeholder="Search suites or tests..."
-                  class="w-full bg-surface-container border border-outline-variant/40 rounded-lg pl-8 pr-3 py-1.5 text-xs text-on-surface placeholder:text-outline search-input-custom"
+                  autocomplete="off"
+                  spellcheck="false"
+                  class="grimoir-search-input search-input-custom"
                 />
+                <button
+                  type="button"
+                  id="clearAutomatedSearch"
+                  aria-label="Clear test search filter"
+                  title="Clear search (Esc)"
+                  class="hidden grimoir-search-clear"
+                >
+                  <span
+                    class="material-symbols-outlined text-sm block"
+                    aria-hidden="true"
+                    >close</span
+                  >
+                </button>
               </div>
               <div
                 id="automatedTagsContainer"
                 class="flex flex-wrap gap-1.5 mb-2 empty:hidden"
               ></div>
               <div
-                class="flex items-center justify-between gap-1 overflow-x-auto pb-1 scrollbar-none"
+                class="flex items-center justify-between gap-1.5 overflow-x-auto pb-1"
                 id="automatedFilterButtons"
+                role="group"
+                aria-label="Filter tests by status"
               >
                 <button
                   type="button"
                   data-filter="all"
-                  class="auto-filter-btn active flex-1 py-1 rounded text-[10px] font-label-caps font-semibold border border-primary/40 bg-primary/20 text-primary transition-all whitespace-nowrap"
+                  aria-pressed="true"
+                  class="auto-filter-btn active flex-1 py-1.5 px-2 min-h-[32px] rounded text-xs font-label-caps font-semibold border border-primary/40 bg-primary/20 text-primary-container active:scale-[0.98] transition-[color,background-color,border-color,transform] duration-500 whitespace-nowrap"
                 >
                   All
                 </button>
                 <button
                   type="button"
                   data-filter="passed"
-                  class="auto-filter-btn flex-1 py-1 rounded text-[10px] font-label-caps font-semibold border border-outline-variant/40 bg-surface-container text-on-surface-variant hover:text-emerald-400 transition-all whitespace-nowrap"
+                  aria-pressed="false"
+                  class="auto-filter-btn flex-1 py-1.5 px-2 min-h-[32px] rounded text-xs font-label-caps font-semibold border border-outline-variant bg-surface-container text-on-surface-variant hover:text-emerald-400 active:scale-[0.98] transition-[color,background-color,border-color,transform] duration-500 whitespace-nowrap"
                 >
                   Pass
                 </button>
                 <button
                   type="button"
                   data-filter="failed"
-                  class="auto-filter-btn flex-1 py-1 rounded text-[10px] font-label-caps font-semibold border border-outline-variant/40 bg-surface-container text-on-surface-variant hover:text-error transition-all whitespace-nowrap"
+                  aria-pressed="false"
+                  class="auto-filter-btn flex-1 py-1.5 px-2 min-h-[32px] rounded text-xs font-label-caps font-semibold border border-outline-variant bg-surface-container text-on-surface-variant hover:text-error active:scale-[0.98] transition-[color,background-color,border-color,transform] duration-500 whitespace-nowrap"
                 >
                   Fail
                 </button>
-
                 <button
                   type="button"
                   data-filter="skipped"
-                  class="auto-filter-btn flex-1 py-1 rounded text-[10px] font-label-caps font-semibold border border-outline-variant/40 bg-surface-container text-on-surface-variant hover:text-outline transition-all whitespace-nowrap"
+                  aria-pressed="false"
+                  class="auto-filter-btn flex-1 py-1.5 px-2 min-h-[32px] rounded text-xs font-label-caps font-semibold border border-outline-variant bg-surface-container text-on-surface-variant hover:text-outline active:scale-[0.98] transition-[color,background-color,border-color,transform] duration-500 whitespace-nowrap"
                 >
                   Skip
                 </button>
+              </div>
+              <div
+                class="flex items-center justify-between mt-2 pt-1.5 border-t border-outline-variant/40 text-xs font-mono text-outline"
+              >
+                <span
+                  id="automatedVisibleCount"
+                  aria-live="polite"
+                  class="tabular-nums"
+                  >Showing all tests</span
+                >
+                <span class="hidden sm:inline text-[11px] opacity-80"
+                  >↑↓ Navigate</span
+                >
               </div>
             </div>
 
             <!-- Tree Container -->
             <div
-              class="flex-1 overflow-y-auto custom-scrollbar p-2 min-h-0"
+              class="flex-1 overflow-y-auto custom-scrollbar p-2.5 min-h-0"
               id="automatedTreeContainer"
+              role="tree"
+              aria-label="Automated Test Suites"
             >
               <!-- Rendered via JS -->
             </div>
@@ -1072,69 +1336,83 @@
 
           <!-- Right Pane: Test Details -->
           <div
-            class="lg:w-2/3 bg-surface-container-lowest border border-outline-variant rounded-xl flex flex-col overflow-hidden relative min-h-0"
+            class="lg:w-7/12 bg-surface-container-lowest border border-outline-variant rounded-xl flex flex-col overflow-hidden relative min-h-[380px] lg:min-h-0 card-hover"
             id="automatedDetailsContainer"
           >
             <!-- Empty State -->
             <div
               id="automatedEmptyState"
-              class="absolute inset-0 flex flex-col items-center justify-center text-outline bg-surface-container-lowest z-10 transition-opacity duration-300"
+              class="absolute inset-0 flex flex-col items-center justify-center text-outline bg-surface-container-lowest z-10 transition-opacity duration-150 p-6 text-center"
             >
               <span
-                class="material-symbols-outlined text-6xl opacity-30 mb-4 animate-pulse-glow"
-                >magic_button</span
+                class="material-symbols-outlined text-5xl text-secondary-container/60 mb-3"
+                aria-hidden="true"
+                >auto_stories</span
               >
-              <p class="font-label-caps text-sm">
-                Select a test to view details
+              <p
+                class="font-display text-sm uppercase tracking-wider text-on-surface-variant"
+              >
+                Select a test from the grimoire tree to inspect diagnostics
               </p>
             </div>
 
             <!-- Content State -->
             <div
               id="automatedContentState"
-              class="flex flex-col flex-1 w-full opacity-0 pointer-events-none transition-opacity duration-300 min-h-0 relative z-10"
+              class="flex flex-col flex-1 w-full opacity-0 pointer-events-none transition-opacity duration-150 min-h-0 relative z-10"
             >
               <!-- Header -->
               <div
-                class="p-4 border-b border-outline-variant/50 flex flex-col gap-2"
+                class="p-4 border-b border-outline-variant flex flex-col gap-2 bg-surface-container-low/40"
               >
-                <div class="flex items-center justify-between">
-                  <div class="flex items-center gap-2">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                  <div class="flex items-center gap-2 min-w-0">
                     <span
                       id="detailStatusBadge"
-                      class="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold rounded-full border bg-primary/10 text-primary border-primary/30"
+                      class="inline-flex items-center gap-1.5 px-2.5 py-0.5 text-xs font-bold rounded-full border bg-primary/15 text-primary-container border-primary/35 shrink-0"
                     >
                       <span
                         class="w-1.5 h-1.5 rounded-full bg-primary"
                         id="detailStatusDot"
+                        aria-hidden="true"
                       ></span>
                       <span id="detailStatusText" class="uppercase"
                         >PASSED</span
                       >
                     </span>
                     <span
-                      class="text-on-surface-variant font-mono text-xs"
+                      class="text-on-surface-variant font-mono text-xs truncate"
                       id="detailSuiteText"
                       >suite_name.spec.ts</span
                     >
                   </div>
-                  <div
-                    class="text-on-surface-variant font-mono text-xs flex items-center gap-1"
-                  >
-                    <span class="material-symbols-outlined text-sm">timer</span>
-                    <span id="detailDurationText">120ms</span>
-                  </div>
-                  <div
-                    id="detailAttemptsBadge"
-                    class="hidden text-amber-500 bg-amber-500/10 font-mono text-[10px] px-1.5 py-0.5 rounded border border-amber-500/30 flex items-center gap-1 ml-2"
-                  >
-                    <span class="material-symbols-outlined text-[12px]"
-                      >replay</span
+                  <div class="flex items-center gap-2">
+                    <div
+                      class="text-on-surface-variant font-mono text-xs flex items-center gap-1"
                     >
-                    <span id="detailAttemptsText"></span>
+                      <span
+                        class="material-symbols-outlined text-sm text-secondary-container"
+                        aria-hidden="true"
+                        >timer</span
+                      >
+                      <span id="detailDurationText" class="tabular-nums"
+                        >120ms</span
+                      >
+                    </div>
+                    <div
+                      id="detailAttemptsBadge"
+                      class="hidden text-amber-400 bg-amber-500/10 font-mono text-xs px-2 py-0.5 rounded border border-amber-500/30 flex items-center gap-1"
+                    >
+                      <span
+                        class="material-symbols-outlined text-xs"
+                        aria-hidden="true"
+                        >replay</span
+                      >
+                      <span id="detailAttemptsText"></span>
+                    </div>
                   </div>
                 </div>
-                <div class="flex items-start justify-between gap-4 mt-2">
+                <div class="flex items-start justify-between gap-4 mt-1">
                   <h3
                     class="font-body font-bold text-lg text-on-surface flex-1 tracking-tight"
                     id="detailTestName"
@@ -1144,11 +1422,14 @@
                   <button
                     type="button"
                     id="btnOpenAllure"
-                    class="text-outline hover:text-primary transition-colors p-1.5 rounded hover:bg-surface-container flex items-center justify-center shrink-0 border border-outline-variant/30 hover:border-primary/50 shadow-sm"
-                    title="Expandir detalles (Estilo Allure)"
+                    aria-label="Open full test chronicle modal"
+                    class="w-8 h-8 inline-flex items-center justify-center rounded-lg bg-surface-container border border-outline-variant text-on-surface-variant hover:text-secondary-container hover:border-primary hover:bg-primary/15 active:scale-[0.96] transition-[color,background-color,border-color,transform] duration-500 shrink-0"
+                    title="Expand full test chronicle"
                   >
-                    <span class="material-symbols-outlined text-[18px]"
-                      >article</span
+                    <span
+                      class="material-symbols-outlined text-base"
+                      aria-hidden="true"
+                      >open_in_full</span
                     >
                   </button>
                 </div>
@@ -1156,25 +1437,36 @@
 
               <!-- Tabs for Body -->
               <div
-                class="px-4 pt-2 border-b border-outline-variant/50 flex items-center gap-4"
+                class="px-4 pt-2 border-b border-outline-variant flex items-center gap-4"
+                role="tablist"
+                aria-label="Test Case Details"
               >
                 <button
+                  type="button"
+                  role="tab"
+                  aria-selected="true"
                   id="tabBtnExecution"
-                  class="px-2 py-1 text-sm font-label-caps text-primary border-b-2 border-primary transition-colors focus:outline-none"
+                  class="px-2 py-2 text-xs font-label-caps text-primary border-b-2 border-primary transition-colors"
                   onclick="switchDetailTab('execution')"
                 >
                   Execution
                 </button>
                 <button
+                  type="button"
+                  role="tab"
+                  aria-selected="false"
                   id="tabBtnExecutions"
-                  class="px-2 py-1 text-sm font-label-caps text-on-surface-variant hover:text-on-surface border-b-2 border-transparent transition-colors focus:outline-none hidden"
+                  class="px-2 py-2 text-xs font-label-caps text-on-surface-variant hover:text-on-surface border-b-2 border-transparent transition-colors hidden"
                   onclick="switchDetailTab('executions')"
                 >
                   Attempts
                 </button>
                 <button
+                  type="button"
+                  role="tab"
+                  aria-selected="false"
                   id="tabBtnArtifacts"
-                  class="px-2 py-1 text-sm font-label-caps text-on-surface-variant hover:text-on-surface border-b-2 border-transparent transition-colors focus:outline-none hidden"
+                  class="px-2 py-2 text-xs font-label-caps text-on-surface-variant hover:text-on-surface border-b-2 border-transparent transition-colors hidden"
                   onclick="switchDetailTab('artifacts')"
                 >
                   Artifacts
@@ -1206,97 +1498,284 @@
         </div>
       </div>
 
-      <!-- ==================== PERFORMANCE TAB (v1) ==================== -->
+      <!-- ==================== PERFORMANCE TAB (Rule 4 Complete) ==================== -->
       <div
         id="tab-perf"
+        role="tabpanel"
+        aria-labelledby="tab-btn-perf"
         class="tab-panel hidden-panel hidden flex flex-col gap-gutter"
       >
-        <!-- 3 Core Metrics + Thresholds KPI Grid -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-base">
-          <!-- Metric 1: Latencia p95 -->
+        <!-- Primary KPI Grid (Total Requests, Success Rate, Error Rate, P95 Latency, Throughput, VUs, Thresholds) -->
+        <div
+          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-base"
+        >
+          <!-- Total Requests & Success Rate -->
           <div
-            class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter text-center card-hover animate-fade-in-up delay-100 relative overflow-hidden"
+            class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter card-hover tab-anim-item flex flex-col justify-between"
           >
-            <div class="flex items-center justify-between text-outline text-[10px] font-label-caps uppercase mb-1">
-              <span>P95 Latency</span>
-              <span class="text-tertiary">http_req_duration</span>
+            <div
+              class="flex items-center justify-between text-on-surface-variant text-xs font-label-caps uppercase"
+            >
+              <span>Total Requests</span>
+              <span
+                class="material-symbols-outlined text-secondary-container text-base"
+                aria-hidden="true"
+                >stacked_bar_chart</span
+              >
             </div>
-            <p class="font-mono text-headline-md text-on-surface mt-2 font-bold tracking-tight">
+            <p
+              class="font-mono text-headline-md text-on-surface mt-2 font-bold tracking-tight tabular-nums"
+            >
+              __TOTAL_REQUESTS__
+            </p>
+            <p class="text-xs font-mono text-emerald-400 mt-1">
+              __REQUEST_SUCCESS_RATE__% success rate
+            </p>
+          </div>
+
+          <!-- P95 Latency -->
+          <div
+            class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter card-hover tab-anim-item flex flex-col justify-between"
+          >
+            <div
+              class="flex items-center justify-between text-on-surface-variant text-xs font-label-caps uppercase"
+            >
+              <span>P95 Latency</span>
+              <span class="text-primary-container font-mono text-xs"
+                >p(95)</span
+              >
+            </div>
+            <p
+              class="font-mono text-headline-md text-on-surface mt-2 font-bold tracking-tight tabular-nums"
+            >
               __K6_P95_DISPLAY__
             </p>
-            <p class="text-[11px] font-body-md text-on-surface-variant mt-1">95th percentile response</p>
-          </div>
-
-          <!-- Metric 2: Tasa de error -->
-          <div
-            class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter text-center card-hover animate-fade-in-up delay-200 relative overflow-hidden"
-          >
-            <div class="flex items-center justify-between text-outline text-[10px] font-label-caps uppercase mb-1">
-              <span>Error Rate</span>
-              <span class="text-error">http_req_failed</span>
-            </div>
-            <p class="font-mono text-headline-md mt-2 font-bold tracking-tight __K6_ERROR_RATE_COLOR__">
-              __K6_ERROR_RATE_DISPLAY__
+            <p class="text-xs font-body-md text-on-surface-variant mt-1">
+              http_req_duration
             </p>
-            <p class="text-[11px] font-body-md text-on-surface-variant mt-1">Failed requests ratio</p>
           </div>
 
-          <!-- Metric 3: Throughput -->
+          <!-- Throughput -->
           <div
-            class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter text-center card-hover animate-fade-in-up delay-300 relative overflow-hidden"
+            class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter card-hover tab-anim-item flex flex-col justify-between"
           >
-            <div class="flex items-center justify-between text-outline text-[10px] font-label-caps uppercase mb-1">
+            <div
+              class="flex items-center justify-between text-on-surface-variant text-xs font-label-caps uppercase"
+            >
               <span>Throughput</span>
-              <span class="text-secondary">http_reqs</span>
+              <span class="text-secondary-container font-mono text-xs"
+                >http_reqs</span
+              >
             </div>
-            <p class="font-mono text-headline-md text-on-surface mt-2 font-bold tracking-tight">
+            <p
+              class="font-mono text-headline-md text-on-surface mt-2 font-bold tracking-tight tabular-nums"
+            >
               __K6_THROUGHPUT_DISPLAY__
             </p>
-            <p class="text-[11px] font-body-md text-on-surface-variant mt-1">Volume rate (req/s)</p>
+            <p class="text-xs font-body-md text-on-surface-variant mt-1">
+              Request rate (req/s)
+            </p>
           </div>
 
-          <!-- Metric 4: Thresholds Status -->
+          <!-- Error Rate -->
           <div
-            class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter text-center card-hover animate-fade-in-up delay-400 relative overflow-hidden"
+            class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter card-hover tab-anim-item flex flex-col justify-between"
           >
-            <div class="flex items-center justify-between text-outline text-[10px] font-label-caps uppercase mb-1">
-              <span>Thresholds</span>
-              <span class="text-primary font-mono">k6 rules</span>
+            <div
+              class="flex items-center justify-between text-on-surface-variant text-xs font-label-caps uppercase"
+            >
+              <span>Error Rate</span>
+              <span class="text-error font-mono text-xs">failed</span>
             </div>
-            <div class="mt-2 flex items-center justify-center">
+            <p
+              class="font-mono text-headline-md mt-2 font-bold tracking-tight tabular-nums __K6_ERROR_RATE_COLOR__"
+            >
+              __K6_ERROR_RATE_DISPLAY__
+            </p>
+            <p class="text-xs font-body-md text-on-surface-variant mt-1">
+              __FAILED_REQUESTS__ failed reqs
+            </p>
+          </div>
+
+          <!-- Virtual Users -->
+          <div
+            class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter card-hover tab-anim-item flex flex-col justify-between"
+          >
+            <div
+              class="flex items-center justify-between text-on-surface-variant text-xs font-label-caps uppercase"
+            >
+              <span>Virtual Users</span>
+              <span class="text-primary-container font-mono text-xs">vus</span>
+            </div>
+            <p
+              class="font-mono text-headline-md text-on-surface mt-2 font-bold tracking-tight tabular-nums"
+            >
+              __K6_VUS_DISPLAY__
+            </p>
+            <p class="text-xs font-mono text-on-surface-variant mt-1">
+              __K6_VUS_MAX_DISPLAY__
+            </p>
+          </div>
+
+          <!-- Thresholds Status -->
+          <div
+            class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter card-hover tab-anim-item flex flex-col justify-between"
+          >
+            <div
+              class="flex items-center justify-between text-on-surface-variant text-xs font-label-caps uppercase"
+            >
+              <span>Thresholds</span>
+              <span class="text-secondary-container font-mono text-xs"
+                >rules</span
+              >
+            </div>
+            <div class="mt-2 flex items-center">
               __K6_THRESHOLDS_STATUS_BADGE__
             </div>
-            <p class="text-[11px] font-body-md text-on-surface-variant mt-2 font-mono">__K6_THRESHOLDS_SUMMARY__</p>
+            <p class="text-xs font-mono text-on-surface-variant mt-1">
+              __K6_THRESHOLDS_SUMMARY__
+            </p>
+          </div>
+        </div>
+
+        <!-- Latency Distribution Breakdown (Rule 4: avg, min, max, p90, p95) & Chart -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter mt-1">
+          <div
+            class="lg:col-span-5 bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter flex flex-col justify-between card-hover tab-anim-item"
+          >
+            <div>
+              <h3
+                class="font-display text-lg font-semibold text-on-surface tracking-wide uppercase mb-1"
+              >
+                Latency Distribution Breakdown
+              </h3>
+              <p class="text-xs text-on-surface-variant font-mono mb-4">
+                http_req_duration (milliseconds)
+              </p>
+            </div>
+            <dl
+              class="grid grid-cols-2 sm:grid-cols-3 gap-y-4 gap-x-4 my-auto border-y border-outline-variant/40 py-4"
+            >
+              <div>
+                <dt
+                  class="text-xs font-label-caps text-on-surface-variant uppercase"
+                >
+                  Min
+                </dt>
+                <dd
+                  class="font-mono text-lg font-bold text-emerald-400 tabular-nums mt-1"
+                >
+                  __K6_MIN_DISPLAY__
+                </dd>
+              </div>
+              <div>
+                <dt
+                  class="text-xs font-label-caps text-on-surface-variant uppercase"
+                >
+                  Average
+                </dt>
+                <dd
+                  class="font-mono text-lg font-bold text-on-surface tabular-nums mt-1"
+                >
+                  __K6_AVG_DISPLAY__
+                </dd>
+              </div>
+              <div>
+                <dt
+                  class="text-xs font-label-caps text-on-surface-variant uppercase"
+                >
+                  P90
+                </dt>
+                <dd
+                  class="font-mono text-lg font-bold text-secondary-container tabular-nums mt-1"
+                >
+                  __K6_P90_DISPLAY__
+                </dd>
+              </div>
+              <div>
+                <dt
+                  class="text-xs font-label-caps text-primary-container uppercase"
+                >
+                  P95
+                </dt>
+                <dd
+                  class="font-mono text-lg font-bold text-primary-container tabular-nums mt-1"
+                >
+                  __K6_P95_DISPLAY__
+                </dd>
+              </div>
+              <div>
+                <dt
+                  class="text-xs font-label-caps text-on-surface-variant uppercase"
+                >
+                  Max
+                </dt>
+                <dd
+                  class="font-mono text-lg font-bold text-amber-400 tabular-nums mt-1"
+                >
+                  __K6_MAX_DISPLAY__
+                </dd>
+              </div>
+            </dl>
+            <p class="text-xs text-outline font-mono mt-4">
+              Scenarios evaluated: __PASSED_PERFORMANCE_SCENARIOS__ /
+              __TOTAL_PERFORMANCE_SCENARIOS__ passed
+            </p>
+          </div>
+
+          <div
+            class="lg:col-span-7 bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter card-hover tab-anim-item"
+          >
+            <h3
+              class="font-display text-lg font-semibold text-on-surface tracking-wide uppercase mb-base"
+            >
+              Response Time Percentiles (ms)
+            </h3>
+            <div class="chart-wrap h-[240px]">
+              <canvas
+                id="perfChart"
+                aria-label="Bar chart of k6 latency percentiles: Avg, Min, Max, P90, P95"
+                role="img"
+              ></canvas>
+            </div>
           </div>
         </div>
 
         <!-- Ingestion Warnings Container (if any) -->
         __K6_WARNINGS_CONTAINER__
 
+        <!-- Scenarios Table (Rule 4) -->
+        __K6_SCENARIOS_TABLE__
+
         <!-- Thresholds Detail Table (if any) -->
         __K6_THRESHOLDS_TABLE__
       </div>
+
       <!-- Error Detail Modal -->
       <div
         id="errorModal"
-        class="modal-backdrop fixed inset-0 z-50 hidden items-center justify-center bg-black/60 backdrop-blur-sm p-gutter"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="errorModalTitle"
+        class="modal-backdrop fixed inset-0 z-50 hidden items-center justify-center bg-black/70 backdrop-blur-sm p-gutter"
       >
         <div
-          class="modal-content bg-surface-container-lowest border border-primary/30 rounded-xl shadow-[0_0_40px_rgba(139,92,246,0.15)] max-w-2xl w-full max-h-[80vh] flex flex-col"
+          class="modal-content bg-surface-container-lowest border border-primary/40 rounded-xl shadow-2xl max-w-2xl w-full max-h-[82vh] flex flex-col"
         >
           <div
             class="p-gutter border-b border-outline-variant flex items-center justify-between"
           >
             <h3
-              class="font-label-caps text-on-surface-variant text-[11px] uppercase"
+              id="errorModalTitle"
+              class="font-display text-sm font-bold text-on-surface uppercase tracking-wider"
             >
-              Error Detail
+              Diagnostic Error Detail
             </h3>
             <button
               type="button"
               id="closeErrorModal"
-              class="material-symbols-outlined text-outline hover:text-primary transition-colors"
-              aria-label="Close"
+              class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors p-1 rounded"
+              aria-label="Close error detail modal"
             >
               close
             </button>
@@ -1310,48 +1789,60 @@
       <!-- Allure-style Details Modal -->
       <div
         id="allureModal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="allureTestName"
         class="modal-backdrop fixed inset-0 z-[60] hidden items-center justify-center bg-black/80 backdrop-blur-xl p-4 lg:p-10"
       >
         <div
-          class="modal-content bg-surface-container-low border border-outline-variant/30 rounded-xl w-full max-w-5xl h-full flex flex-col shadow-2xl relative overflow-hidden text-[#e4e6eb] font-body"
+          class="modal-content bg-surface-container-lowest border border-outline-variant rounded-xl w-full max-w-5xl h-full flex flex-col shadow-2xl relative overflow-hidden text-on-surface font-body"
         >
           <!-- Header section -->
           <div
-            class="px-8 pt-6 pb-0 border-b border-outline-variant/20 flex flex-col gap-5 bg-surface-container"
+            class="px-6 md:px-8 pt-6 pb-0 border-b border-outline-variant flex flex-col gap-4 bg-surface-container-low"
           >
             <!-- Top row: filepath + actions -->
-            <div class="flex items-center justify-between">
+            <div class="flex items-center justify-between gap-2">
               <div
-                class="flex items-center gap-3 text-on-surface-variant font-mono text-xs"
+                class="flex items-center gap-2 text-on-surface-variant font-mono text-xs min-w-0"
               >
-                <span class="material-symbols-outlined text-[16px]"
+                <span
+                  class="material-symbols-outlined text-base shrink-0"
+                  aria-hidden="true"
                   >description</span
                 >
-                <span id="allureSuiteText"></span>
+                <span id="allureSuiteText" class="truncate"></span>
                 <button
-                  class="material-symbols-outlined text-[14px] hover:text-primary"
-                  title="Copy"
+                  type="button"
+                  id="copyAllureSuiteBtn"
+                  class="material-symbols-outlined text-sm hover:text-primary p-1 rounded shrink-0"
+                  aria-label="Copy suite path"
+                  title="Copy suite path"
                 >
                   content_copy
                 </button>
               </div>
-              <div class="flex items-center gap-4">
+              <div class="flex items-center gap-3 shrink-0">
                 <div
-                  class="flex items-center gap-2 text-on-surface-variant text-sm"
+                  class="flex items-center gap-1 text-on-surface-variant text-sm"
                 >
                   <button
+                    type="button"
                     id="allureModalPrevBtn"
-                    class="material-symbols-outlined text-[20px] hover:text-primary transition-all disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:text-on-surface-variant hover:scale-110 active:scale-95 disabled:hover:scale-100"
+                    aria-label="Previous test case"
+                    class="material-symbols-outlined text-xl p-1 min-h-[32px] min-w-[32px] rounded hover:text-primary active:scale-[0.98] transition-[color,transform] disabled:opacity-30 disabled:cursor-not-allowed"
                   >
                     expand_less
                   </button>
                   <span
                     id="allureModalCounter"
-                    class="font-mono text-[11px] w-12 text-center"
+                    class="font-mono text-xs w-14 text-center tabular-nums"
                   ></span>
                   <button
+                    type="button"
                     id="allureModalNextBtn"
-                    class="material-symbols-outlined text-[20px] hover:text-primary transition-all disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:text-on-surface-variant hover:scale-110 active:scale-95 disabled:hover:scale-100"
+                    aria-label="Next test case"
+                    class="material-symbols-outlined text-xl p-1 min-h-[32px] min-w-[32px] rounded hover:text-primary active:scale-[0.98] transition-[color,transform] disabled:opacity-30 disabled:cursor-not-allowed"
                   >
                     expand_more
                   </button>
@@ -1359,7 +1850,8 @@
                 <button
                   type="button"
                   onclick="closeAllureModal()"
-                  class="material-symbols-outlined text-outline hover:text-primary transition-all p-1 rounded-full hover:bg-white/5 hover:scale-110 active:scale-95"
+                  aria-label="Close test chronicle modal"
+                  class="material-symbols-outlined text-on-surface-variant hover:text-primary active:scale-[0.98] transition-[color,background-color,transform] p-1.5 min-h-[34px] min-w-[34px] rounded-full hover:bg-white/5"
                 >
                   close
                 </button>
@@ -1368,14 +1860,12 @@
 
             <!-- Title -->
             <h2
-              class="font-body text-xl md:text-3xl font-bold tracking-tight text-on-surface"
+              class="font-body text-xl md:text-2xl font-bold tracking-tight text-on-surface"
               id="allureTestName"
             ></h2>
 
             <!-- Badges Row -->
-            <div
-              class="flex flex-wrap items-center gap-4 text-[11px] font-medium"
-            >
+            <div class="flex flex-wrap items-center gap-4 text-xs font-medium">
               <!-- Status -->
               <div
                 id="allureStatusBadge"
@@ -1383,179 +1873,146 @@
               >
                 <span
                   id="allureStatusIcon"
-                  class="material-symbols-outlined text-[14px]"
+                  class="material-symbols-outlined text-sm"
+                  aria-hidden="true"
                 ></span>
                 <span id="allureStatusText" class="font-bold"></span>
               </div>
-              <!-- Timeline icon -->
-              <div class="flex items-center gap-1 text-on-surface-variant">
-                <span class="material-symbols-outlined text-[16px]"
-                  >linear_scale</span
-                >
-              </div>
               <!-- Priority -->
               <div class="flex items-center gap-1.5 text-on-surface-variant">
-                <span class="material-symbols-outlined text-[14px]"
+                <span
+                  class="material-symbols-outlined text-sm"
+                  aria-hidden="true"
                   >drag_handle</span
                 >
                 <span>Normal</span>
               </div>
               <!-- Duration -->
               <div
-                class="text-on-surface-variant font-mono"
+                class="text-on-surface-variant font-mono tabular-nums"
                 id="allureDurationText"
               ></div>
             </div>
 
             <!-- Tabs Row -->
-            <div class="flex items-center gap-6 mt-2">
+            <div
+              class="flex items-center gap-6 mt-1 overflow-x-auto"
+              role="tablist"
+              aria-label="Chronicle Sections"
+            >
               <button
-                class="px-1 py-3 text-sm font-bold text-on-surface border-b-2 border-primary"
+                type="button"
+                role="tab"
+                aria-selected="true"
+                class="px-1 py-3 text-sm font-bold text-primary border-b-2 border-primary whitespace-nowrap"
                 data-allure-tab="resumen"
               >
                 Overview
               </button>
               <button
-                class="px-1 py-3 text-sm font-medium text-on-surface-variant hover:text-on-surface transition-colors flex items-center gap-2"
+                type="button"
+                role="tab"
+                aria-selected="false"
+                class="px-1 py-3 text-sm font-medium text-on-surface-variant hover:text-on-surface transition-colors flex items-center gap-2 whitespace-nowrap"
                 data-allure-tab="historial"
                 id="allureHistorialTabBtn"
               >
                 History
                 <span
                   id="allureHistoryCountBadge"
-                  class="bg-surface-container-high text-on-surface text-[10px] px-1.5 py-0.5 rounded-full font-mono leading-none"
+                  class="bg-surface-container-high text-on-surface text-xs px-1.5 py-0.5 rounded-full font-mono leading-none tabular-nums"
                   >0</span
                 >
               </button>
               <button
-                class="px-1 py-3 text-sm font-medium text-on-surface-variant hover:text-on-surface transition-colors flex items-center gap-2 hidden"
+                type="button"
+                role="tab"
+                aria-selected="false"
+                class="px-1 py-3 text-sm font-medium text-on-surface-variant hover:text-on-surface transition-colors flex items-center gap-2 hidden whitespace-nowrap"
                 id="allureReintentosTabBtn"
                 data-allure-tab="reintentos"
               >
                 Retries
                 <span
                   id="allureAttemptsCountBadge"
-                  class="bg-surface-container-high text-on-surface text-[10px] px-1.5 py-0.5 rounded-full font-mono leading-none"
+                  class="bg-surface-container-high text-on-surface text-xs px-1.5 py-0.5 rounded-full font-mono leading-none tabular-nums"
                   >0</span
                 >
               </button>
               <button
-                class="px-1 py-3 text-sm font-medium text-on-surface-variant hover:text-on-surface transition-colors flex items-center gap-2"
+                type="button"
+                role="tab"
+                aria-selected="false"
+                class="px-1 py-3 text-sm font-medium text-on-surface-variant hover:text-on-surface transition-colors flex items-center gap-2 whitespace-nowrap"
                 data-allure-tab="adjuntos"
                 id="allureAdjuntosTabBtn"
               >
                 Attachments
                 <span
                   id="allureAdjuntosCountBadge"
-                  class="bg-surface-container-high text-on-surface text-[10px] px-1.5 py-0.5 rounded-full font-mono leading-none hidden"
+                  class="bg-surface-container-high text-on-surface text-xs px-1.5 py-0.5 rounded-full font-mono leading-none tabular-nums hidden"
                   >0</span
                 >
-              </button>
-              <button
-                class="px-1 py-3 text-sm font-medium text-on-surface-variant hover:text-on-surface transition-colors flex items-center gap-2"
-                data-allure-tab="entornos"
-                id="allureEntornosTabBtn"
-                style="display: none !important"
-              >
-                Environments
               </button>
             </div>
           </div>
 
           <!-- Body Area -->
           <div
-            class="flex-1 overflow-y-auto custom-scrollbar p-8 bg-surface-container-low"
+            class="flex-1 overflow-y-auto custom-scrollbar p-6 md:p-8 bg-surface-container-lowest"
           >
             <!-- Tab: Resumen -->
             <div
               id="allureTab-resumen"
-              class="allure-tab-content flex flex-col gap-8 max-w-5xl transition-all duration-300 ease-in-out opacity-100 translate-y-0"
+              role="tabpanel"
+              class="allure-tab-content flex flex-col gap-6 max-w-5xl transition-[opacity,transform] duration-500 ease-out opacity-100 translate-y-0"
             >
-              <!-- Playwright Trace -->
-              <div>
-                <div class="flex items-center gap-3 mb-4">
-                  <h3 class="text-sm font-bold text-on-surface">
-                    Playwright Trace
-                  </h3>
-                  <span
-                    class="bg-surface-container-high text-on-surface text-[10px] px-1.5 py-0.5 rounded-full font-mono leading-none"
-                    >1</span
-                  >
-                </div>
-                <div
-                  class="flex items-center justify-between text-[13px] bg-white/[0.02] p-2 rounded hover:bg-white/[0.06] transition-all duration-300 border border-transparent hover:border-outline-variant/50 group cursor-pointer hover:shadow-lg"
-                >
-                  <div class="flex items-center gap-3">
-                    <span
-                      class="material-symbols-outlined text-error text-[16px]"
-                      >bug_report</span
-                    >
-                    <span
-                      class="font-mono text-on-surface-variant group-hover:text-on-surface transition-colors"
-                      >1</span
-                    >
-                    <span class="text-on-surface font-medium">trace</span>
-                  </div>
-                  <div class="flex items-center gap-4 text-on-surface-variant">
-                    <span class="font-mono text-[11px] opacity-70"
-                      >application/vnd.allure.playwright-trace</span
-                    >
-                    <span class="font-mono text-[11px]">4.7 KiB</span>
-                    <span
-                      class="material-symbols-outlined text-[16px] hover:text-on-surface"
-                      >open_in_full</span
-                    >
-                    <span
-                      class="material-symbols-outlined text-[16px] hover:text-on-surface"
-                      >cloud_download</span
-                    >
-                  </div>
-                </div>
-              </div>
-
-              <hr class="border-outline-variant/30" />
-
               <!-- Parameters -->
               <div>
-                <div class="flex items-center gap-3 mb-4">
-                  <h3 class="text-sm font-bold text-on-surface">Parameters</h3>
-                  <span
-                    class="bg-surface-container-high text-on-surface text-[10px] px-1.5 py-0.5 rounded-full font-mono leading-none"
-                    >1</span
+                <div class="flex items-center gap-3 mb-3">
+                  <h3
+                    class="text-sm font-bold text-on-surface uppercase font-display tracking-wider"
                   >
+                    Parameters
+                  </h3>
                 </div>
                 <div
-                  class="grid grid-cols-[140px_1fr] items-center text-[13px] gap-y-3"
+                  class="grid grid-cols-[120px_1fr] items-center text-xs gap-y-3"
                 >
                   <span class="text-on-surface-variant">Project</span>
                   <span class="inline-flex"
                     ><span
                       id="allureProjectText"
-                      class="bg-surface-container-highest text-on-surface/90 border border-outline-variant/30 px-2 py-0.5 rounded text-xs font-mono"
+                      class="bg-surface-container text-on-surface border border-outline-variant px-2 py-0.5 rounded text-xs font-mono"
                     ></span
                   ></span>
                 </div>
               </div>
 
-              <hr class="border-outline-variant/30" />
+              <hr class="border-outline-variant" />
 
               <!-- Tags -->
               <div>
-                <div class="flex items-center gap-3 mb-4">
-                  <h3 class="text-sm font-bold text-on-surface">Tags</h3>
+                <div class="flex items-center gap-3 mb-3">
+                  <h3
+                    class="text-sm font-bold text-on-surface uppercase font-display tracking-wider"
+                  >
+                    Metadata & Tags
+                  </h3>
                   <span
                     id="allureTagsCountBadge"
-                    class="bg-surface-container-high text-on-surface text-[10px] px-1.5 py-0.5 rounded-full font-mono leading-none"
+                    class="bg-surface-container text-on-surface text-xs px-2 py-0.5 rounded-full font-mono leading-none tabular-nums"
                     >0</span
                   >
                 </div>
                 <div
                   id="allureTagsGrid"
-                  class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-3 text-[13px]"
+                  class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-3 text-xs"
                 >
                   <!-- Populated via JS -->
                 </div>
                 <button
+                  type="button"
                   id="allureTagsShowMoreBtn"
                   class="mt-4 text-xs font-bold text-on-surface-variant hover:text-primary transition-colors hidden"
                 >
@@ -1563,12 +2020,13 @@
                 </button>
               </div>
 
-              <hr class="border-outline-variant/30" />
+              <hr class="border-outline-variant" />
 
               <!-- Test Body -->
               <div>
-                <div
-                  class="flex items-center gap-2 mb-4 cursor-pointer select-none"
+                <button
+                  type="button"
+                  class="flex items-center gap-2 mb-4 cursor-pointer select-none text-left"
                   onclick="
                     const b = document.getElementById('allureExecutionBody');
                     const i = this.querySelector('.material-symbols-outlined');
@@ -1578,21 +2036,23 @@
                   "
                 >
                   <span
-                    class="material-symbols-outlined text-[18px] text-on-surface-variant transition-transform"
+                    class="material-symbols-outlined text-lg text-on-surface-variant transition-transform"
                     style="transform: rotate(0deg)"
+                    aria-hidden="true"
                     >arrow_drop_down</span
                   >
-                  <h3 class="text-sm font-bold text-on-surface">Test Body</h3>
+                  <h3
+                    class="text-sm font-bold text-on-surface uppercase font-display tracking-wider"
+                  >
+                    Execution Steps
+                  </h3>
                   <span
                     id="allureStepsCountBadge"
-                    class="bg-surface-container-high text-on-surface text-[10px] px-1.5 py-0.5 rounded-full font-mono leading-none"
+                    class="bg-surface-container text-on-surface text-xs px-2 py-0.5 rounded-full font-mono leading-none tabular-nums"
                     >0</span
                   >
-                </div>
-                <div
-                  id="allureExecutionBody"
-                  class="flex flex-col w-full pl-[26px]"
-                >
+                </button>
+                <div id="allureExecutionBody" class="flex flex-col w-full pl-4">
                   <!-- Steps go here -->
                 </div>
               </div>
@@ -1601,16 +2061,19 @@
             <!-- Tab: Reintentos -->
             <div
               id="allureTab-reintentos"
-              class="allure-tab-content hidden opacity-0 translate-y-4 transition-all duration-300 ease-in-out"
+              role="tabpanel"
+              class="allure-tab-content hidden opacity-0 translate-y-4 transition-[opacity,transform] duration-500 ease-out"
             >
               <div id="allureReintentosBody" class="flex flex-col gap-4">
                 <div
                   class="text-sm text-on-surface-variant flex flex-col items-center justify-center py-20 gap-4"
                 >
-                  <span class="material-symbols-outlined text-[48px] opacity-50"
+                  <span
+                    class="material-symbols-outlined text-5xl opacity-50"
+                    aria-hidden="true"
                     >history</span
                   >
-                  <p>No retries for this test case.</p>
+                  <p>No retries recorded for this test case.</p>
                 </div>
               </div>
             </div>
@@ -1618,7 +2081,8 @@
             <!-- Tab: Historial -->
             <div
               id="allureTab-historial"
-              class="allure-tab-content hidden opacity-0 translate-y-4 transition-all duration-300 ease-in-out"
+              role="tabpanel"
+              class="allure-tab-content hidden opacity-0 translate-y-4 transition-[opacity,transform] duration-500 ease-out"
             >
               <div
                 id="allureHistorialBody"
@@ -1628,7 +2092,8 @@
                   class="text-sm text-on-surface-variant flex flex-col items-center justify-center py-20 gap-4"
                 >
                   <span
-                    class="material-symbols-outlined text-[48px] opacity-50 text-primary"
+                    class="material-symbols-outlined text-5xl opacity-50 text-primary"
+                    aria-hidden="true"
                     >timeline</span
                   >
                   <p class="font-bold">No execution history recorded yet</p>
@@ -1643,36 +2108,20 @@
             <!-- Tab: Adjuntos -->
             <div
               id="allureTab-adjuntos"
-              class="allure-tab-content hidden opacity-0 translate-y-4 transition-all duration-300 ease-in-out"
+              role="tabpanel"
+              class="allure-tab-content hidden opacity-0 translate-y-4 transition-[opacity,transform] duration-500 ease-out"
             >
               <div id="allureAdjuntosBody" class="flex flex-col gap-4">
                 <div
                   class="text-sm text-on-surface-variant flex flex-col items-center justify-center py-20 gap-4"
                 >
-                  <span class="material-symbols-outlined text-[48px] opacity-50"
+                  <span
+                    class="material-symbols-outlined text-5xl opacity-50"
+                    aria-hidden="true"
                     >attachment</span
                   >
-                  <p>No attachments for this test.</p>
+                  <p>No attachments recorded for this test.</p>
                 </div>
-              </div>
-            </div>
-
-            <!-- Tab: Entornos -->
-            <div
-              id="allureTab-entornos"
-              class="allure-tab-content hidden opacity-0 translate-y-4 transition-all duration-300 ease-in-out"
-            >
-              <div
-                class="text-sm text-on-surface-variant flex flex-col items-center justify-center py-20 gap-4"
-              >
-                <span
-                  class="material-symbols-outlined text-[48px] opacity-50 text-primary"
-                  >dns</span
-                >
-                <p class="font-bold">Environment Variables</p>
-                <p class="text-xs opacity-70">
-                  This feature will be available in the next version of Grimoir.
-                </p>
               </div>
             </div>
           </div>
@@ -1680,11 +2129,9 @@
       </div>
     </main>
 
-    <!-- Tab switching script -->
+    <!-- Tab switching & Interactive Report Script -->
     <script>
-      __CUSTOM_SCRIPTS__
+      __CUSTOM_SCRIPTS__;
     </script>
-
-    <!-- Charts -->
   </body>
 </html>

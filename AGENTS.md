@@ -26,6 +26,7 @@ Grimoir is developed and tested using **[Bun](https://bun.com/)**, but distribut
 ## 2. Invariant Architectural Rules
 
 ### Rule 1: Universal Node.js Distribution Compatibility
+
 - The compiled output in `dist/` must execute without error on Node.js 18, 20, and 22 without Bun installed.
 - **NEVER** use `Bun.serve`, `Bun.file`, `Bun.spawn`, `Bun.password`, or any global `Bun.*` inside `src/`.
 - **NEVER** import `bun:*` modules (`bun:test`, `bun:ffi`, etc.) inside `src/`.
@@ -35,6 +36,7 @@ Grimoir is developed and tested using **[Bun](https://bun.com/)**, but distribut
 - Full specification: [.agents/rules/01-node-compatibility.md](file:///Users/saul.sosa/Desktop/Proyectos/grimoir/.agents/rules/01-node-compatibility.md).
 
 ### Rule 2: Arcane Dark Aesthetics
+
 - Visual report styling must adhere to Grimoir's Arcane Dark theme:
   - **Surfaces:** Void Obsidian (`#0B0C10`), Grimoire Slate (`#13171F`), Arcane Dark (`#1F2833`).
   - **Accents:** Arcane Gold (`#C5A059`), Radiant Gold (`#E5C583`), Ether Cyan (`#45A29E`), Sorcery Violet (`#8A4FFF`).
@@ -45,6 +47,7 @@ Grimoir is developed and tested using **[Bun](https://bun.com/)**, but distribut
 - Full specification: [.agents/rules/02-arcane-dark-design.md](file:///Users/saul.sosa/Desktop/Proyectos/grimoir/.agents/rules/02-arcane-dark-design.md).
 
 ### Rule 3: Parser Resilience & Contracts
+
 - All parsers (`src/parsers/`) must ingest test outputs defensively:
   - Guard against `null`, `undefined`, and missing metrics.
   - Support both nested k6 summary outputs (`metric.values.avg`) and flat representations.
@@ -54,6 +57,7 @@ Grimoir is developed and tested using **[Bun](https://bun.com/)**, but distribut
 - Full specification: [.agents/rules/03-parsers-and-contracts.md](file:///Users/saul.sosa/Desktop/Proyectos/grimoir/.agents/rules/03-parsers-and-contracts.md).
 
 ### Rule 4: Performance & k6 Metrics Standards
+
 - Performance tab metrics must include:
   - Latency distribution: `avg`, `min`, `max`, `p90`, and `p95`.
   - Throughput and volume: total requests and rate (req/s).
@@ -67,6 +71,7 @@ Grimoir is developed and tested using **[Bun](https://bun.com/)**, but distribut
 ## 3. Mandatory Pre-PR Verification Gate
 
 Before opening a pull request or pushing to `main`, every agent or developer must verify that the following command exits with code `0`:
+
 ```bash
 bun run gate
 # (Shortcut for: bun test && bun run lint && bun run audit:compat && bun run test:compat && bun run build)
@@ -79,6 +84,7 @@ This verification is also enforced in GitHub Actions CI across a **Node.js 18, 2
 ## 4. Skills & Specialized Roles
 
 For AI agents supporting modular skills and plugin architectures:
+
 - **Skills (`.agents/skills/`):**
   - [grimoir-dev-workflow](file:///Users/saul.sosa/Desktop/Proyectos/grimoir/.agents/skills/grimoir-dev-workflow/SKILL.md): Local development, test, and build procedures.
   - [grimoir-perf-tester](file:///Users/saul.sosa/Desktop/Proyectos/grimoir/.agents/skills/grimoir-perf-tester/SKILL.md): Procedures and fixtures for k6 load testing and the Performance tab.
@@ -111,24 +117,24 @@ Grimoir keeps its project-specific skills (`grimoir-*` and `impeccable`) in `.ag
 
 ### 5.2 Routing table
 
-| Task | Role / subagent | Use these skills | Do not use |
-| :--- | :--- | :--- | :--- |
-| Requirements, user stories, acceptance criteria, scoping | `product-planner` | `/plan`, `/grill-me`, `documentation-and-adrs`, `domain-modeling`, `qa-test-planner` | Direct code editing skills |
-| Module boundaries, contracts, data pipelines, ADRs | `architect` | `improve-codebase-architecture`, `domain-modeling`, `api-and-interface-design`, `archify`, `diagram-design` | Any design direction skill |
-| New or changed parser, CLI commands, report bundler | `backend-engineer` | `grimoir-parser-builder`, `grimoir-dev-workflow`, `test-driven-development`, `api-and-interface-design`, `source-driven-development` | Prisma, Supabase, React/auth skills |
-| Report HTML/CSS/JS (`src/report/`) | `frontend-engineer` | `grimoir-report-designer`, `frontend-ui-engineering`, `web-design-guidelines`, `staff-designer`, `accessibility` | `impeccable` (only `critique`/`audit`/`polish` and manual `impeccable detect src/report`; Rule 2 overrides style advice), `design-taste-frontend`, `hallmark` |
-| Motion in the report | `frontend-engineer` | `animate` (timing, easing, `prefers-reduced-motion`) | Any library other than Anime.js |
-| Performance tab and k6 metrics | `performance-engineer` | `grimoir-perf-tester`, `k6`, `performance-optimization` | `prometheus`, `promql`, `dashboarding` unless a Grafana export is added |
-| Client-side rendering efficiency & bundle size | `performance-engineer` | `performance-optimization`, `browser-testing-with-devtools`, `chrome-devtools` | none |
-| Test suites, fixtures, compatibility audit, pre-PR gate | `qa-engineer` | `test-strategy`, `test-reliability`, `test-driven-development`, `grimoir-compat-verifier`, `verification-before-completion` | `playwright-*` for unit tests |
-| Playwright reporter or E2E in `tests/e2e/` | `qa-engineer` | `playwright-best-practices`, `playwright-cli`, `webapp-testing` | none |
-| Security audit, HTML escaping, local preview hardening | `secure-reviewer` | `security-and-hardening`, `code-review-and-quality`, `accessibility` | `better-auth-best-practices` |
-| Code review before merge | `secure-reviewer` | `code-review-and-quality`, `verification-before-completion` | none |
-| Bug triage, defect reproduction, root cause isolation | `bug-triager` | `systematic-debugging` (root cause first), then `test-driven-development` for regression test | Speculative symptom fixes |
-| Version bumps, changelog, GitHub Actions, release prep | `release-engineer` | `grimoir-compat-verifier`, `grimoir-dev-workflow`, `github-actions`, `gh-fix-ci`, `verification-before-completion` | `npm publish` or `git push` |
-| End-to-end delivery orchestration | `lifecycle-orchestrator` | `orchestration`, section 5.2 routing table, pre-PR quality gate | Direct file editing |
-| Daily dev loop, build, lint | any | `grimoir-dev-workflow` | none |
-| Logo, favicon, icons | general | `logo-design`, `logo-designer`, `logo-generator`, `icon-generator` | none |
+| Task                                                     | Role / subagent          | Use these skills                                                                                                                     | Do not use                                                                                                                                                    |
+| :------------------------------------------------------- | :----------------------- | :----------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Requirements, user stories, acceptance criteria, scoping | `product-planner`        | `/plan`, `/grill-me`, `documentation-and-adrs`, `domain-modeling`, `qa-test-planner`                                                 | Direct code editing skills                                                                                                                                    |
+| Module boundaries, contracts, data pipelines, ADRs       | `architect`              | `improve-codebase-architecture`, `domain-modeling`, `api-and-interface-design`, `archify`, `diagram-design`                          | Any design direction skill                                                                                                                                    |
+| New or changed parser, CLI commands, report bundler      | `backend-engineer`       | `grimoir-parser-builder`, `grimoir-dev-workflow`, `test-driven-development`, `api-and-interface-design`, `source-driven-development` | Prisma, Supabase, React/auth skills                                                                                                                           |
+| Report HTML/CSS/JS (`src/report/`)                       | `frontend-engineer`      | `grimoir-report-designer`, `frontend-ui-engineering`, `web-design-guidelines`, `staff-designer`, `accessibility`                     | `impeccable` (only `critique`/`audit`/`polish` and manual `impeccable detect src/report`; Rule 2 overrides style advice), `design-taste-frontend`, `hallmark` |
+| Motion in the report                                     | `frontend-engineer`      | `animate` (timing, easing, `prefers-reduced-motion`)                                                                                 | Any library other than Anime.js                                                                                                                               |
+| Performance tab and k6 metrics                           | `performance-engineer`   | `grimoir-perf-tester`, `k6`, `performance-optimization`                                                                              | `prometheus`, `promql`, `dashboarding` unless a Grafana export is added                                                                                       |
+| Client-side rendering efficiency & bundle size           | `performance-engineer`   | `performance-optimization`, `browser-testing-with-devtools`, `chrome-devtools`                                                       | none                                                                                                                                                          |
+| Test suites, fixtures, compatibility audit, pre-PR gate  | `qa-engineer`            | `test-strategy`, `test-reliability`, `test-driven-development`, `grimoir-compat-verifier`, `verification-before-completion`          | `playwright-*` for unit tests                                                                                                                                 |
+| Playwright reporter or E2E in `tests/e2e/`               | `qa-engineer`            | `playwright-best-practices`, `playwright-cli`, `webapp-testing`                                                                      | none                                                                                                                                                          |
+| Security audit, HTML escaping, local preview hardening   | `secure-reviewer`        | `security-and-hardening`, `code-review-and-quality`, `accessibility`                                                                 | `better-auth-best-practices`                                                                                                                                  |
+| Code review before merge                                 | `secure-reviewer`        | `code-review-and-quality`, `verification-before-completion`                                                                          | none                                                                                                                                                          |
+| Bug triage, defect reproduction, root cause isolation    | `bug-triager`            | `systematic-debugging` (root cause first), then `test-driven-development` for regression test                                        | Speculative symptom fixes                                                                                                                                     |
+| Version bumps, changelog, GitHub Actions, release prep   | `release-engineer`       | `grimoir-compat-verifier`, `grimoir-dev-workflow`, `github-actions`, `gh-fix-ci`, `verification-before-completion`                   | `npm publish` or `git push`                                                                                                                                   |
+| End-to-end delivery orchestration                        | `lifecycle-orchestrator` | `orchestration`, section 5.2 routing table, pre-PR quality gate                                                                      | Direct file editing                                                                                                                                           |
+| Daily dev loop, build, lint                              | any                      | `grimoir-dev-workflow`                                                                                                               | none                                                                                                                                                          |
+| Logo, favicon, icons                                     | general                  | `logo-design`, `logo-designer`, `logo-generator`, `icon-generator`                                                                   | none                                                                                                                                                          |
 
 ### 5.3 Lifecycle Delivery Flow
 

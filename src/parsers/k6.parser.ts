@@ -16,6 +16,12 @@ export interface K6V1Metrics {
   p95LatencyMs: number | null;     // 1. Latencia p95 (http_req_duration) en ms
   errorRatePercent: number | null; // 2. Tasa de error (http_req_failed) en %
   throughputRps: number | null;    // 3. Throughput (http_reqs) en req/s
+  avgLatencyMs?: number | null;
+  minLatencyMs?: number | null;
+  maxLatencyMs?: number | null;
+  p90LatencyMs?: number | null;
+  vus?: number | null;
+  vusMax?: number | null;
 }
 
 export interface K6Scenario {
@@ -62,6 +68,12 @@ export function parseK6(rawJson: Record<string, unknown>): K6Report {
         p95LatencyMs: null,
         errorRatePercent: null,
         throughputRps: null,
+        avgLatencyMs: null,
+        minLatencyMs: null,
+        maxLatencyMs: null,
+        p90LatencyMs: null,
+        vus: null,
+        vusMax: null,
       },
       thresholds: {
         status: 'none',
@@ -92,8 +104,12 @@ export function parseK6(rawJson: Record<string, unknown>): K6Report {
     ? (rawMetrics as Record<string, unknown>)
     : {};
 
-  // 1. Latencia p95 (http_req_duration) en ms
+  // 1. Latencia p95 y distribución (http_req_duration) en ms
   let p95LatencyMs: number | null = null;
+  let avgLatencyMs: number | null = null;
+  let minLatencyMs: number | null = null;
+  let maxLatencyMs: number | null = null;
+  let p90LatencyMs: number | null = null;
   const durationValues = extractValues(metricsObj['http_req_duration']);
   if (durationValues) {
     const p95 = durationValues['p(95)'] ?? durationValues['p95'];
@@ -102,8 +118,27 @@ export function parseK6(rawJson: Record<string, unknown>): K6Report {
     } else {
       warnings.push("Missing metric: http_req_duration.values['p(95)']");
     }
+    const avg = durationValues['avg'];
+    if (typeof avg === 'number' && !Number.isNaN(avg)) avgLatencyMs = Number(avg.toFixed(2));
+    const min = durationValues['min'];
+    if (typeof min === 'number' && !Number.isNaN(min)) minLatencyMs = Number(min.toFixed(2));
+    const max = durationValues['max'];
+    if (typeof max === 'number' && !Number.isNaN(max)) maxLatencyMs = Number(max.toFixed(2));
+    const p90 = durationValues['p(90)'] ?? durationValues['p90'];
+    if (typeof p90 === 'number' && !Number.isNaN(p90)) p90LatencyMs = Number(p90.toFixed(2));
   } else {
     warnings.push('Missing metric: http_req_duration (p95 latency is unavailable)');
+  }
+
+  // Virtual Users (vus)
+  let vus: number | null = null;
+  let vusMax: number | null = null;
+  const vusValues = extractValues(metricsObj['vus']);
+  if (vusValues) {
+    const val = vusValues['value'] ?? vusValues['vus'];
+    if (typeof val === 'number' && !Number.isNaN(val)) vus = Math.round(val);
+    const maxVal = vusValues['max'];
+    if (typeof maxVal === 'number' && !Number.isNaN(maxVal)) vusMax = Math.round(maxVal);
   }
 
   // 2. Tasa de error (http_req_failed) en %
@@ -201,6 +236,12 @@ export function parseK6(rawJson: Record<string, unknown>): K6Report {
       p95LatencyMs,
       errorRatePercent,
       throughputRps,
+      avgLatencyMs,
+      minLatencyMs,
+      maxLatencyMs,
+      p90LatencyMs,
+      vus,
+      vusMax,
     },
     thresholds: {
       status: thresholdStatus,
