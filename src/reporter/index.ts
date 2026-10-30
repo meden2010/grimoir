@@ -1,4 +1,4 @@
-import { Reporter, TestCase, TestResult, TestStep } from '@playwright/test/reporter';
+import { Reporter, TestCase, TestResult, TestStep, FullConfig, Suite } from '@playwright/test/reporter';
 import fs from 'fs';
 import path from 'path';
 
@@ -19,7 +19,7 @@ export default class GrimoirReporter implements Reporter {
     this.outputFile = options.outputFile || 'test-results/playwright-results.json';
   }
 
-  onBegin(config: any, suite: any) {
+  onBegin(config: FullConfig, suite: Suite) {
     this.suites = [];
   }
 

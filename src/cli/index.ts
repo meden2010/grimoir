@@ -18,6 +18,12 @@ export interface HistoricalRun {
   duration: number;
 }
 
+const resolveTestStatus = (isFailed: boolean, lastResultStatus: string): 'passed' | 'failed' | 'skipped' => {
+  if (isFailed) return 'failed';
+  if (['passed', 'expected', 'flaky'].includes(lastResultStatus)) return 'passed';
+  return 'skipped';
+};
+
 export interface TestHistoryItem {
   date: string;
   status: 'passed' | 'failed' | 'skipped';
@@ -152,11 +158,7 @@ const buildReport = (inputPath: string, outputPath: string, clean: boolean = fal
           const results = test.results;
           const lastResult = results[results.length - 1];
           const isFailed = results.some((r: any) => ['failed', 'timedout', 'interrupted'].includes((r.status || '').toLowerCase()));
-          const testStatus: 'passed' | 'failed' | 'skipped' = isFailed
-            ? 'failed'
-            : (['passed', 'expected', 'flaky'].includes(lastResult.status)
-                ? 'passed'
-                : 'skipped');
+          const testStatus = resolveTestStatus(isFailed, lastResult.status);
 
           const duration = results.reduce((acc: number, r: any) => acc + (r.duration || 0), 0);
           const rawError = lastResult.error?.message || lastResult.errors?.[0]?.message || (typeof lastResult.error === 'string' ? lastResult.error : undefined);
