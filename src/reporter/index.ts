@@ -23,8 +23,13 @@ export default class GrimoirReporter implements Reporter {
     this.suites = [];
   }
 
+  private extractErrorMessage(error: TestStep['error']): string | undefined {
+    if (!error) return undefined;
+    return typeof error === 'string' ? error : error.message;
+  }
+
   private processStep(step: TestStep): GrimoirTestStep {
-    const errorMsg = step.error ? (typeof step.error === 'string' ? step.error : step.error.message) : undefined;
+    const errorMsg = this.extractErrorMessage(step.error);
     return {
       title: step.title,
       category: step.category,
