@@ -31,11 +31,15 @@ const loadTemplate = (): string => {
 };
 
 const replacePlaceholders = (template: string, placeholders: Placeholders): string => {
-  return Object.entries(placeholders).reduce((result, [key, value]) => {
+  // ⚡ Bolt Optimization: Single-pass template replacement instead of O(N * M) multiple passes.
+  const map: Record<string, string> = {};
+  for (const [key, value] of Object.entries(placeholders)) {
     const snakeKey = key.replace(/([A-Z])/g, '_$1').toUpperCase();
-    const pattern = new RegExp(`__${snakeKey}__`, 'g');
-    return result.replace(pattern, String(value));
-  }, template);
+    map[`__${snakeKey}__`] = String(value);
+  }
+  return template.replace(/__[A-Z0-9_]+__/g, (match) => {
+    return map[match] !== undefined ? map[match] : match;
+  });
 };
 
 const formatDuration = (ms: number | null | undefined): string => {
