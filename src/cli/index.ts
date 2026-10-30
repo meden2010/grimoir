@@ -151,13 +151,10 @@ const buildReport = (inputPath: string, outputPath: string, clean: boolean = fal
 
           const results = test.results;
           const lastResult = results[results.length - 1];
-          const isFailed = results.some((r: any) => {
-            const s = (r.status || '').toLowerCase();
-            return s === 'failed' || s === 'timedout' || s === 'interrupted';
-          });
+          const isFailed = results.some((r: any) => ['failed', 'timedout', 'interrupted'].includes((r.status || '').toLowerCase()));
           const testStatus: 'passed' | 'failed' | 'skipped' = isFailed
             ? 'failed'
-            : ((lastResult.status === 'passed' || lastResult.status === 'expected' || lastResult.status === 'flaky')
+            : (['passed', 'expected', 'flaky'].includes(lastResult.status)
                 ? 'passed'
                 : 'skipped');
 
