@@ -4,7 +4,7 @@ import { Command } from 'commander';
 import { readFileSync, writeFileSync, mkdirSync, watch, existsSync, copyFileSync, rmSync } from 'fs';
 import { join, basename } from 'path';
 import { createServer, IncomingMessage, ServerResponse } from 'http';
-import { parsePlaywright, PlaywrightReport } from '../parsers/playwright.parser';
+import { parsePlaywright, PlaywrightReport, PlaywrightSuite } from '../parsers/playwright.parser';
 import { parseK6, K6Report } from '../parsers/k6.parser';
 import { generateHTML } from '../report/template';
 import { truncateString } from '../utils/string.util';
@@ -74,7 +74,7 @@ const buildReport = (inputPath: string, outputPath: string, clean: boolean = fal
     mkdirSync(dataDir, { recursive: true });
   }
 
-  const processAttachments = (suites: any[]) => {
+  const processAttachments = (suites: PlaywrightSuite[]) => {
     for (const suite of suites) {
       for (const spec of suite.specs || []) {
         for (const test of spec.tests || []) {
@@ -95,7 +95,7 @@ const buildReport = (inputPath: string, outputPath: string, clean: boolean = fal
       }
     }
   };
-  processAttachments((playwrightRaw['suites'] as any[]) || []);
+  processAttachments((playwrightRaw['suites'] as PlaywrightSuite[]) || []);
 
   const playwrightReport: PlaywrightReport = parsePlaywright(playwrightRaw);
 
