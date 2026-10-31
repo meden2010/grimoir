@@ -241,31 +241,51 @@ interface AutomatedRow {
   error?: any;
 }
 
-const extractAutomatedRows = (suites: PlaywrightSuite[], parentTitle = ''): AutomatedRow[] => {
-  let rows: AutomatedRow[] = [];
-
+// ⚡ Bolt Optimization:
+// Optimize `extractAutomatedRows` by passing the `outRows` array as a parameter
+// rather than allocating a new array and using `.concat()` at every nested suite level.
+// Reduces memory allocations and O(N) array copying for deep/wide test suite structures.
+// Also converted `.reduce()`, `.some()`, and `.every()` to basic `for...of` loops to reduce
+// callback overhead and unnecessary full array iteration.
+const extractAutomatedRows = (suites: PlaywrightSuite[], parentTitle = '', outRows: AutomatedRow[] = []): AutomatedRow[] => {
   for (const suite of suites) {
     const currentTitle = parentTitle ? `${parentTitle} > ${suite.title}` : suite.title;
 
     if (suite.specs) {
       for (const spec of suite.specs) {
-        const lastTest = spec.tests?.[spec.tests.length - 1];
-        const lastResult = lastTest?.results?.[lastTest.results.length - 1];
+        const tests = spec.tests;
+        const lastTest = tests?.[tests.length - 1];
+        const lastResult = lastTest?.results?.[lastTest?.results.length - 1];
         
         let status: 'passed' | 'failed' | 'flaky' | 'skipped' = 'passed';
         if (!spec.ok) {
           status = 'failed';
-        } else if (spec.tests?.some(t => t.status === 'flaky')) {
-          status = 'flaky';
-        } else if (spec.tests?.every(t => t.status === 'skipped')) {
-          status = 'skipped';
+        } else if (tests) {
+          let hasFlaky = false;
+          let allSkipped = tests.length > 0;
+          for (const t of tests) {
+            if (t.status === 'flaky') hasFlaky = true;
+            if (t.status !== 'skipped') allSkipped = false;
+          }
+          if (hasFlaky) {
+            status = 'flaky';
+          } else if (allSkipped) {
+            status = 'skipped';
+          }
         }
 
-        const duration = spec.tests?.reduce((acc, t) => {
-          return acc + (t.results?.reduce((rAcc, r) => rAcc + (r.duration || 0), 0) || 0);
-        }, 0) || 0;
+        let duration = 0;
+        if (tests) {
+          for (const t of tests) {
+            if (t.results) {
+              for (const r of t.results) {
+                duration += r.duration || 0;
+              }
+            }
+          }
+        }
 
-        rows.push({
+        outRows.push({
           suite: currentTitle,
           test: spec.title,
           status,
@@ -276,11 +296,11 @@ const extractAutomatedRows = (suites: PlaywrightSuite[], parentTitle = ''): Auto
     }
 
     if (suite.suites) {
-      rows = rows.concat(extractAutomatedRows(suite.suites, currentTitle));
+      extractAutomatedRows(suite.suites, currentTitle, outRows);
     }
   }
 
-  return rows;
+  return outRows;
 };
 
 const generateAutomatedTestRows = (playwright: PlaywrightReport): string => {
