@@ -6,3 +6,6 @@
 
 ### Template Replacements
 When replacing multiple placeholders in a large string template (like an HTML report), avoid using a global `replace()` sequentially for each placeholder. If there are `N` placeholders and the string length is `L`, sequential replacements result in a time complexity of `O(N * L)`. Instead, map the placeholder keys and do a single regex replacement `template.replace(/__[A-Z0-9_]+__/g, (match) => map[match] ?? match)`. This reduces the complexity to `O(L)`.
+
+### Recursive Array Extraction
+When recursively extracting items from deeply nested structures (e.g., test suites), pass an accumulator array as an argument to mutate in-place rather than using `.concat()`. This prevents O(N^2) memory allocations and reduces garbage collection overhead during massive report generations.

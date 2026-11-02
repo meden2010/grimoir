@@ -241,9 +241,11 @@ interface AutomatedRow {
   error?: any;
 }
 
-const extractAutomatedRows = (suites: PlaywrightSuite[], parentTitle = ''): AutomatedRow[] => {
-  let rows: AutomatedRow[] = [];
-
+// ⚡ Bolt Optimization:
+// Passing an accumulator array to prevent O(N^2) memory allocations when recursively extracting rows.
+// Previously, `.concat()` was creating numerous intermediate arrays for deeply nested test suites.
+// This reduces memory pressure and GC overhead during large report generations.
+const extractAutomatedRows = (suites: PlaywrightSuite[], parentTitle = '', rows: AutomatedRow[] = []): AutomatedRow[] => {
   for (const suite of suites) {
     const currentTitle = parentTitle ? `${parentTitle} > ${suite.title}` : suite.title;
 
@@ -276,7 +278,7 @@ const extractAutomatedRows = (suites: PlaywrightSuite[], parentTitle = ''): Auto
     }
 
     if (suite.suites) {
-      rows = rows.concat(extractAutomatedRows(suite.suites, currentTitle));
+      extractAutomatedRows(suite.suites, currentTitle, rows);
     }
   }
 
