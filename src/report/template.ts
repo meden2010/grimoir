@@ -241,9 +241,11 @@ interface AutomatedRow {
   error?: any;
 }
 
-const extractAutomatedRows = (suites: PlaywrightSuite[], parentTitle = ''): AutomatedRow[] => {
-  let rows: AutomatedRow[] = [];
-
+// ⚡ Bolt Optimization:
+// Passing an accumulator array to mutate in-place rather than using `.concat()`.
+// This prevents O(N^2) memory allocations and reduces garbage collection overhead
+// when extracting deeply nested test suites.
+const extractAutomatedRows = (suites: PlaywrightSuite[], parentTitle = '', acc: AutomatedRow[] = []): AutomatedRow[] => {
   for (const suite of suites) {
     const currentTitle = parentTitle ? `${parentTitle} > ${suite.title}` : suite.title;
 
@@ -261,11 +263,11 @@ const extractAutomatedRows = (suites: PlaywrightSuite[], parentTitle = ''): Auto
           status = 'skipped';
         }
 
-        const duration = spec.tests?.reduce((acc, t) => {
-          return acc + (t.results?.reduce((rAcc, r) => rAcc + (r.duration || 0), 0) || 0);
+        const duration = spec.tests?.reduce((accDuration, t) => {
+          return accDuration + (t.results?.reduce((rAcc, r) => rAcc + (r.duration || 0), 0) || 0);
         }, 0) || 0;
 
-        rows.push({
+        acc.push({
           suite: currentTitle,
           test: spec.title,
           status,
@@ -276,11 +278,11 @@ const extractAutomatedRows = (suites: PlaywrightSuite[], parentTitle = ''): Auto
     }
 
     if (suite.suites) {
-      rows = rows.concat(extractAutomatedRows(suite.suites, currentTitle));
+      extractAutomatedRows(suite.suites, currentTitle, acc);
     }
   }
 
-  return rows;
+  return acc;
 };
 
 const generateAutomatedTestRows = (playwright: PlaywrightReport): string => {

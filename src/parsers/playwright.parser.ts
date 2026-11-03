@@ -88,13 +88,15 @@ export function normalizeStatus(status: string): PlaywrightTest['status'] {
   return 'skipped';
 }
 
-function extractTests(suites: PlaywrightSuite[]): PlaywrightTest[] {
-  const tests: PlaywrightTest[] = [];
-
+// ⚡ Bolt Optimization:
+// Passing an accumulator array to mutate in-place rather than using `.push(...extractTests(...))`.
+// This prevents O(N^2) memory allocations and reduces garbage collection overhead
+// when extracting deeply nested test suites.
+function extractTests(suites: PlaywrightSuite[], acc: PlaywrightTest[] = []): PlaywrightTest[] {
   for (const suite of suites) {
     // Legacy direct tests format
     if (suite.tests) {
-      tests.push(...suite.tests);
+      acc.push(...suite.tests);
     }
 
     // Playwright JSON reporter format: suite -> specs -> tests -> results
@@ -129,10 +131,10 @@ function extractTests(suites: PlaywrightSuite[]): PlaywrightTest[] {
             ? 'failed'
             : normalizeStatus(lastResult.status);
 
-          tests.push({
+          acc.push({
             title: spec.title,
             status: overallStatus,
-            duration: results.reduce((acc, r) => acc + (r.duration || 0), 0),
+            duration: results.reduce((sum, r) => sum + (r.duration || 0), 0),
             error: lastResult.error || lastResult.errors?.[0],
             steps: lastResult.steps,
             attachments: lastResult.attachments || [],
@@ -145,11 +147,11 @@ function extractTests(suites: PlaywrightSuite[]): PlaywrightTest[] {
 
     // Nested suites
     if (suite.suites) {
-      tests.push(...extractTests(suite.suites));
+      extractTests(suite.suites, acc);
     }
   }
 
-  return tests;
+  return acc;
 }
 
 export function parsePlaywright(rawJson: Record<string, unknown>): PlaywrightReport {
