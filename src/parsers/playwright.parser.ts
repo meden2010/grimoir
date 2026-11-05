@@ -88,9 +88,10 @@ export function normalizeStatus(status: string): PlaywrightTest['status'] {
   return 'skipped';
 }
 
-function extractTests(suites: PlaywrightSuite[]): PlaywrightTest[] {
-  const tests: PlaywrightTest[] = [];
-
+// ⚡ Bolt Optimization:
+// Passing an accumulator array (`tests`) as an argument to mutate in-place rather than using `.push(...recursiveCall())`.
+// This prevents O(N^2) memory allocations and reduces garbage collection overhead when parsing deeply nested suites.
+function extractTests(suites: PlaywrightSuite[], tests: PlaywrightTest[] = []): PlaywrightTest[] {
   for (const suite of suites) {
     // Legacy direct tests format
     if (suite.tests) {
@@ -145,7 +146,7 @@ function extractTests(suites: PlaywrightSuite[]): PlaywrightTest[] {
 
     // Nested suites
     if (suite.suites) {
-      tests.push(...extractTests(suite.suites));
+      extractTests(suite.suites, tests);
     }
   }
 
