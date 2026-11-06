@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 
 import { Command } from 'commander';
-import { readFileSync, writeFileSync, mkdirSync, watch, existsSync, copyFileSync, rmSync, realpathSync, promises as fsPromises } from 'fs';
+import { readFileSync, mkdirSync, watch, existsSync, rmSync, realpathSync, promises as fsPromises } from 'fs';
 import { join, basename, resolve, parse } from 'path';
 import { createServer, IncomingMessage, ServerResponse } from 'http';
-import { parsePlaywright, PlaywrightReport, PlaywrightSuite, PlaywrightResult } from '../parsers/playwright.parser';
+import { parsePlaywright, PlaywrightReport, PlaywrightSuite } from '../parsers/playwright.parser';
 import { parseK6, K6Report } from '../parsers/k6.parser';
 import { generateHTML } from '../report/template';
 import { truncateString } from '../utils/string.util';

@@ -1,6 +1,6 @@
 import { readFileSync, existsSync } from 'fs';
 import { join } from 'path';
-import { PlaywrightReport, PlaywrightTest, PlaywrightSuite, PlaywrightSpec, normalizeStatus } from '../parsers/playwright.parser';
+import { PlaywrightReport, PlaywrightSuite, PlaywrightSpec } from '../parsers/playwright.parser';
 import { K6Report } from '../parsers/k6.parser';
 
 

@@ -118,7 +118,7 @@ describe('CLI - index.ts', () => {
       if (!existsSync(FIXTURES_DIR)) return;
 
       const serverProg = createProgram();
-      let listenArgs: { port: number; host: string } | null = null;
+      let listenArgs: { port: number; host: string } | undefined;
       let closed = false;
 
       const mockServer = {
@@ -138,7 +138,7 @@ describe('CLI - index.ts', () => {
 
       await serverProg.parseAsync(['node', 'grimoir', 'generate', '-i', FIXTURES_DIR, '-o', outputPath]);
 
-      expect(listenArgs).not.toBeNull();
+      expect(listenArgs).toBeDefined();
       expect(listenArgs?.host).toBe('127.0.0.1');
       expect(listenArgs?.port).toBe(8080);
       mockServer.close();
@@ -150,7 +150,7 @@ describe('CLI - index.ts', () => {
       if (!existsSync(FIXTURES_DIR)) return;
 
       const serverProg = createProgram();
-      let listenArgs: { port: number; host: string } | null = null;
+      let listenArgs: { port: number; host: string } | undefined;
       let closed = false;
 
       const mockServer = {
@@ -170,7 +170,7 @@ describe('CLI - index.ts', () => {
 
       await serverProg.parseAsync(['node', 'grimoir', 'generate', '-i', FIXTURES_DIR, '-o', outputPath, '--host', '0.0.0.0']);
 
-      expect(listenArgs).not.toBeNull();
+      expect(listenArgs).toBeDefined();
       expect(listenArgs?.host).toBe('0.0.0.0');
       mockServer.close();
       expect(closed).toBe(true);
@@ -181,7 +181,7 @@ describe('CLI - index.ts', () => {
       writeFileSync(dummyFile, '<h1>Report</h1>');
 
       const serverProg = createProgram();
-      let listenArgs: { port: number; host: string } | null = null;
+      let listenArgs: { port: number; host: string } | undefined;
       let closed = false;
 
       const mockServer = {
@@ -201,7 +201,7 @@ describe('CLI - index.ts', () => {
 
       await serverProg.parseAsync(['node', 'grimoir', 'serve', '-f', dummyFile]);
 
-      expect(listenArgs).not.toBeNull();
+      expect(listenArgs).toBeDefined();
       expect(listenArgs?.host).toBe('127.0.0.1');
       expect(listenArgs?.port).toBe(8080);
       mockServer.close();
@@ -213,7 +213,7 @@ describe('CLI - index.ts', () => {
       writeFileSync(dummyFile, '<h1>Report</h1>');
 
       const serverProg = createProgram();
-      let listenArgs: { port: number; host: string } | null = null;
+      let listenArgs: { port: number; host: string } | undefined;
       let closed = false;
 
       const mockServer = {
@@ -233,7 +233,7 @@ describe('CLI - index.ts', () => {
 
       await serverProg.parseAsync(['node', 'grimoir', 'serve', '-f', dummyFile, '--host', '192.168.1.1']);
 
-      expect(listenArgs).not.toBeNull();
+      expect(listenArgs).toBeDefined();
       expect(listenArgs?.host).toBe('192.168.1.1');
       mockServer.close();
       expect(closed).toBe(true);
