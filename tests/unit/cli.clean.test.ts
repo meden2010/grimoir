@@ -54,4 +54,8 @@ describe('cleanOutput', () => {
     // This should just run without throwing any errors
     expect(() => cleanOutput(tempDir)).not.toThrow();
   });
+
+  test('should throw an error when attempting to clean the root directory', () => {
+    expect(() => cleanOutput('/')).toThrow('Refusing to clean root directory for safety reasons.');
+  });
 });

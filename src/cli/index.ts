@@ -1,13 +1,14 @@
 #!/usr/bin/env node
 
 import { Command } from 'commander';
-import { readFileSync, writeFileSync, mkdirSync, watch, existsSync, copyFileSync, rmSync, promises as fsPromises } from 'fs';
-import { join, basename } from 'path';
+import { readFileSync, writeFileSync, mkdirSync, watch, existsSync, copyFileSync, rmSync, realpathSync, promises as fsPromises } from 'fs';
+import { join, basename, resolve, parse } from 'path';
 import { createServer, IncomingMessage, ServerResponse } from 'http';
 import { parsePlaywright, PlaywrightReport, PlaywrightSuite, PlaywrightResult } from '../parsers/playwright.parser';
 import { parseK6, K6Report } from '../parsers/k6.parser';
 import { generateHTML } from '../report/template';
 import { truncateString } from '../utils/string.util';
+import { Logger } from '../utils/logger.util';
 
 export interface HistoricalRun {
   date: string;
@@ -57,11 +58,16 @@ interface ServeOptions {
 export const program = new Command();
 
 export const cleanOutput = (outputPath: string): void => {
-  const historyPath = join(outputPath, '.grimoir-history.json');
+  const resolvedPath = existsSync(outputPath) ? realpathSync(outputPath) : resolve(outputPath);
+  if (resolvedPath === parse(resolvedPath).root) {
+    throw new Error('Refusing to clean root directory for safety reasons.');
+  }
+
+  const historyPath = join(resolvedPath, '.grimoir-history.json');
   if (existsSync(historyPath)) {
     rmSync(historyPath, { force: true });
   }
-  const dataDir = join(outputPath, 'data');
+  const dataDir = join(resolvedPath, 'data');
   if (existsSync(dataDir)) {
     rmSync(dataDir, { recursive: true, force: true });
   }
@@ -80,28 +86,51 @@ export const buildReport = async (inputPath: string, outputPath: string, clean: 
     mkdirSync(dataDir, { recursive: true });
   }
 
-  const processAttachments = (suites: PlaywrightSuite[]) => {
-    for (const suite of suites) {
+  const processAttachments = async (suites: PlaywrightSuite[]): Promise<void> => {
+    const copyPromises: Promise<void>[] = [];
+    let counter = 0; // to ensure unique filenames in fast concurrent loop
+
+    const processSuite = (suite: PlaywrightSuite) => {
       const attachments = (suite.specs || [])
         .flatMap((spec: any) => spec.tests || [])
         .flatMap((test: any) => test.results || [])
         .flatMap((result: any) => result.attachments || []);
 
       for (const attachment of attachments) {
-        if (attachment.path && existsSync(attachment.path)) {
-          const fileName = `${Date.now()}-${basename(attachment.path)}`;
-          const destPath = join(dataDir, fileName);
-          copyFileSync(attachment.path, destPath);
-          attachment.path = `./data/${fileName}`;
+        if (attachment.path) {
+          const p = attachment.path;
+          copyPromises.push(
+            (async () => {
+              try {
+                // ⚡ Bolt: Async file check and copy to avoid blocking the event loop on deep nested attachments
+                await fsPromises.access(p);
+              } catch {
+                // File does not exist or cannot be accessed, ignore
+                return;
+              }
+              const fileName = `${Date.now()}-${counter++}-${basename(p)}`;
+              const destPath = join(dataDir, fileName);
+              await fsPromises.copyFile(p, destPath);
+              attachment.path = `./data/${fileName}`;
+            })()
+          );
         }
       }
 
       if (suite.suites) {
-        processAttachments(suite.suites);
+        for (const childSuite of suite.suites) {
+          processSuite(childSuite);
+        }
       }
+    };
+
+    for (const suite of suites) {
+      processSuite(suite);
     }
+
+    await Promise.all(copyPromises);
   };
-  processAttachments((playwrightRaw['suites'] as PlaywrightSuite[]) || []);
+  await processAttachments((playwrightRaw['suites'] as PlaywrightSuite[]) || []);
 
   const playwrightReport: PlaywrightReport = parsePlaywright(playwrightRaw);
 
@@ -158,10 +187,23 @@ export const buildReport = async (inputPath: string, outputPath: string, clean: 
 
           const results = test.results;
           const lastResult = results[results.length - 1];
-          const isFailed = results.some((r: PlaywrightResult) => ['failed', 'timedout', 'interrupted'].includes((r.status || '').toLowerCase()));
+
+          let isFailed = false;
+          let duration = 0;
+          // ⚡ Bolt: Single pass for loop avoids closure allocation and multiple iterations
+          for (let i = 0; i < results.length; i++) {
+            const r = results[i];
+            if (!isFailed) {
+              const status = (r.status || '').toLowerCase();
+              if (status === 'failed' || status === 'timedout' || status === 'interrupted') {
+                isFailed = true;
+              }
+            }
+            duration += r.duration || 0;
+          }
+
           const testStatus = resolveTestStatus(isFailed, lastResult.status);
 
-          const duration = results.reduce((acc: number, r: PlaywrightResult) => acc + (r.duration || 0), 0);
           const rawError = lastResult.error?.message || lastResult.errors?.[0]?.message || (typeof lastResult.error === 'string' ? lastResult.error : undefined);
           const errorSnippet = truncateString(rawError, 200);
 
@@ -199,21 +241,21 @@ export const buildReport = async (inputPath: string, outputPath: string, clean: 
   await fsPromises.writeFile(tempHtmlPath, html, 'utf-8');
   await fsPromises.rename(tempHtmlPath, join(outputPath, 'index.html'));
 
-  console.log(`\n✅ Playwright Results:`);
-  console.log(`   Total:   ${playwrightReport.stats.total}`);
-  console.log(`   Passed:  ${playwrightReport.stats.passed}`);
-  console.log(`   Failed:  ${playwrightReport.stats.failed}`);
-  console.log(`   Skipped: ${playwrightReport.stats.skipped}`);
-  console.log(`   Duration: ${playwrightReport.stats.duration}ms`);
+  Logger.info(`\n✅ Playwright Results:`);
+  Logger.info(`   Total:   ${playwrightReport.stats.total}`);
+  Logger.info(`   Passed:  ${playwrightReport.stats.passed}`);
+  Logger.info(`   Failed:  ${playwrightReport.stats.failed}`);
+  Logger.info(`   Skipped: ${playwrightReport.stats.skipped}`);
+  Logger.info(`   Duration: ${playwrightReport.stats.duration}ms`);
 
   if (k6Report) {
-    console.log(`\n🔮 k6 Performance (v1):`);
-    console.log(`   P95 Latency:   ${k6Report.metrics.p95LatencyMs !== null ? `${k6Report.metrics.p95LatencyMs}ms` : 'N/A'}`);
-    console.log(`   Error Rate:    ${k6Report.metrics.errorRatePercent !== null ? `${k6Report.metrics.errorRatePercent}%` : 'N/A'}`);
-    console.log(`   Throughput:    ${k6Report.metrics.throughputRps !== null ? `${k6Report.metrics.throughputRps} req/s` : 'N/A'}`);
-    console.log(`   Thresholds:    ${k6Report.thresholds.status.toUpperCase()} (${k6Report.thresholds.passed}/${k6Report.thresholds.total})`);
+    Logger.info(`\n🔮 k6 Performance (v1):`);
+    Logger.info(`   P95 Latency:   ${k6Report.metrics.p95LatencyMs !== null ? `${k6Report.metrics.p95LatencyMs}ms` : 'N/A'}`);
+    Logger.info(`   Error Rate:    ${k6Report.metrics.errorRatePercent !== null ? `${k6Report.metrics.errorRatePercent}%` : 'N/A'}`);
+    Logger.info(`   Throughput:    ${k6Report.metrics.throughputRps !== null ? `${k6Report.metrics.throughputRps} req/s` : 'N/A'}`);
+    Logger.info(`   Thresholds:    ${k6Report.thresholds.status.toUpperCase()} (${k6Report.thresholds.passed}/${k6Report.thresholds.total})`);
     if (k6Report.warnings.length > 0) {
-      console.log(`   ⚠️ Warnings:   ${k6Report.warnings.join(' | ')}`);
+      Logger.info(`   ⚠️ Warnings:   ${k6Report.warnings.join(' | ')}`);
     }
   }
 
@@ -235,11 +277,11 @@ program
   .option('--no-serve', 'Do not start the report server')
   .option('-w, --watch', 'Watch input folder and regenerate on changes')
   .action(async (options: GenerateOptions): Promise<void> => {
-    console.log(`📖 Grimoir - Generating report...`);
+    Logger.info(`📖 Grimoir - Generating report...`);
 
     await buildReport(options.input, options.output, !!options.clean);
 
-    console.log(`\n🔮 Report saved at: ${join(options.output, 'index.html')}`);
+    Logger.info(`\n🔮 Report saved at: ${join(options.output, 'index.html')}`);
 
     // Start local server
     if (options.serve) {
@@ -261,11 +303,11 @@ program
 
       server.listen(port, () => {
         const url = `http://localhost:${port}`;
-        console.log(`\n🌐 Report served at: ${url}`);
+        Logger.info(`\n🌐 Report served at: ${url}`);
 
         if (options.watch) {
-          console.log(`   👀 Watching: ${options.input}/`);
-          console.log(`   Press Ctrl+C to stop\n`);
+          Logger.info(`   👀 Watching: ${options.input}/`);
+          Logger.info(`   Press Ctrl+C to stop\n`);
 
           let isBuilding = false;
           let pendingRebuild = false;
@@ -279,7 +321,7 @@ program
             try {
               await buildReport(options.input, options.output);
             } catch {
-              console.log(`   ⚠️  Error regenerating, waiting for next change...`);
+              Logger.info(`   ⚠️  Error regenerating, waiting for next change...`);
             } finally {
               isBuilding = false;
               if (pendingRebuild) {
@@ -291,12 +333,12 @@ program
 
           watch(options.input, async (_event: string, filename: string | null): Promise<void> => {
             if (filename && filename.endsWith('.json')) {
-              console.log(`\n🔄 Change detected in ${filename} — regenerating...`);
+              Logger.info(`\n🔄 Change detected in ${filename} — regenerating...`);
               await triggerRebuild();
             }
           });
         } else {
-          console.log(`   Press Ctrl+C to stop the server\n`);
+          Logger.info(`   Press Ctrl+C to stop the server\n`);
         }
       });
     }
@@ -318,9 +360,9 @@ program
 
     server.listen(port, () => {
       const url = `http://localhost:${port}`;
-      console.log(`🌐 Serving report from: ${options.file}`);
-      console.log(`   Report available at: ${url}`);
-      console.log(`   Press Ctrl+C to stop the server\n`);
+      Logger.info(`🌐 Serving report from: ${options.file}`);
+      Logger.info(`   Report available at: ${url}`);
+      Logger.info(`   Press Ctrl+C to stop the server\n`);
     });
   });
 
@@ -329,18 +371,18 @@ program
   .description('Clean previous report and execution history')
   .requiredOption('-o, --output <path>', 'Path to the report output folder to clean')
   .action((options: CleanOptions): void => {
-    console.log(`🧹 Grimoir - Cleaning report history and output...`);
+    Logger.info(`🧹 Grimoir - Cleaning report history and output...`);
     cleanOutput(options.output);
     const indexPath = join(options.output, 'index.html');
     if (existsSync(indexPath)) {
       rmSync(indexPath, { force: true });
     }
-    console.log(`✨ Output folder ${options.output} cleaned successfully.`);
+    Logger.info(`✨ Output folder ${options.output} cleaned successfully.`);
   });
 
 if (require.main === module) {
   program.parseAsync().catch((err: unknown) => {
-    console.error('Execution error:', err);
+    Logger.error('Execution error:', err);
     process.exit(1);
   });
 }
