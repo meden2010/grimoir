@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { Command } from 'commander';
-import { readFileSync, writeFileSync, mkdirSync, watch, existsSync, copyFileSync, rmSync, promises as fsPromises } from 'fs';
+import { readFileSync, writeFileSync, mkdirSync, watch, existsSync, copyFileSync, rmSync, realpathSync, promises as fsPromises } from 'fs';
 import { join, basename, resolve, parse } from 'path';
 import { createServer, IncomingMessage, ServerResponse } from 'http';
 import { parsePlaywright, PlaywrightReport, PlaywrightSuite, PlaywrightResult } from '../parsers/playwright.parser';
@@ -57,16 +57,16 @@ interface ServeOptions {
 const program = new Command();
 
 export const cleanOutput = (outputPath: string): void => {
-  const resolvedPath = resolve(outputPath);
+  const resolvedPath = existsSync(outputPath) ? realpathSync(outputPath) : resolve(outputPath);
   if (resolvedPath === parse(resolvedPath).root) {
     throw new Error('Refusing to clean root directory for safety reasons.');
   }
 
-  const historyPath = join(outputPath, '.grimoir-history.json');
+  const historyPath = join(resolvedPath, '.grimoir-history.json');
   if (existsSync(historyPath)) {
     rmSync(historyPath, { force: true });
   }
-  const dataDir = join(outputPath, 'data');
+  const dataDir = join(resolvedPath, 'data');
   if (existsSync(dataDir)) {
     rmSync(dataDir, { recursive: true, force: true });
   }
