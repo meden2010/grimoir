@@ -241,9 +241,10 @@ interface AutomatedRow {
   error?: any;
 }
 
-const extractAutomatedRows = (suites: PlaywrightSuite[], parentTitle = ''): AutomatedRow[] => {
-  let rows: AutomatedRow[] = [];
-
+// ⚡ Bolt Optimization:
+// Passing an accumulator array (`rows`) as an argument to mutate in-place rather than using `rows = rows.concat(recursiveCall())`.
+// This prevents O(N^2) memory allocations and reduces garbage collection overhead when parsing deeply nested suites.
+const extractAutomatedRows = (suites: PlaywrightSuite[], parentTitle = '', rows: AutomatedRow[] = []): AutomatedRow[] => {
   for (const suite of suites) {
     const currentTitle = parentTitle ? `${parentTitle} > ${suite.title}` : suite.title;
 
@@ -276,7 +277,7 @@ const extractAutomatedRows = (suites: PlaywrightSuite[], parentTitle = ''): Auto
     }
 
     if (suite.suites) {
-      rows = rows.concat(extractAutomatedRows(suite.suites, currentTitle));
+      extractAutomatedRows(suite.suites, currentTitle, rows);
     }
   }
 
