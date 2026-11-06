@@ -180,10 +180,23 @@ const buildReport = async (inputPath: string, outputPath: string, clean: boolean
 
           const results = test.results;
           const lastResult = results[results.length - 1];
-          const isFailed = results.some((r: PlaywrightResult) => ['failed', 'timedout', 'interrupted'].includes((r.status || '').toLowerCase()));
+
+          let isFailed = false;
+          let duration = 0;
+          // ⚡ Bolt: Single pass for loop avoids closure allocation and multiple iterations
+          for (let i = 0; i < results.length; i++) {
+            const r = results[i];
+            if (!isFailed) {
+              const status = (r.status || '').toLowerCase();
+              if (status === 'failed' || status === 'timedout' || status === 'interrupted') {
+                isFailed = true;
+              }
+            }
+            duration += r.duration || 0;
+          }
+
           const testStatus = resolveTestStatus(isFailed, lastResult.status);
 
-          const duration = results.reduce((acc: number, r: PlaywrightResult) => acc + (r.duration || 0), 0);
           const rawError = lastResult.error?.message || lastResult.errors?.[0]?.message || (typeof lastResult.error === 'string' ? lastResult.error : undefined);
           const errorSnippet = truncateString(rawError, 200);
 
