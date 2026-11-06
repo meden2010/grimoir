@@ -57,8 +57,6 @@ interface ServeOptions {
   host: string;
 }
 
-export const program = new Command();
-
 export const cleanOutput = (outputPath: string): void => {
   const resolvedPath = existsSync(outputPath) ? realpathSync(outputPath) : resolve(outputPath);
   if (resolvedPath === parse(resolvedPath).root) {
@@ -264,125 +262,139 @@ export const buildReport = async (inputPath: string, outputPath: string, clean: 
   return html;
 };
 
-program
-  .name('grimoir')
-  .description('Unified test report tool that consolidates different types of test results into a single visual report')
-  .version('0.1.0');
+export const formatServerUrl = (host: string, port: number): string => {
+  const displayHost = host === '0.0.0.0' ? '127.0.0.1' : host;
+  const bracketed = displayHost.includes(':') && !displayHost.startsWith('[') ? `[${displayHost}]` : displayHost;
+  return `http://${bracketed}:${port}`;
+};
 
-program
-  .command('generate')
-  .description('Generate a unified test report')
-  .requiredOption('-i, --input <path>', 'Path to the folder containing test results')
-  .requiredOption('-o, --output <path>', 'Path where the report will be generated')
-  .option('-p, --port <number>', 'Port to serve the report', '8080')
-  .option('-H, --host <string>', 'Host to bind the server to', '127.0.0.1')
-  .option('-c, --clean', 'Clean previous execution history before generating report')
-  .option('--no-serve', 'Do not start the report server')
-  .option('-w, --watch', 'Watch input folder and regenerate on changes')
-  .action(async (options: GenerateOptions): Promise<void> => {
-    Logger.info(`📖 Grimoir - Generating report...`);
+export const createProgram = (): Command => {
+  const prog = new Command();
 
-    await buildReport(options.input, options.output, !!options.clean);
+  prog
+    .name('grimoir')
+    .description('Unified test report tool that consolidates different types of test results into a single visual report')
+    .version('0.1.0');
 
-    Logger.info(`\n🔮 Report saved at: ${join(options.output, 'index.html')}`);
+  prog
+    .command('generate')
+    .description('Generate a unified test report')
+    .requiredOption('-i, --input <path>', 'Path to the folder containing test results')
+    .requiredOption('-o, --output <path>', 'Path where the report will be generated')
+    .option('-p, --port <number>', 'Port to serve the report', '8080')
+    .option('-H, --host <string>', 'Host to bind the server to', '127.0.0.1')
+    .option('-c, --clean', 'Clean previous execution history before generating report')
+    .option('--no-serve', 'Do not start the report server')
+    .option('-w, --watch', 'Watch input folder and regenerate on changes')
+    .action(async (options: GenerateOptions): Promise<void> => {
+      Logger.info(`📖 Grimoir - Generating report...`);
 
-    // Start local server
-    if (options.serve) {
-      const port: number = parseInt(options.port, 10);
-      const reportFile: string = join(options.output, 'index.html');
+      await buildReport(options.input, options.output, !!options.clean);
 
-      const requestHandler = (_req: IncomingMessage, res: ServerResponse): void => {
-        try {
-          const content: string = readFileSync(reportFile, 'utf-8');
-          res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-          res.end(content);
-        } catch {
-          res.writeHead(500);
-          res.end('Report not found');
-        }
-      };
+      Logger.info(`\n🔮 Report saved at: ${join(options.output, 'index.html')}`);
 
-      const server = createServer(requestHandler);
+      // Start local server
+      if (options.serve) {
+        const port: number = parseInt(options.port, 10);
+        const reportFile: string = join(options.output, 'index.html');
 
-      server.listen(port, options.host, () => {
-        const url = `http://${options.host}:${port}`;
-        Logger.info(`\n🌐 Report served at: ${url}`);
+        const requestHandler = (_req: IncomingMessage, res: ServerResponse): void => {
+          try {
+            const content: string = readFileSync(reportFile, 'utf-8');
+            res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+            res.end(content);
+          } catch {
+            res.writeHead(500);
+            res.end('Report not found');
+          }
+        };
 
-        if (options.watch) {
-          Logger.info(`   👀 Watching: ${options.input}/`);
-          Logger.info(`   Press Ctrl+C to stop\n`);
+        const server = createServer(requestHandler);
 
-          let isBuilding = false;
-          let pendingRebuild = false;
+        server.listen(port, options.host, () => {
+          const url = formatServerUrl(options.host, port);
+          Logger.info(`\n🌐 Report served at: ${url}`);
 
-          const triggerRebuild = async (): Promise<void> => {
-            if (isBuilding) {
-              pendingRebuild = true;
-              return;
-            }
-            isBuilding = true;
-            try {
-              await buildReport(options.input, options.output);
-            } catch {
-              Logger.info(`   ⚠️  Error regenerating, waiting for next change...`);
-            } finally {
-              isBuilding = false;
-              if (pendingRebuild) {
-                pendingRebuild = false;
+          if (options.watch) {
+            Logger.info(`   👀 Watching: ${options.input}/`);
+            Logger.info(`   Press Ctrl+C to stop\n`);
+
+            let isBuilding = false;
+            let pendingRebuild = false;
+
+            const triggerRebuild = async (): Promise<void> => {
+              if (isBuilding) {
+                pendingRebuild = true;
+                return;
+              }
+              isBuilding = true;
+              try {
+                await buildReport(options.input, options.output);
+              } catch {
+                Logger.info(`   ⚠️  Error regenerating, waiting for next change...`);
+              } finally {
+                isBuilding = false;
+                if (pendingRebuild) {
+                  pendingRebuild = false;
+                  await triggerRebuild();
+                }
+              }
+            };
+
+            watch(options.input, async (_event: string, filename: string | null): Promise<void> => {
+              if (filename && filename.endsWith('.json')) {
+                Logger.info(`\n🔄 Change detected in ${filename} — regenerating...`);
                 await triggerRebuild();
               }
-            }
-          };
+            });
+          } else {
+            Logger.info(`   Press Ctrl+C to stop the server\n`);
+          }
+        });
+      }
+    });
 
-          watch(options.input, async (_event: string, filename: string | null): Promise<void> => {
-            if (filename && filename.endsWith('.json')) {
-              Logger.info(`\n🔄 Change detected in ${filename} — regenerating...`);
-              await triggerRebuild();
-            }
-          });
-        } else {
-          Logger.info(`   Press Ctrl+C to stop the server\n`);
-        }
+  prog
+    .command('serve')
+    .description('Serve an existing report')
+    .requiredOption('-f, --file <path>', 'Path to the report HTML file')
+    .option('-p, --port <number>', 'Port to serve the report', '8080')
+    .option('-H, --host <string>', 'Host to bind the server to', '127.0.0.1')
+    .action((options: ServeOptions): void => {
+      const html: string = readFileSync(options.file, 'utf-8');
+      const port: number = parseInt(options.port, 10);
+
+      const server = createServer((_req: IncomingMessage, res: ServerResponse): void => {
+        res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+        res.end(html);
       });
-    }
-  });
 
-program
-  .command('serve')
-  .description('Serve an existing report')
-  .requiredOption('-f, --file <path>', 'Path to the report HTML file')
-  .option('-p, --port <number>', 'Port to serve the report', '8080')
-  .option('-H, --host <string>', 'Host to bind the server to', '127.0.0.1')
-  .action((options: ServeOptions): void => {
-    const html: string = readFileSync(options.file, 'utf-8');
-    const port: number = parseInt(options.port, 10);
-
-    const server = createServer((_req: IncomingMessage, res: ServerResponse): void => {
-      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-      res.end(html);
+      server.listen(port, options.host, () => {
+        const url = formatServerUrl(options.host, port);
+        Logger.info(`🌐 Serving report from: ${options.file}`);
+        Logger.info(`   Report available at: ${url}`);
+        Logger.info(`   Press Ctrl+C to stop the server\n`);
+      });
     });
 
-    server.listen(port, options.host, () => {
-        const url = `http://${options.host}:${port}`;
-      Logger.info(`🌐 Serving report from: ${options.file}`);
-      Logger.info(`   Report available at: ${url}`);
-      Logger.info(`   Press Ctrl+C to stop the server\n`);
+  prog
+    .command('clean')
+    .description('Clean previous report and execution history')
+    .requiredOption('-o, --output <path>', 'Path to the report output folder to clean')
+    .action((options: CleanOptions): void => {
+      Logger.info(`🧹 Grimoir - Cleaning report history and output...`);
+      cleanOutput(options.output);
+      const indexPath = join(options.output, 'index.html');
+      if (existsSync(indexPath)) {
+        rmSync(indexPath, { force: true });
+      }
+      Logger.info(`✨ Output folder ${options.output} cleaned successfully.`);
     });
-  });
 
-program
-  .command('clean')
-  .description('Clean previous report and execution history')
-  .requiredOption('-o, --output <path>', 'Path to the report output folder to clean')
-  .action((options: CleanOptions): void => {
-    Logger.info(`🧹 Grimoir - Cleaning report history and output...`);
-    cleanOutput(options.output);
-    const indexPath = join(options.output, 'index.html');
-    if (existsSync(indexPath)) {
-      rmSync(indexPath, { force: true });
-    }
-    Logger.info(`✨ Output folder ${options.output} cleaned successfully.`);
-  });
+  return prog;
+};
+
+export const program = createProgram();
 
 if (require.main === module) {
   program.parseAsync().catch((err: unknown) => {

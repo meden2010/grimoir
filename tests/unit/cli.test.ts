@@ -1,7 +1,8 @@
 import { describe, test, expect, beforeEach, afterEach, mock, spyOn } from 'bun:test';
 import { existsSync, mkdirSync, rmSync, writeFileSync, readFileSync } from 'fs';
 import { join } from 'path';
-import { program, buildReport } from '../../src/cli/index';
+import * as http from 'http';
+import { program, buildReport, createProgram, formatServerUrl } from '../../src/cli/index';
 
 // We need a real file system for these tests since the functions under test
 // utilize Node's fs heavily and interact with actual JSON fixture formats.
@@ -112,33 +113,154 @@ describe('CLI - index.ts', () => {
     });
 
 
-    test('generate command should parse host flag correctly', async () => {
-      const outputPath = join(tempDir, 'out-host-gen');
+    test('generate command should bind server to default host 127.0.0.1 when --host is omitted', async () => {
+      const outputPath = join(tempDir, 'out-host-gen-default');
       if (!existsSync(FIXTURES_DIR)) return;
 
-      await program.parseAsync(['node', 'grimoir', 'generate', '-i', FIXTURES_DIR, '-o', outputPath, '--host', '0.0.0.0', '--no-serve']);
+      const serverProg = createProgram();
+      let listenArgs: { port: number; host: string } | null = null;
+      let closed = false;
 
-      const genCommand = program.commands.find(c => c.name() === 'generate');
-      expect(genCommand?.opts().host).toBe('0.0.0.0');
+      const mockServer = {
+        listen: (port: number, host: string, cb?: () => void) => {
+          listenArgs = { port, host };
+          if (cb) cb();
+          return mockServer;
+        },
+        close: (cb?: () => void) => {
+          closed = true;
+          if (cb) cb();
+          return mockServer;
+        },
+      };
+
+      spyOn(http, 'createServer').mockReturnValue(mockServer as any);
+
+      await serverProg.parseAsync(['node', 'grimoir', 'generate', '-i', FIXTURES_DIR, '-o', outputPath]);
+
+      expect(listenArgs).not.toBeNull();
+      expect(listenArgs?.host).toBe('127.0.0.1');
+      expect(listenArgs?.port).toBe(8080);
+      mockServer.close();
+      expect(closed).toBe(true);
     });
 
-    test('serve command should parse host flag correctly', async () => {
-      const serveCommand = program.commands.find(c => c.name() === 'serve');
-      expect(serveCommand).toBeDefined();
-      if (!serveCommand) return;
+    test('generate command should bind server to explicit host when --host is provided', async () => {
+      const outputPath = join(tempDir, 'out-host-gen-custom');
+      if (!existsSync(FIXTURES_DIR)) return;
 
-      const dummyFile = join(tempDir, 'dummy.html');
-      writeFileSync(dummyFile, 'dummy');
+      const serverProg = createProgram();
+      let listenArgs: { port: number; host: string } | null = null;
+      let closed = false;
 
-      const originalAction = (serveCommand as any)._actionHandler;
-      serveCommand.action(() => {}); // Prevent actual serving
+      const mockServer = {
+        listen: (port: number, host: string, cb?: () => void) => {
+          listenArgs = { port, host };
+          if (cb) cb();
+          return mockServer;
+        },
+        close: (cb?: () => void) => {
+          closed = true;
+          if (cb) cb();
+          return mockServer;
+        },
+      };
 
-      program.parse(['node', 'grimoir', 'serve', '-f', dummyFile, '--host', '192.168.1.1']);
-      expect(serveCommand.opts().host).toBe('192.168.1.1');
+      spyOn(http, 'createServer').mockReturnValue(mockServer as any);
 
-      if (originalAction) {
-        serveCommand.action(originalAction);
-      }
+      await serverProg.parseAsync(['node', 'grimoir', 'generate', '-i', FIXTURES_DIR, '-o', outputPath, '--host', '0.0.0.0']);
+
+      expect(listenArgs).not.toBeNull();
+      expect(listenArgs?.host).toBe('0.0.0.0');
+      mockServer.close();
+      expect(closed).toBe(true);
+    });
+
+    test('serve command should bind server to default host 127.0.0.1 when --host is omitted', async () => {
+      const dummyFile = join(tempDir, 'dummy-default.html');
+      writeFileSync(dummyFile, '<h1>Report</h1>');
+
+      const serverProg = createProgram();
+      let listenArgs: { port: number; host: string } | null = null;
+      let closed = false;
+
+      const mockServer = {
+        listen: (port: number, host: string, cb?: () => void) => {
+          listenArgs = { port, host };
+          if (cb) cb();
+          return mockServer;
+        },
+        close: (cb?: () => void) => {
+          closed = true;
+          if (cb) cb();
+          return mockServer;
+        },
+      };
+
+      spyOn(http, 'createServer').mockReturnValue(mockServer as any);
+
+      await serverProg.parseAsync(['node', 'grimoir', 'serve', '-f', dummyFile]);
+
+      expect(listenArgs).not.toBeNull();
+      expect(listenArgs?.host).toBe('127.0.0.1');
+      expect(listenArgs?.port).toBe(8080);
+      mockServer.close();
+      expect(closed).toBe(true);
+    });
+
+    test('serve command should bind server to explicit host when --host is provided', async () => {
+      const dummyFile = join(tempDir, 'dummy-custom.html');
+      writeFileSync(dummyFile, '<h1>Report</h1>');
+
+      const serverProg = createProgram();
+      let listenArgs: { port: number; host: string } | null = null;
+      let closed = false;
+
+      const mockServer = {
+        listen: (port: number, host: string, cb?: () => void) => {
+          listenArgs = { port, host };
+          if (cb) cb();
+          return mockServer;
+        },
+        close: (cb?: () => void) => {
+          closed = true;
+          if (cb) cb();
+          return mockServer;
+        },
+      };
+
+      spyOn(http, 'createServer').mockReturnValue(mockServer as any);
+
+      await serverProg.parseAsync(['node', 'grimoir', 'serve', '-f', dummyFile, '--host', '192.168.1.1']);
+
+      expect(listenArgs).not.toBeNull();
+      expect(listenArgs?.host).toBe('192.168.1.1');
+      mockServer.close();
+      expect(closed).toBe(true);
+    });
+  });
+
+  describe('formatServerUrl', () => {
+    test('should format standard IPv4 host', () => {
+      expect(formatServerUrl('127.0.0.1', 8080)).toBe('http://127.0.0.1:8080');
+    });
+
+    test('should report 0.0.0.0 wildcard as 127.0.0.1 for local viewing convenience', () => {
+      expect(formatServerUrl('0.0.0.0', 8080)).toBe('http://127.0.0.1:8080');
+    });
+
+    test('should bracket unbracketed IPv6 host values', () => {
+      expect(formatServerUrl('::1', 8080)).toBe('http://[::1]:8080');
+      expect(formatServerUrl('2001:db8::1', 3000)).toBe('http://[2001:db8::1]:3000');
+    });
+
+    test('should preserve already bracketed IPv6 host values', () => {
+      expect(formatServerUrl('[::1]', 8080)).toBe('http://[::1]:8080');
+    });
+
+    test('should format domain names and custom hosts', () => {
+      expect(formatServerUrl('localhost', 8080)).toBe('http://localhost:8080');
+      expect(formatServerUrl('192.168.1.10', 9000)).toBe('http://192.168.1.10:9000');
     });
   });
 });
