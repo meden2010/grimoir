@@ -44,6 +44,7 @@ interface GenerateOptions {
   serve: boolean;
   watch: boolean;
   clean?: boolean;
+  host: string;
 }
 
 interface CleanOptions {
@@ -53,6 +54,7 @@ interface CleanOptions {
 interface ServeOptions {
   file: string;
   port: string;
+  host: string;
 }
 
 export const program = new Command();
@@ -273,6 +275,7 @@ program
   .requiredOption('-i, --input <path>', 'Path to the folder containing test results')
   .requiredOption('-o, --output <path>', 'Path where the report will be generated')
   .option('-p, --port <number>', 'Port to serve the report', '8080')
+  .option('-H, --host <string>', 'Host to bind the server to', '127.0.0.1')
   .option('-c, --clean', 'Clean previous execution history before generating report')
   .option('--no-serve', 'Do not start the report server')
   .option('-w, --watch', 'Watch input folder and regenerate on changes')
@@ -301,8 +304,8 @@ program
 
       const server = createServer(requestHandler);
 
-      server.listen(port, () => {
-        const url = `http://localhost:${port}`;
+      server.listen(port, options.host, () => {
+        const url = `http://${options.host}:${port}`;
         Logger.info(`\n🌐 Report served at: ${url}`);
 
         if (options.watch) {
@@ -349,6 +352,7 @@ program
   .description('Serve an existing report')
   .requiredOption('-f, --file <path>', 'Path to the report HTML file')
   .option('-p, --port <number>', 'Port to serve the report', '8080')
+  .option('-H, --host <string>', 'Host to bind the server to', '127.0.0.1')
   .action((options: ServeOptions): void => {
     const html: string = readFileSync(options.file, 'utf-8');
     const port: number = parseInt(options.port, 10);
@@ -358,8 +362,8 @@ program
       res.end(html);
     });
 
-    server.listen(port, () => {
-      const url = `http://localhost:${port}`;
+    server.listen(port, options.host, () => {
+        const url = `http://${options.host}:${port}`;
       Logger.info(`🌐 Serving report from: ${options.file}`);
       Logger.info(`   Report available at: ${url}`);
       Logger.info(`   Press Ctrl+C to stop the server\n`);

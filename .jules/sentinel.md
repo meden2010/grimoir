@@ -1,0 +1,3 @@
+- Document critical security learnings, defense-in-depth measures, and vulnerability resolutions in \`.jules/sentinel.md\`.
+- When implementing local preview servers, always bind \`server.listen()\` explicitly to \`127.0.0.1\` (or a provided host configuration) rather than defaulting to \`0.0.0.0\` to prevent unintended network exposure.
+- For security fixes and hardening measures, always add regression unit tests in \`tests/\` covering the vulnerability or fix, and keep code changes minimal (under 50 lines).

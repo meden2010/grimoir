@@ -110,5 +110,35 @@ describe('CLI - index.ts', () => {
 
       expect(existsSync(join(outputPath, 'index.html'))).toBe(true);
     });
+
+
+    test('generate command should parse host flag correctly', async () => {
+      const outputPath = join(tempDir, 'out-host-gen');
+      if (!existsSync(FIXTURES_DIR)) return;
+
+      await program.parseAsync(['node', 'grimoir', 'generate', '-i', FIXTURES_DIR, '-o', outputPath, '--host', '0.0.0.0', '--no-serve']);
+
+      const genCommand = program.commands.find(c => c.name() === 'generate');
+      expect(genCommand?.opts().host).toBe('0.0.0.0');
+    });
+
+    test('serve command should parse host flag correctly', async () => {
+      const serveCommand = program.commands.find(c => c.name() === 'serve');
+      expect(serveCommand).toBeDefined();
+      if (!serveCommand) return;
+
+      const dummyFile = join(tempDir, 'dummy.html');
+      writeFileSync(dummyFile, 'dummy');
+
+      const originalAction = (serveCommand as any)._actionHandler;
+      serveCommand.action(() => {}); // Prevent actual serving
+
+      program.parse(['node', 'grimoir', 'serve', '-f', dummyFile, '--host', '192.168.1.1']);
+      expect(serveCommand.opts().host).toBe('192.168.1.1');
+
+      if (originalAction) {
+        serveCommand.action(originalAction);
+      }
+    });
   });
 });
