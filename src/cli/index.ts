@@ -8,6 +8,7 @@ import { parsePlaywright, PlaywrightReport, PlaywrightSuite, PlaywrightResult } 
 import { parseK6, K6Report } from '../parsers/k6.parser';
 import { generateHTML } from '../report/template';
 import { truncateString } from '../utils/string.util';
+import { Logger } from '../utils/logger.util';
 
 export interface HistoricalRun {
   date: string;
@@ -240,21 +241,21 @@ const buildReport = async (inputPath: string, outputPath: string, clean: boolean
   await fsPromises.writeFile(tempHtmlPath, html, 'utf-8');
   await fsPromises.rename(tempHtmlPath, join(outputPath, 'index.html'));
 
-  console.log(`\n✅ Playwright Results:`);
-  console.log(`   Total:   ${playwrightReport.stats.total}`);
-  console.log(`   Passed:  ${playwrightReport.stats.passed}`);
-  console.log(`   Failed:  ${playwrightReport.stats.failed}`);
-  console.log(`   Skipped: ${playwrightReport.stats.skipped}`);
-  console.log(`   Duration: ${playwrightReport.stats.duration}ms`);
+  Logger.info(`\n✅ Playwright Results:`);
+  Logger.info(`   Total:   ${playwrightReport.stats.total}`);
+  Logger.info(`   Passed:  ${playwrightReport.stats.passed}`);
+  Logger.info(`   Failed:  ${playwrightReport.stats.failed}`);
+  Logger.info(`   Skipped: ${playwrightReport.stats.skipped}`);
+  Logger.info(`   Duration: ${playwrightReport.stats.duration}ms`);
 
   if (k6Report) {
-    console.log(`\n🔮 k6 Performance (v1):`);
-    console.log(`   P95 Latency:   ${k6Report.metrics.p95LatencyMs !== null ? `${k6Report.metrics.p95LatencyMs}ms` : 'N/A'}`);
-    console.log(`   Error Rate:    ${k6Report.metrics.errorRatePercent !== null ? `${k6Report.metrics.errorRatePercent}%` : 'N/A'}`);
-    console.log(`   Throughput:    ${k6Report.metrics.throughputRps !== null ? `${k6Report.metrics.throughputRps} req/s` : 'N/A'}`);
-    console.log(`   Thresholds:    ${k6Report.thresholds.status.toUpperCase()} (${k6Report.thresholds.passed}/${k6Report.thresholds.total})`);
+    Logger.info(`\n🔮 k6 Performance (v1):`);
+    Logger.info(`   P95 Latency:   ${k6Report.metrics.p95LatencyMs !== null ? `${k6Report.metrics.p95LatencyMs}ms` : 'N/A'}`);
+    Logger.info(`   Error Rate:    ${k6Report.metrics.errorRatePercent !== null ? `${k6Report.metrics.errorRatePercent}%` : 'N/A'}`);
+    Logger.info(`   Throughput:    ${k6Report.metrics.throughputRps !== null ? `${k6Report.metrics.throughputRps} req/s` : 'N/A'}`);
+    Logger.info(`   Thresholds:    ${k6Report.thresholds.status.toUpperCase()} (${k6Report.thresholds.passed}/${k6Report.thresholds.total})`);
     if (k6Report.warnings.length > 0) {
-      console.log(`   ⚠️ Warnings:   ${k6Report.warnings.join(' | ')}`);
+      Logger.info(`   ⚠️ Warnings:   ${k6Report.warnings.join(' | ')}`);
     }
   }
 
@@ -276,11 +277,11 @@ program
   .option('--no-serve', 'Do not start the report server')
   .option('-w, --watch', 'Watch input folder and regenerate on changes')
   .action(async (options: GenerateOptions): Promise<void> => {
-    console.log(`📖 Grimoir - Generating report...`);
+    Logger.info(`📖 Grimoir - Generating report...`);
 
     await buildReport(options.input, options.output, !!options.clean);
 
-    console.log(`\n🔮 Report saved at: ${join(options.output, 'index.html')}`);
+    Logger.info(`\n🔮 Report saved at: ${join(options.output, 'index.html')}`);
 
     // Start local server
     if (options.serve) {
@@ -302,11 +303,11 @@ program
 
       server.listen(port, () => {
         const url = `http://localhost:${port}`;
-        console.log(`\n🌐 Report served at: ${url}`);
+        Logger.info(`\n🌐 Report served at: ${url}`);
 
         if (options.watch) {
-          console.log(`   👀 Watching: ${options.input}/`);
-          console.log(`   Press Ctrl+C to stop\n`);
+          Logger.info(`   👀 Watching: ${options.input}/`);
+          Logger.info(`   Press Ctrl+C to stop\n`);
 
           let isBuilding = false;
           let pendingRebuild = false;
@@ -320,7 +321,7 @@ program
             try {
               await buildReport(options.input, options.output);
             } catch {
-              console.log(`   ⚠️  Error regenerating, waiting for next change...`);
+              Logger.info(`   ⚠️  Error regenerating, waiting for next change...`);
             } finally {
               isBuilding = false;
               if (pendingRebuild) {
@@ -332,12 +333,12 @@ program
 
           watch(options.input, async (_event: string, filename: string | null): Promise<void> => {
             if (filename && filename.endsWith('.json')) {
-              console.log(`\n🔄 Change detected in ${filename} — regenerating...`);
+              Logger.info(`\n🔄 Change detected in ${filename} — regenerating...`);
               await triggerRebuild();
             }
           });
         } else {
-          console.log(`   Press Ctrl+C to stop the server\n`);
+          Logger.info(`   Press Ctrl+C to stop the server\n`);
         }
       });
     }
@@ -359,9 +360,9 @@ program
 
     server.listen(port, () => {
       const url = `http://localhost:${port}`;
-      console.log(`🌐 Serving report from: ${options.file}`);
-      console.log(`   Report available at: ${url}`);
-      console.log(`   Press Ctrl+C to stop the server\n`);
+      Logger.info(`🌐 Serving report from: ${options.file}`);
+      Logger.info(`   Report available at: ${url}`);
+      Logger.info(`   Press Ctrl+C to stop the server\n`);
     });
   });
 
@@ -370,18 +371,18 @@ program
   .description('Clean previous report and execution history')
   .requiredOption('-o, --output <path>', 'Path to the report output folder to clean')
   .action((options: CleanOptions): void => {
-    console.log(`🧹 Grimoir - Cleaning report history and output...`);
+    Logger.info(`🧹 Grimoir - Cleaning report history and output...`);
     cleanOutput(options.output);
     const indexPath = join(options.output, 'index.html');
     if (existsSync(indexPath)) {
       rmSync(indexPath, { force: true });
     }
-    console.log(`✨ Output folder ${options.output} cleaned successfully.`);
+    Logger.info(`✨ Output folder ${options.output} cleaned successfully.`);
   });
 
 if (require.main === module) {
   program.parseAsync().catch((err: unknown) => {
-    console.error('Execution error:', err);
+    Logger.error('Execution error:', err);
     process.exit(1);
   });
 }
