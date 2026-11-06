@@ -335,6 +335,24 @@ const generateAutomatedTestRows = (playwright: PlaywrightReport): string => {
   }).join('');
 };
 
+
+const generateTableWrapper = (title: string, ariaLabel: string, headersHtml: string, rowsHtml: string): string => {
+  return `
+      <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter mt-base">
+        <h3 class="font-display text-base font-semibold text-on-surface tracking-wide uppercase mb-base">${title}</h3>
+        <div class="overflow-x-auto" tabindex="0" role="region" aria-label="${ariaLabel}">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              ${headersHtml}
+            </thead>
+            <tbody>
+              ${rowsHtml}
+            </tbody>
+          </table>
+        </div>
+      </div>`;
+};
+
 const generateCoverageChips = (isAutomatedActive: boolean, isPerformanceActive: boolean): string => {
   const types = [
     { label: 'Automated', active: isAutomatedActive },
@@ -565,24 +583,16 @@ export const generateHTML = (playwright: PlaywrightReport, k6: K6Report | null, 
         </tr>`;
     }).join('');
 
-    k6ThresholdsTable = `
-      <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter mt-base">
-        <h3 class="font-display text-base font-semibold text-on-surface tracking-wide uppercase mb-base">Threshold Rule Details</h3>
-        <div class="overflow-x-auto" tabindex="0" role="region" aria-label="k6 Threshold Rules">
-          <table class="w-full text-left border-collapse">
-            <thead>
-              <tr class="bg-surface-container-low/50 border-b border-outline-variant text-xs font-label-caps uppercase text-on-surface-variant">
+    k6ThresholdsTable = generateTableWrapper(
+      'Threshold Rule Details',
+      'k6 Threshold Rules',
+      `<tr class="bg-surface-container-low/50 border-b border-outline-variant text-xs font-label-caps uppercase text-on-surface-variant">
                 <th scope="col" class="p-gutter">Rule / Threshold</th>
                 <th scope="col" class="p-gutter">Metric Target</th>
                 <th scope="col" class="p-gutter text-right">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${rows}
-            </tbody>
-          </table>
-        </div>
-      </div>`;
+              </tr>`,
+      rows
+    );
   }
 
   let k6ScenariosTable = '';
@@ -601,25 +611,17 @@ export const generateHTML = (playwright: PlaywrightReport, k6: K6Report | null, 
         </tr>`;
     }).join('');
 
-    k6ScenariosTable = `
-      <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter mt-base">
-        <h3 class="font-display text-base font-semibold text-on-surface tracking-wide uppercase mb-base">Scenario Runs</h3>
-        <div class="overflow-x-auto" tabindex="0" role="region" aria-label="k6 Scenario Runs">
-          <table class="w-full text-left border-collapse">
-            <thead>
-              <tr class="bg-surface-container-low/50 border-b border-outline-variant text-xs font-label-caps uppercase text-on-surface-variant">
+    k6ScenariosTable = generateTableWrapper(
+      'Scenario Runs',
+      'k6 Scenario Runs',
+      `<tr class="bg-surface-container-low/50 border-b border-outline-variant text-xs font-label-caps uppercase text-on-surface-variant">
                 <th scope="col" class="p-gutter">Scenario</th>
                 <th scope="col" class="p-gutter">Virtual Users</th>
                 <th scope="col" class="p-gutter">Iterations</th>
                 <th scope="col" class="p-gutter text-right">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${sRows}
-            </tbody>
-          </table>
-        </div>
-      </div>`;
+              </tr>`,
+      sRows
+    );
   }
 
   const template = loadTemplate();
