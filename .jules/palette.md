@@ -1,0 +1,1 @@
+When implementing ARIA labels in dynamic templates (like test status pills), ensure the label correctly maps to the specific underlying state (e.g., 'Status: Failed') rather than hardcoding a static label across all iterations, to avoid misleading screen readers and causing accessibility regressions.
