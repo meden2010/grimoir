@@ -98,13 +98,14 @@ const buildReport = async (inputPath: string, outputPath: string, clean: boolean
               try {
                 // ⚡ Bolt: Async file check and copy to avoid blocking the event loop on deep nested attachments
                 await fsPromises.access(p);
-                const fileName = `${Date.now()}-${counter++}-${basename(p)}`;
-                const destPath = join(dataDir, fileName);
-                await fsPromises.copyFile(p, destPath);
-                attachment.path = `./data/${fileName}`;
               } catch {
                 // File does not exist or cannot be accessed, ignore
+                return;
               }
+              const fileName = `${Date.now()}-${counter++}-${basename(p)}`;
+              const destPath = join(dataDir, fileName);
+              await fsPromises.copyFile(p, destPath);
+              attachment.path = `./data/${fileName}`;
             })()
           );
         }
