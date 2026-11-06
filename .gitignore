@@ -153,3 +153,6 @@ test-results/
 .impeccable/critique/
 .impeccable/config.local.json
 
+bench-data/
+bench-out-old/
+bench-out-new/
