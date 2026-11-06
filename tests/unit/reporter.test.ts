@@ -1,4 +1,4 @@
-import { describe, test, expect, beforeEach, mock } from 'bun:test';
+import { describe, test, expect, beforeEach, afterEach, mock } from 'bun:test';
 import GrimoirReporter from '../../src/reporter/index';
 
 describe('GrimoirReporter', () => {
@@ -159,5 +159,63 @@ describe('GrimoirReporter', () => {
     expect(skippedSuite).toBeDefined();
     expect(skippedSuite.specs[0].ok).toBe(true); // passed or skipped is ok
     expect(skippedSuite.specs[0].tests[0].results[0].status).toBe('skipped');
+  });
+});
+describe('GrimoirReporter - onEnd', () => {
+  let reporter: GrimoirReporter;
+  const originalExistsSync = require('fs').existsSync;
+  const originalMkdirSync = require('fs').mkdirSync;
+  const originalWriteFileSync = require('fs').writeFileSync;
+
+  beforeEach(() => {
+    reporter = new GrimoirReporter({ outputFile: "test-dir/test-output.json" });
+    const fs = require('fs');
+    fs.existsSync = mock(() => false);
+    fs.mkdirSync = mock(() => undefined);
+    fs.writeFileSync = mock(() => undefined);
+  });
+
+  afterEach(() => {
+    const fs = require('fs');
+    fs.existsSync = originalExistsSync;
+    fs.mkdirSync = originalMkdirSync;
+    fs.writeFileSync = originalWriteFileSync;
+  });
+
+  test("should create directory if it doesn't exist and write results", () => {
+    const fs = require('fs');
+    const logSpy = mock(() => undefined);
+    const originalLog = console.log;
+    console.log = logSpy;
+
+    reporter.onEnd();
+
+    expect(fs.existsSync).toHaveBeenCalledWith("test-dir");
+    expect(fs.mkdirSync).toHaveBeenCalledWith("test-dir", { recursive: true });
+    expect(fs.writeFileSync).toHaveBeenCalledWith("test-dir/test-output.json", JSON.stringify({
+      config: {},
+      suites: [],
+      errors: []
+    }, null, 2));
+    expect(logSpy).toHaveBeenCalledWith(expect.stringContaining("Results written to test-dir/test-output.json"));
+
+    console.log = originalLog;
+  });
+
+  test("should not create directory if it already exists", () => {
+    const fs = require('fs');
+    fs.existsSync = mock(() => true);
+
+    const logSpy = mock(() => undefined);
+    const originalLog = console.log;
+    console.log = logSpy;
+
+    reporter.onEnd();
+
+    expect(fs.existsSync).toHaveBeenCalledWith("test-dir");
+    expect(fs.mkdirSync).not.toHaveBeenCalled();
+    expect(fs.writeFileSync).toHaveBeenCalled();
+
+    console.log = originalLog;
   });
 });
