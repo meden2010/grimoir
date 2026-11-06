@@ -241,23 +241,40 @@ interface AutomatedRow {
   error?: any;
 }
 
+// ⚡ Bolt Optimization:
+// Replaced .some() and .every() with a single for loop to compute spec status in one pass.
+// This avoids closure memory allocations and reduces redundant iterations over tests.
 const determineSpecStatus = (spec: PlaywrightSpec): 'passed' | 'failed' | 'flaky' | 'skipped' => {
   if (!spec.ok) {
     return 'failed';
   }
-  if (spec.tests?.some(t => t.status === 'flaky')) {
-    return 'flaky';
-  }
-  if (spec.tests?.every(t => t.status === 'skipped')) {
+  if (!spec.tests || spec.tests.length === 0) {
     return 'skipped';
   }
-  return 'passed';
+  let allSkipped = true;
+  for (let i = 0; i < spec.tests.length; i++) {
+    const status = spec.tests[i].status;
+    if (status === 'flaky') return 'flaky';
+    if (status !== 'skipped') allSkipped = false;
+  }
+  return allSkipped ? 'skipped' : 'passed';
 };
 
+// ⚡ Bolt Optimization:
+// Replaced nested .reduce() calls with nested for loops to calculate total spec duration.
+// This avoids closure memory allocations and function call overhead.
 const calculateSpecDuration = (spec: PlaywrightSpec): number => {
-  return spec.tests?.reduce((acc, t) => {
-    return acc + (t.results?.reduce((rAcc, r) => rAcc + (r.duration || 0), 0) || 0);
-  }, 0) || 0;
+  if (!spec.tests) return 0;
+  let total = 0;
+  for (let i = 0; i < spec.tests.length; i++) {
+    const t = spec.tests[i];
+    if (t.results) {
+      for (let j = 0; j < t.results.length; j++) {
+        total += t.results[j].duration || 0;
+      }
+    }
+  }
+  return total;
 };
 
 const getSpecError = (spec: PlaywrightSpec): any => {
