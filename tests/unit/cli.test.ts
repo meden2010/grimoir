@@ -1,5 +1,5 @@
 import { describe, test, expect, beforeEach, afterEach, mock, spyOn } from 'bun:test';
-import { existsSync, mkdirSync, rmSync, writeFileSync } from 'fs';
+import { existsSync, mkdirSync, rmSync, writeFileSync, readFileSync } from 'fs';
 import { join } from 'path';
 import { program, buildReport } from '../../src/cli/index';
 
@@ -32,10 +32,13 @@ describe('CLI - index.ts', () => {
 
   describe('buildReport', () => {
     test('should generate a report from valid input and clean prior data if requested', async () => {
-      // Mock history and other initial state
+      // Mock history with a seeded prior run
       const outputPath = join(tempDir, 'out1');
       mkdirSync(outputPath, { recursive: true });
-      writeFileSync(join(outputPath, '.grimoir-history.json'), '{"runs":[], "tests":{}}');
+      writeFileSync(
+        join(outputPath, '.grimoir-history.json'),
+        JSON.stringify({ runs: [{ date: '2020-01-01', total: 99, passed: 99, failed: 0, skipped: 0, duration: 100 }], tests: {} })
+      );
 
       // The demo-output fixture should have playwright-results.json and k6-results.json
       // Make sure those fixtures are created before this test runs (e.g. via pre-build steps in gate)
@@ -51,9 +54,12 @@ describe('CLI - index.ts', () => {
       expect(html.length).toBeGreaterThan(0);
       expect(existsSync(join(outputPath, 'index.html'))).toBe(true);
 
-      // We supplied `clean: true`, which should have forcefully re-created data folders
-      // but importantly the history file should still be successfully created during execution
-      expect(existsSync(join(outputPath, '.grimoir-history.json'))).toBe(true);
+      // We supplied `clean: true`, which should have cleared prior runs and created a fresh history with current run only
+      const historyFile = join(outputPath, '.grimoir-history.json');
+      expect(existsSync(historyFile)).toBe(true);
+      const history = JSON.parse(readFileSync(historyFile, 'utf-8'));
+      expect(history.runs.some((r: any) => r.total === 99)).toBe(false);
+      expect(history.runs.length).toBe(1);
     });
 
     test('should gracefully handle empty or invalid history file during read', async () => {
@@ -69,7 +75,12 @@ describe('CLI - index.ts', () => {
       expect(typeof html).toBe('string');
       expect(html.length).toBeGreaterThan(0);
       expect(existsSync(join(outputPath, 'index.html'))).toBe(true);
-      expect(existsSync(join(outputPath, '.grimoir-history.json'))).toBe(true);
+      
+      const historyFile = join(outputPath, '.grimoir-history.json');
+      expect(existsSync(historyFile)).toBe(true);
+      const history = JSON.parse(readFileSync(historyFile, 'utf-8'));
+      expect(Array.isArray(history.runs)).toBe(true);
+      expect(history.runs.length).toBe(1);
     });
   });
 
