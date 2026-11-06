@@ -80,28 +80,50 @@ const buildReport = async (inputPath: string, outputPath: string, clean: boolean
     mkdirSync(dataDir, { recursive: true });
   }
 
-  const processAttachments = (suites: PlaywrightSuite[]) => {
-    for (const suite of suites) {
+  const processAttachments = async (suites: PlaywrightSuite[]): Promise<void> => {
+    const copyPromises: Promise<void>[] = [];
+    let counter = 0; // to ensure unique filenames in fast concurrent loop
+
+    const processSuite = (suite: PlaywrightSuite) => {
       const attachments = (suite.specs || [])
         .flatMap((spec: any) => spec.tests || [])
         .flatMap((test: any) => test.results || [])
         .flatMap((result: any) => result.attachments || []);
 
       for (const attachment of attachments) {
-        if (attachment.path && existsSync(attachment.path)) {
-          const fileName = `${Date.now()}-${basename(attachment.path)}`;
-          const destPath = join(dataDir, fileName);
-          copyFileSync(attachment.path, destPath);
-          attachment.path = `./data/${fileName}`;
+        if (attachment.path) {
+          const p = attachment.path;
+          copyPromises.push(
+            (async () => {
+              try {
+                // ⚡ Bolt: Async file check and copy to avoid blocking the event loop on deep nested attachments
+                await fsPromises.access(p);
+                const fileName = `${Date.now()}-${counter++}-${basename(p)}`;
+                const destPath = join(dataDir, fileName);
+                await fsPromises.copyFile(p, destPath);
+                attachment.path = `./data/${fileName}`;
+              } catch {
+                // File does not exist or cannot be accessed, ignore
+              }
+            })()
+          );
         }
       }
 
       if (suite.suites) {
-        processAttachments(suite.suites);
+        for (const childSuite of suite.suites) {
+          processSuite(childSuite);
+        }
       }
+    };
+
+    for (const suite of suites) {
+      processSuite(suite);
     }
+
+    await Promise.all(copyPromises);
   };
-  processAttachments((playwrightRaw['suites'] as PlaywrightSuite[]) || []);
+  await processAttachments((playwrightRaw['suites'] as PlaywrightSuite[]) || []);
 
   const playwrightReport: PlaywrightReport = parsePlaywright(playwrightRaw);
 
