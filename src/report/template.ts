@@ -1,6 +1,6 @@
 import { readFileSync, existsSync } from 'fs';
 import { join } from 'path';
-import { PlaywrightReport, PlaywrightTest, PlaywrightSuite, normalizeStatus } from '../parsers/playwright.parser';
+import { PlaywrightReport, PlaywrightTest, PlaywrightSuite, PlaywrightSpec, normalizeStatus } from '../parsers/playwright.parser';
 import { K6Report } from '../parsers/k6.parser';
 
 
@@ -241,6 +241,31 @@ interface AutomatedRow {
   error?: any;
 }
 
+const determineSpecStatus = (spec: PlaywrightSpec): 'passed' | 'failed' | 'flaky' | 'skipped' => {
+  if (!spec.ok) {
+    return 'failed';
+  }
+  if (spec.tests?.some(t => t.status === 'flaky')) {
+    return 'flaky';
+  }
+  if (spec.tests?.every(t => t.status === 'skipped')) {
+    return 'skipped';
+  }
+  return 'passed';
+};
+
+const calculateSpecDuration = (spec: PlaywrightSpec): number => {
+  return spec.tests?.reduce((acc, t) => {
+    return acc + (t.results?.reduce((rAcc, r) => rAcc + (r.duration || 0), 0) || 0);
+  }, 0) || 0;
+};
+
+const getSpecError = (spec: PlaywrightSpec): any => {
+  const lastTest = spec.tests?.[spec.tests.length - 1];
+  const lastResult = lastTest?.results?.[lastTest.results.length - 1];
+  return lastResult?.error || (lastResult?.errors && lastResult.errors[0]);
+};
+
 // ⚡ Bolt Optimization:
 // Passing an accumulator array (`rows`) as an argument to mutate in-place rather than using `rows = rows.concat(recursiveCall())`.
 // This prevents O(N^2) memory allocations and reduces garbage collection overhead when parsing deeply nested suites.
@@ -250,28 +275,12 @@ const extractAutomatedRows = (suites: PlaywrightSuite[], parentTitle = '', rows:
 
     if (suite.specs) {
       for (const spec of suite.specs) {
-        const lastTest = spec.tests?.[spec.tests.length - 1];
-        const lastResult = lastTest?.results?.[lastTest.results.length - 1];
-        
-        let status: 'passed' | 'failed' | 'flaky' | 'skipped' = 'passed';
-        if (!spec.ok) {
-          status = 'failed';
-        } else if (spec.tests?.some(t => t.status === 'flaky')) {
-          status = 'flaky';
-        } else if (spec.tests?.every(t => t.status === 'skipped')) {
-          status = 'skipped';
-        }
-
-        const duration = spec.tests?.reduce((acc, t) => {
-          return acc + (t.results?.reduce((rAcc, r) => rAcc + (r.duration || 0), 0) || 0);
-        }, 0) || 0;
-
         rows.push({
           suite: currentTitle,
           test: spec.title,
-          status,
-          duration,
-          error: lastResult?.error || (lastResult?.errors && lastResult.errors[0])
+          status: determineSpecStatus(spec),
+          duration: calculateSpecDuration(spec),
+          error: getSpecError(spec)
         });
       }
     }
