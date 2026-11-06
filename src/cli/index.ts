@@ -2,7 +2,7 @@
 
 import { Command } from 'commander';
 import { readFileSync, writeFileSync, mkdirSync, watch, existsSync, copyFileSync, rmSync, promises as fsPromises } from 'fs';
-import { join, basename } from 'path';
+import { join, basename, resolve, parse } from 'path';
 import { createServer, IncomingMessage, ServerResponse } from 'http';
 import { parsePlaywright, PlaywrightReport, PlaywrightSuite, PlaywrightResult } from '../parsers/playwright.parser';
 import { parseK6, K6Report } from '../parsers/k6.parser';
@@ -57,6 +57,11 @@ interface ServeOptions {
 const program = new Command();
 
 export const cleanOutput = (outputPath: string): void => {
+  const resolvedPath = resolve(outputPath);
+  if (resolvedPath === parse(resolvedPath).root) {
+    throw new Error('Refusing to clean root directory for safety reasons.');
+  }
+
   const historyPath = join(outputPath, '.grimoir-history.json');
   if (existsSync(historyPath)) {
     rmSync(historyPath, { force: true });
