@@ -11,3 +11,9 @@ When replacing multiple placeholders in a large string template (like an HTML re
 When recursively extracting items from deeply nested structures (e.g., test suites), pass an accumulator array as an argument to mutate in-place rather than using `.concat()` or `.push(...recursiveCall())`. This prevents O(N^2) memory allocations and reduces garbage collection overhead by avoiding the creation of numerous intermediate arrays.
 
 - When optimizing Playwright parsing (`src/parsers/playwright.parser.ts`), always look for ways to merge array iteration passes (like `.reduce()`, `.some()`, and `.map()` calls) into a single loop to reduce CPU overhead on massive output files.
+
+### Array Method Optimizations in Parser Loops
+When parsing complex, deeply nested JSON representations of test suites (e.g. Playwright output), extracting state or aggregating durations can become a hot path for memory allocations if not implemented carefully.
+*   **The Issue:** Higher-order array methods like `.some()`, `.every()`, and especially nested `.reduce()` calls introduce substantial overhead. They allocate a new closure for each callback invocation and require traversing arrays multiple times to derive different logical states. In large reports containing thousands of test items, this creates significant GC (Garbage Collection) pressure and slows down report generation.
+*   **The Solution:** Replacing these functional chains with a single standard `for` loop allows computing multiple values (such as test status and total duration) in a single pass. This avoids the overhead of function call allocations and closure creation.
+*   **Example:** In `src/report/template.ts`, replacing `.some(t => t.status === 'flaky')` and `.every(t => t.status === 'skipped')` with a single `for` loop that sets boolean flags during iteration resulted in a measurable decrease in both parse time and memory consumption.

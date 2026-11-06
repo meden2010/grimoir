@@ -241,23 +241,40 @@ interface AutomatedRow {
   error?: any;
 }
 
+// ⚡ Bolt Optimization:
+// Replaced .some() and .every() with a single for loop to compute spec status in one pass.
+// This avoids closure memory allocations and reduces redundant iterations over tests.
 const determineSpecStatus = (spec: PlaywrightSpec): 'passed' | 'failed' | 'flaky' | 'skipped' => {
   if (!spec.ok) {
     return 'failed';
   }
-  if (spec.tests?.some(t => t.status === 'flaky')) {
-    return 'flaky';
-  }
-  if (spec.tests?.every(t => t.status === 'skipped')) {
+  if (!spec.tests || spec.tests.length === 0) {
     return 'skipped';
   }
-  return 'passed';
+  let allSkipped = true;
+  for (let i = 0; i < spec.tests.length; i++) {
+    const status = spec.tests[i].status;
+    if (status === 'flaky') return 'flaky';
+    if (status !== 'skipped') allSkipped = false;
+  }
+  return allSkipped ? 'skipped' : 'passed';
 };
 
+// ⚡ Bolt Optimization:
+// Replaced nested .reduce() calls with nested for loops to calculate total spec duration.
+// This avoids closure memory allocations and function call overhead.
 const calculateSpecDuration = (spec: PlaywrightSpec): number => {
-  return spec.tests?.reduce((acc, t) => {
-    return acc + (t.results?.reduce((rAcc, r) => rAcc + (r.duration || 0), 0) || 0);
-  }, 0) || 0;
+  if (!spec.tests) return 0;
+  let total = 0;
+  for (let i = 0; i < spec.tests.length; i++) {
+    const t = spec.tests[i];
+    if (t.results) {
+      for (let j = 0; j < t.results.length; j++) {
+        total += t.results[j].duration || 0;
+      }
+    }
+  }
+  return total;
 };
 
 const getSpecError = (spec: PlaywrightSpec): any => {
@@ -311,17 +328,17 @@ const generateAutomatedTestRows = (playwright: PlaywrightReport): string => {
     
     switch (row.status) {
       case 'passed':
-        statusBadge = '<span class="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-950/40 text-emerald-400 text-xs font-bold rounded-full border border-emerald-500/30"><span class="w-1.5 h-1.5 bg-emerald-400 rounded-full"></span>Passed</span>';
+        statusBadge = '<span class="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-950/40 text-emerald-400 text-xs font-bold rounded-full border border-emerald-500/30"><span class="w-1.5 h-1.5 bg-emerald-400 rounded-full" aria-hidden="true"></span><span class="visually-hidden">Status: </span>Passed</span>';
         break;
       case 'failed':
-        statusBadge = '<span class="inline-flex items-center gap-1 px-2 py-0.5 bg-error/10 text-error text-xs font-bold rounded-full border border-error/30"><span class="w-1.5 h-1.5 bg-error rounded-full"></span>Failed</span>';
+        statusBadge = '<span class="inline-flex items-center gap-1 px-2 py-0.5 bg-error/10 text-error text-xs font-bold rounded-full border border-error/30"><span class="w-1.5 h-1.5 bg-error rounded-full" aria-hidden="true"></span><span class="visually-hidden">Status: </span>Failed</span>';
         statusClass = 'hover:bg-error/5';
         break;
       case 'flaky':
-        statusBadge = '<span class="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-950/40 text-amber-400 text-xs font-bold rounded-full border border-amber-500/30"><span class="w-1.5 h-1.5 bg-amber-400 rounded-full"></span>Flaky</span>';
+        statusBadge = '<span class="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-950/40 text-amber-400 text-xs font-bold rounded-full border border-amber-500/30"><span class="w-1.5 h-1.5 bg-amber-400 rounded-full" aria-hidden="true"></span><span class="visually-hidden">Status: </span>Flaky</span>';
         break;
       case 'skipped':
-        statusBadge = '<span class="inline-flex items-center gap-1 px-2 py-0.5 bg-surface-container text-outline text-xs font-bold rounded-full border border-outline-variant"><span class="w-1.5 h-1.5 bg-outline rounded-full"></span>Skipped</span>';
+        statusBadge = '<span class="inline-flex items-center gap-1 px-2 py-0.5 bg-surface-container text-outline text-xs font-bold rounded-full border border-outline-variant"><span class="w-1.5 h-1.5 bg-outline rounded-full" aria-hidden="true"></span><span class="visually-hidden">Status: </span>Skipped</span>';
         break;
     }
 
@@ -541,11 +558,11 @@ export const generateHTML = (playwright: PlaywrightReport, k6: K6Report | null, 
     : 'N/A';
 
   const threshStatus = k6?.thresholds?.status ?? 'none';
-  let k6ThresholdsStatusBadge = `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-bold bg-surface-container text-on-surface-variant border border-outline-variant">NO THRESHOLDS</span>`;
+  let k6ThresholdsStatusBadge = `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-bold bg-surface-container text-on-surface-variant border border-outline-variant"><span class="visually-hidden">Status: </span>NO THRESHOLDS</span>`;
   if (threshStatus === 'passed') {
-    k6ThresholdsStatusBadge = `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-bold bg-emerald-950/40 text-emerald-400 border border-emerald-500/30"><span class="w-2 h-2 rounded-full bg-emerald-400"></span>PASSED</span>`;
+    k6ThresholdsStatusBadge = `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-bold bg-emerald-950/40 text-emerald-400 border border-emerald-500/30"><span class="w-2 h-2 rounded-full bg-emerald-400" aria-hidden="true"></span><span class="visually-hidden">Status: </span>PASSED</span>`;
   } else if (threshStatus === 'failed') {
-    k6ThresholdsStatusBadge = `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-bold bg-error/10 text-error border border-error/30"><span class="w-2 h-2 rounded-full bg-error"></span>FAILED</span>`;
+    k6ThresholdsStatusBadge = `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-bold bg-error/10 text-error border border-error/30"><span class="w-2 h-2 rounded-full bg-error" aria-hidden="true"></span><span class="visually-hidden">Status: </span>FAILED</span>`;
   }
 
   const k6TotalThresholds = k6?.thresholds?.total ?? 0;
@@ -600,8 +617,8 @@ export const generateHTML = (playwright: PlaywrightReport, k6: K6Report | null, 
     const sRows = Object.entries(k6.scenarios).map(([name, sc]) => {
       const isPassed = sc.status === 'passed';
       const badge = isPassed
-        ? `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-emerald-950/40 text-emerald-400 border border-emerald-500/30"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400" aria-hidden="true"></span>PASSED</span>`
-        : `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-error/10 text-error border border-error/30"><span class="w-1.5 h-1.5 rounded-full bg-error" aria-hidden="true"></span>FAILED</span>`;
+        ? `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-emerald-950/40 text-emerald-400 border border-emerald-500/30"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400" aria-hidden="true"></span><span class="visually-hidden">Status: </span>PASSED</span>`
+        : `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-error/10 text-error border border-error/30"><span class="w-1.5 h-1.5 rounded-full bg-error" aria-hidden="true"></span><span class="visually-hidden">Status: </span>FAILED</span>`;
       return `
         <tr class="border-b border-outline-variant/30 hover:bg-surface-container/30 transition-colors perf-metric-row">
           <td class="p-gutter font-mono text-xs text-on-surface font-semibold">${escapeHtml(name)}</td>
