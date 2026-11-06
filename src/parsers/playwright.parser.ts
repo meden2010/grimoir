@@ -107,8 +107,22 @@ function extractTests(suites: PlaywrightSuite[], tests: PlaywrightTest[] = []): 
           
           const results = test.results;
 
-          // Normalize attachment bodies if they are serialized Buffers
+          // ⚡ Bolt Optimization:
+          // Merged attachment normalization, status resolution, and duration calculation into a single loop.
+          // Reduces CPU overhead by turning an O(3N) pass into an O(N) pass per test results array.
+          let hasFailure = false;
+          let totalDuration = 0;
+
           for (const result of results) {
+            // Duration calculation
+            totalDuration += (result.duration || 0);
+
+            // Status resolution
+            if (['failed', 'timedOut', 'interrupted'].includes(result.status)) {
+              hasFailure = true;
+            }
+
+            // Normalize attachment bodies if they are serialized Buffers
             if (result.attachments) {
               for (const att of result.attachments) {
                 if (
@@ -125,15 +139,14 @@ function extractTests(suites: PlaywrightSuite[], tests: PlaywrightTest[] = []): 
 
           const lastResult = results[results.length - 1];
           
-          // Determine overall status
-          const overallStatus = results.some(r => ['failed', 'timedOut', 'interrupted'].includes(r.status))
+          const overallStatus = hasFailure
             ? 'failed'
             : normalizeStatus(lastResult.status);
 
           tests.push({
             title: spec.title,
             status: overallStatus,
-            duration: results.reduce((acc, r) => acc + (r.duration || 0), 0),
+            duration: totalDuration,
             error: lastResult.error || lastResult.errors?.[0],
             steps: lastResult.steps,
             attachments: lastResult.attachments || [],

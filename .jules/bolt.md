@@ -9,3 +9,5 @@ When replacing multiple placeholders in a large string template (like an HTML re
 
 ### Recursive Array Aggregations
 When recursively extracting items from deeply nested structures (e.g., test suites), pass an accumulator array as an argument to mutate in-place rather than using `.concat()` or `.push(...recursiveCall())`. This prevents O(N^2) memory allocations and reduces garbage collection overhead by avoiding the creation of numerous intermediate arrays.
+
+- When optimizing Playwright parsing (`src/parsers/playwright.parser.ts`), always look for ways to merge array iteration passes (like `.reduce()`, `.some()`, and `.map()` calls) into a single loop to reduce CPU overhead on massive output files.
