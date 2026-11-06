@@ -1,6 +1,6 @@
 import { readFileSync, existsSync } from 'fs';
 import { join } from 'path';
-import { PlaywrightReport, PlaywrightTest, PlaywrightSuite, normalizeStatus } from '../parsers/playwright.parser';
+import { PlaywrightReport, PlaywrightTest, PlaywrightSuite, PlaywrightSpec, normalizeStatus } from '../parsers/playwright.parser';
 import { K6Report } from '../parsers/k6.parser';
 
 
@@ -241,6 +241,31 @@ interface AutomatedRow {
   error?: any;
 }
 
+const determineSpecStatus = (spec: PlaywrightSpec): 'passed' | 'failed' | 'flaky' | 'skipped' => {
+  if (!spec.ok) {
+    return 'failed';
+  }
+  if (spec.tests?.some(t => t.status === 'flaky')) {
+    return 'flaky';
+  }
+  if (spec.tests?.every(t => t.status === 'skipped')) {
+    return 'skipped';
+  }
+  return 'passed';
+};
+
+const calculateSpecDuration = (spec: PlaywrightSpec): number => {
+  return spec.tests?.reduce((acc, t) => {
+    return acc + (t.results?.reduce((rAcc, r) => rAcc + (r.duration || 0), 0) || 0);
+  }, 0) || 0;
+};
+
+const getSpecError = (spec: PlaywrightSpec): any => {
+  const lastTest = spec.tests?.[spec.tests.length - 1];
+  const lastResult = lastTest?.results?.[lastTest.results.length - 1];
+  return lastResult?.error || (lastResult?.errors && lastResult.errors[0]);
+};
+
 // ⚡ Bolt Optimization:
 // Passing an accumulator array (`rows`) as an argument to mutate in-place rather than using `rows = rows.concat(recursiveCall())`.
 // This prevents O(N^2) memory allocations and reduces garbage collection overhead when parsing deeply nested suites.
@@ -250,28 +275,12 @@ const extractAutomatedRows = (suites: PlaywrightSuite[], parentTitle = '', rows:
 
     if (suite.specs) {
       for (const spec of suite.specs) {
-        const lastTest = spec.tests?.[spec.tests.length - 1];
-        const lastResult = lastTest?.results?.[lastTest.results.length - 1];
-        
-        let status: 'passed' | 'failed' | 'flaky' | 'skipped' = 'passed';
-        if (!spec.ok) {
-          status = 'failed';
-        } else if (spec.tests?.some(t => t.status === 'flaky')) {
-          status = 'flaky';
-        } else if (spec.tests?.every(t => t.status === 'skipped')) {
-          status = 'skipped';
-        }
-
-        const duration = spec.tests?.reduce((acc, t) => {
-          return acc + (t.results?.reduce((rAcc, r) => rAcc + (r.duration || 0), 0) || 0);
-        }, 0) || 0;
-
         rows.push({
           suite: currentTitle,
           test: spec.title,
-          status,
-          duration,
-          error: lastResult?.error || (lastResult?.errors && lastResult.errors[0])
+          status: determineSpecStatus(spec),
+          duration: calculateSpecDuration(spec),
+          error: getSpecError(spec)
         });
       }
     }
@@ -324,6 +333,24 @@ const generateAutomatedTestRows = (playwright: PlaywrightReport): string => {
         <td class="p-gutter font-mono text-sm text-on-surface-variant text-right">${formatDuration(row.duration)}</td>
       </tr>`;
   }).join('');
+};
+
+
+const generateTableWrapper = (title: string, ariaLabel: string, headersHtml: string, rowsHtml: string): string => {
+  return `
+      <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter mt-base">
+        <h3 class="font-display text-base font-semibold text-on-surface tracking-wide uppercase mb-base">${title}</h3>
+        <div class="overflow-x-auto" tabindex="0" role="region" aria-label="${ariaLabel}">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              ${headersHtml}
+            </thead>
+            <tbody>
+              ${rowsHtml}
+            </tbody>
+          </table>
+        </div>
+      </div>`;
 };
 
 const generateCoverageChips = (isAutomatedActive: boolean, isPerformanceActive: boolean): string => {
@@ -556,24 +583,16 @@ export const generateHTML = (playwright: PlaywrightReport, k6: K6Report | null, 
         </tr>`;
     }).join('');
 
-    k6ThresholdsTable = `
-      <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter mt-base">
-        <h3 class="font-display text-base font-semibold text-on-surface tracking-wide uppercase mb-base">Threshold Rule Details</h3>
-        <div class="overflow-x-auto" tabindex="0" role="region" aria-label="k6 Threshold Rules">
-          <table class="w-full text-left border-collapse">
-            <thead>
-              <tr class="bg-surface-container-low/50 border-b border-outline-variant text-xs font-label-caps uppercase text-on-surface-variant">
+    k6ThresholdsTable = generateTableWrapper(
+      'Threshold Rule Details',
+      'k6 Threshold Rules',
+      `<tr class="bg-surface-container-low/50 border-b border-outline-variant text-xs font-label-caps uppercase text-on-surface-variant">
                 <th scope="col" class="p-gutter">Rule / Threshold</th>
                 <th scope="col" class="p-gutter">Metric Target</th>
                 <th scope="col" class="p-gutter text-right">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${rows}
-            </tbody>
-          </table>
-        </div>
-      </div>`;
+              </tr>`,
+      rows
+    );
   }
 
   let k6ScenariosTable = '';
@@ -592,25 +611,17 @@ export const generateHTML = (playwright: PlaywrightReport, k6: K6Report | null, 
         </tr>`;
     }).join('');
 
-    k6ScenariosTable = `
-      <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter mt-base">
-        <h3 class="font-display text-base font-semibold text-on-surface tracking-wide uppercase mb-base">Scenario Runs</h3>
-        <div class="overflow-x-auto" tabindex="0" role="region" aria-label="k6 Scenario Runs">
-          <table class="w-full text-left border-collapse">
-            <thead>
-              <tr class="bg-surface-container-low/50 border-b border-outline-variant text-xs font-label-caps uppercase text-on-surface-variant">
+    k6ScenariosTable = generateTableWrapper(
+      'Scenario Runs',
+      'k6 Scenario Runs',
+      `<tr class="bg-surface-container-low/50 border-b border-outline-variant text-xs font-label-caps uppercase text-on-surface-variant">
                 <th scope="col" class="p-gutter">Scenario</th>
                 <th scope="col" class="p-gutter">Virtual Users</th>
                 <th scope="col" class="p-gutter">Iterations</th>
                 <th scope="col" class="p-gutter text-right">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${sRows}
-            </tbody>
-          </table>
-        </div>
-      </div>`;
+              </tr>`,
+      sRows
+    );
   }
 
   const template = loadTemplate();

@@ -85,28 +85,51 @@ const buildReport = async (inputPath: string, outputPath: string, clean: boolean
     mkdirSync(dataDir, { recursive: true });
   }
 
-  const processAttachments = (suites: PlaywrightSuite[]) => {
-    for (const suite of suites) {
+  const processAttachments = async (suites: PlaywrightSuite[]): Promise<void> => {
+    const copyPromises: Promise<void>[] = [];
+    let counter = 0; // to ensure unique filenames in fast concurrent loop
+
+    const processSuite = (suite: PlaywrightSuite) => {
       const attachments = (suite.specs || [])
         .flatMap((spec: any) => spec.tests || [])
         .flatMap((test: any) => test.results || [])
         .flatMap((result: any) => result.attachments || []);
 
       for (const attachment of attachments) {
-        if (attachment.path && existsSync(attachment.path)) {
-          const fileName = `${Date.now()}-${basename(attachment.path)}`;
-          const destPath = join(dataDir, fileName);
-          copyFileSync(attachment.path, destPath);
-          attachment.path = `./data/${fileName}`;
+        if (attachment.path) {
+          const p = attachment.path;
+          copyPromises.push(
+            (async () => {
+              try {
+                // ⚡ Bolt: Async file check and copy to avoid blocking the event loop on deep nested attachments
+                await fsPromises.access(p);
+              } catch {
+                // File does not exist or cannot be accessed, ignore
+                return;
+              }
+              const fileName = `${Date.now()}-${counter++}-${basename(p)}`;
+              const destPath = join(dataDir, fileName);
+              await fsPromises.copyFile(p, destPath);
+              attachment.path = `./data/${fileName}`;
+            })()
+          );
         }
       }
 
       if (suite.suites) {
-        processAttachments(suite.suites);
+        for (const childSuite of suite.suites) {
+          processSuite(childSuite);
+        }
       }
+    };
+
+    for (const suite of suites) {
+      processSuite(suite);
     }
+
+    await Promise.all(copyPromises);
   };
-  processAttachments((playwrightRaw['suites'] as PlaywrightSuite[]) || []);
+  await processAttachments((playwrightRaw['suites'] as PlaywrightSuite[]) || []);
 
   const playwrightReport: PlaywrightReport = parsePlaywright(playwrightRaw);
 
@@ -163,10 +186,23 @@ const buildReport = async (inputPath: string, outputPath: string, clean: boolean
 
           const results = test.results;
           const lastResult = results[results.length - 1];
-          const isFailed = results.some((r: PlaywrightResult) => ['failed', 'timedout', 'interrupted'].includes((r.status || '').toLowerCase()));
+
+          let isFailed = false;
+          let duration = 0;
+          // ⚡ Bolt: Single pass for loop avoids closure allocation and multiple iterations
+          for (let i = 0; i < results.length; i++) {
+            const r = results[i];
+            if (!isFailed) {
+              const status = (r.status || '').toLowerCase();
+              if (status === 'failed' || status === 'timedout' || status === 'interrupted') {
+                isFailed = true;
+              }
+            }
+            duration += r.duration || 0;
+          }
+
           const testStatus = resolveTestStatus(isFailed, lastResult.status);
 
-          const duration = results.reduce((acc: number, r: PlaywrightResult) => acc + (r.duration || 0), 0);
           const rawError = lastResult.error?.message || lastResult.errors?.[0]?.message || (typeof lastResult.error === 'string' ? lastResult.error : undefined);
           const errorSnippet = truncateString(rawError, 200);
 
