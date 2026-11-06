@@ -241,29 +241,47 @@ interface AutomatedRow {
   error?: any;
 }
 
-const determineSpecStatus = (spec: PlaywrightSpec): 'passed' | 'failed' | 'flaky' | 'skipped' => {
+// ⚡ Bolt Optimization:
+// Combined status determination, duration calculation, and error extraction into a single pass.
+// This eliminates multiple iterations (.some(), .every(), and multiple .reduce()) over spec.tests,
+// significantly reducing CPU overhead and memory allocations on large test suites.
+const getSpecMetrics = (spec: PlaywrightSpec): { status: 'passed' | 'failed' | 'flaky' | 'skipped', duration: number, error: any } => {
+  let status: 'passed' | 'failed' | 'flaky' | 'skipped' = 'passed';
+  let duration = 0;
+  let error: any = undefined;
+
   if (!spec.ok) {
-    return 'failed';
+    status = 'failed';
   }
-  if (spec.tests?.some(t => t.status === 'flaky')) {
-    return 'flaky';
-  }
-  if (spec.tests?.every(t => t.status === 'skipped')) {
-    return 'skipped';
-  }
-  return 'passed';
-};
 
-const calculateSpecDuration = (spec: PlaywrightSpec): number => {
-  return spec.tests?.reduce((acc, t) => {
-    return acc + (t.results?.reduce((rAcc, r) => rAcc + (r.duration || 0), 0) || 0);
-  }, 0) || 0;
-};
+  if (spec.tests) {
+    let hasFlaky = false;
+    let allSkipped = true;
 
-const getSpecError = (spec: PlaywrightSpec): any => {
-  const lastTest = spec.tests?.[spec.tests.length - 1];
-  const lastResult = lastTest?.results?.[lastTest.results.length - 1];
-  return lastResult?.error || (lastResult?.errors && lastResult.errors[0]);
+    for (const t of spec.tests) {
+      if (t.status === 'flaky') hasFlaky = true;
+      if (t.status !== 'skipped') allSkipped = false;
+
+      if (t.results) {
+        for (const r of t.results) {
+          duration += (r.duration || 0);
+        }
+      }
+    }
+
+    if (status !== 'failed') {
+      if (hasFlaky) status = 'flaky';
+      else if (allSkipped && spec.tests.length > 0) status = 'skipped';
+    }
+
+    const lastTest = spec.tests[spec.tests.length - 1];
+    if (lastTest && lastTest.results && lastTest.results.length > 0) {
+      const lastResult = lastTest.results[lastTest.results.length - 1];
+      error = lastResult.error || (lastResult.errors && lastResult.errors[0]);
+    }
+  }
+
+  return { status, duration, error };
 };
 
 // ⚡ Bolt Optimization:
@@ -275,12 +293,13 @@ const extractAutomatedRows = (suites: PlaywrightSuite[], parentTitle = '', rows:
 
     if (suite.specs) {
       for (const spec of suite.specs) {
+        const metrics = getSpecMetrics(spec);
         rows.push({
           suite: currentTitle,
           test: spec.title,
-          status: determineSpecStatus(spec),
-          duration: calculateSpecDuration(spec),
-          error: getSpecError(spec)
+          status: metrics.status,
+          duration: metrics.duration,
+          error: metrics.error
         });
       }
     }
