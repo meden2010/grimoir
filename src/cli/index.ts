@@ -55,7 +55,7 @@ interface ServeOptions {
   port: string;
 }
 
-const program = new Command();
+export const program = new Command();
 
 export const cleanOutput = (outputPath: string): void => {
   const resolvedPath = existsSync(outputPath) ? realpathSync(outputPath) : resolve(outputPath);
@@ -73,7 +73,7 @@ export const cleanOutput = (outputPath: string): void => {
   }
 };
 
-const buildReport = async (inputPath: string, outputPath: string, clean: boolean = false): Promise<string> => {
+export const buildReport = async (inputPath: string, outputPath: string, clean: boolean = false): Promise<string> => {
   if (clean) {
     cleanOutput(outputPath);
   }
