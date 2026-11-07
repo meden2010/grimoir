@@ -1303,6 +1303,21 @@
 
                   const testKey = `${path} > ${spec.title}`;
 
+                  // ⚡ Bolt Optimization:
+                  // Replaced higher-order array methods (.some and .reduce) with a single for loop
+                  // to compute isFlaky and totalDuration in one pass. This avoids closure memory allocations.
+                  let hasFailedAttempt = false;
+                  let totalDuration = 0;
+                  for (let i = 0; i < results.length; i++) {
+                    if (normalizeStatusStr(results[i].status) === "failed") {
+                      hasFailedAttempt = true;
+                    }
+                    totalDuration += results[i].duration || 0;
+                  }
+
+                  const isFlaky = test.status === "flaky" ||
+                    (results.length > 1 && hasFailedAttempt && overallStatus === "passed");
+
                   allAutomatedTests.push({
                     id: "test-" + (allAutomatedTests.length + 1),
                     testKey: testKey,
@@ -1310,17 +1325,8 @@
                     name: spec.title,
                     projectName: test.projectName || "chromium",
                     status: overallStatus,
-                    isFlaky:
-                      test.status === "flaky" ||
-                      (results.length > 1 &&
-                        results.some(
-                          (r) => normalizeStatusStr(r.status) === "failed",
-                        ) &&
-                        overallStatus === "passed"),
-                    duration: results.reduce(
-                      (acc, r) => acc + (r.duration || 0),
-                      0,
-                    ),
+                    isFlaky: isFlaky,
+                    duration: totalDuration,
                     error:
                       lastResult.error?.message ||
                       lastResult.errors?.[0]?.message ||
@@ -2132,8 +2138,17 @@
             const statusIcon = isFailed ? "cancel" : "check_circle";
             const statusColor = isFailed ? "text-error" : "text-emerald-400";
             const hasChildren = step.steps && step.steps.length > 0;
-            const hasChildWithError =
-              hasChildren && step.steps.some((s) => s.error);
+            // ⚡ Bolt Optimization:
+            // Replaced .some() with a standard for loop to check for child errors.
+            let hasChildWithError = false;
+            if (hasChildren) {
+              for (let i = 0; i < step.steps.length; i++) {
+                if (step.steps[i].error) {
+                  hasChildWithError = true;
+                  break;
+                }
+              }
+            }
             const shouldShowErrorBox =
               isFailed && step.error && !hasChildWithError;
 
@@ -2499,10 +2514,14 @@
         }
       }
 
+      // ⚡ Bolt Optimization:
+      // Replaced .some() with a standard for loop to avoid closure memory allocations and improve recursive performance.
       function stepHasError(step) {
         if (step.error) return true;
         if (step.steps && step.steps.length > 0) {
-          return step.steps.some(stepHasError);
+          for (let i = 0; i < step.steps.length; i++) {
+            if (stepHasError(step.steps[i])) return true;
+          }
         }
         return false;
       }
