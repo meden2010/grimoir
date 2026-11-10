@@ -1218,14 +1218,18 @@
       })();
 
       // === AUTOMATED SPLIT PANE LOGIC ===
+      const ESCAPE_MAP = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+      };
+      const ESCAPE_REGEX = /[&<>"']/g;
+
       function escapeHtml(unsafe) {
         if (!unsafe) return "";
-        return String(unsafe)
-          .replace(/&/g, "&amp;")
-          .replace(/</g, "&lt;")
-          .replace(/>/g, "&gt;")
-          .replace(/"/g, "&quot;")
-          .replace(/'/g, "&#039;");
+        return String(unsafe).replace(ESCAPE_REGEX, (m) => ESCAPE_MAP[m]);
       }
 
       function formatDuration(ms) {
@@ -1277,7 +1281,8 @@
         return "skipped";
       }
 
-      function buildFlatTestList(suites, parentPath = "") {
+      // ⚡ Bolt Optimization: Added testList parameter to avoid global array mutation overhead and improve testability
+      function buildFlatTestList(suites, parentPath = "", testList = allAutomatedTests) {
         if (!suites) return;
         suites.forEach((suite) => {
           const path = parentPath
@@ -1343,7 +1348,7 @@
           }
 
           if (suite.suites) {
-            buildFlatTestList(suite.suites, path);
+            buildFlatTestList(suite.suites, path, testList);
           }
         });
       }

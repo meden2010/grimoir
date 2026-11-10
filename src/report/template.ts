@@ -11,13 +11,19 @@ class SafeString {
 
 const safe = (val: string) => new SafeString(val);
 
+// ⚡ Bolt Optimization: Replaced sequential replace calls with a single regex and a map.
+// Expected savings: Reduces O(5N) string allocations to O(N), saving memory and CPU on large reports.
+const ESCAPE_MAP: Record<string, string> = {
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;',
+  "'": '&#039;'
+};
+
 const escapeHtml = (unsafe: string): string => {
-  return unsafe
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
+  if (!unsafe) return "";
+  return String(unsafe).replace(/[&<>"']/g, (m) => ESCAPE_MAP[m]);
 };
 
 interface Placeholders {
@@ -115,12 +121,10 @@ interface Failure {
   duration: number;
 }
 
+// ⚡ Bolt Optimization: Replaced chained .filter().map() with a single for loop to avoid intermediate array allocations.
 const buildFailures = (playwright: PlaywrightReport, k6: K6Report | null): Failure[] => {
-  // ⚡ Bolt Optimization:
-  // Merged .filter() and .map() passes into a single loop.
-  // Eliminates an intermediate array allocation and reduces CPU overhead from O(2N) to O(N) when parsing thousands of test executions.
-  const automatedFailures: Failure[] = [];
   const rows = extractAutomatedRows(playwright.suites);
+  const automatedFailures: Failure[] = [];
   for (let i = 0; i < rows.length; i++) {
     const row = rows[i];
     if (row.status === 'failed') {
@@ -292,12 +296,15 @@ const getSpecError = (spec: PlaywrightSpec): any => {
 // ⚡ Bolt Optimization:
 // Passing an accumulator array (`rows`) as an argument to mutate in-place rather than using `rows = rows.concat(recursiveCall())`.
 // This prevents O(N^2) memory allocations and reduces garbage collection overhead when parsing deeply nested suites.
+// ⚡ Bolt Optimization: Replaced for...of loops with standard for loops to avoid iterator allocation overhead.
 const extractAutomatedRows = (suites: PlaywrightSuite[], parentTitle = '', rows: AutomatedRow[] = []): AutomatedRow[] => {
-  for (const suite of suites) {
+  for (let i = 0; i < suites.length; i++) {
+    const suite = suites[i];
     const currentTitle = parentTitle ? `${parentTitle} > ${suite.title}` : suite.title;
 
     if (suite.specs) {
-      for (const spec of suite.specs) {
+      for (let j = 0; j < suite.specs.length; j++) {
+        const spec = suite.specs[j];
         rows.push({
           suite: currentTitle,
           test: spec.title,
