@@ -11,13 +11,19 @@ class SafeString {
 
 const safe = (val: string) => new SafeString(val);
 
+// ⚡ Bolt Optimization:
+// Replaced chained .replace() calls with a single regex pass and a lookup map.
+// This eliminates intermediate string allocations and redundant traversals,
+// significantly improving performance for high-frequency HTML escaping.
+const htmlEscapeMap: Record<string, string> = {
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;',
+  "'": '&#039;'
+};
 const escapeHtml = (unsafe: string): string => {
-  return unsafe
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
+  return unsafe.replace(/[&<>"']/g, (match) => htmlEscapeMap[match] as string);
 };
 
 interface Placeholders {
