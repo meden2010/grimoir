@@ -91,7 +91,7 @@ For AI agents supporting modular skills and plugin architectures:
   - [grimoir-parser-builder](file:///Users/saul.sosa/Desktop/Proyectos/grimoir/.agents/skills/grimoir-parser-builder/SKILL.md): Step-by-step runbook for adding or extending test parsers.
   - [grimoir-report-designer](file:///Users/saul.sosa/Desktop/Proyectos/grimoir/.agents/skills/grimoir-report-designer/SKILL.md): Runbook for editing report HTML/CSS/JS and live previewing.
   - [grimoir-compat-verifier](file:///Users/saul.sosa/Desktop/Proyectos/grimoir/.agents/skills/grimoir-compat-verifier/SKILL.md): Static audit and real multi-version Node execution procedures.
-  - [grimoir-brain](file:///Users/saul.sosa/Desktop/Proyectos/grimoir/.agents/skills/grimoir-brain/SKILL.md): Operating and updating the persistent Obsidian Second Brain vault in `docs/` and `Grimoir Brain.md`.
+  - [grimoir-brain](.agents/skills/grimoir-brain/SKILL.md): Operating and updating the persistent Obsidian Second Brain vault in `docs/` and `Grimoir Brain.md`.
 - **Specialized Roles (`.agents/plugins/grimoir-devkit/agents/`):**
   - [lifecycle-orchestrator](file:///Users/saul.sosa/Desktop/Proyectos/grimoir/.agents/plugins/grimoir-devkit/agents/lifecycle-orchestrator.md): Tech lead and end-to-end delivery pipeline orchestrator.
   - [product-planner](file:///Users/saul.sosa/Desktop/Proyectos/grimoir/.agents/plugins/grimoir-devkit/agents/product-planner.md): Feature specifications, acceptance criteria, and implementation planning.

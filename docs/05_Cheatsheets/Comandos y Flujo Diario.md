@@ -48,6 +48,9 @@ bun run gate
 > 4. `bun run test:compat` (Compilación y ejecución real bajo Node.js)
 > 5. `bun run build` (Compilación de producción a `dist/`)
 
+> [!WARNING] Limpieza automática en `bun run gate`
+> El paso `bun run test:compat` incluido en `bun run gate` ejecuta `clean --output ./output` al final, por lo que eliminará `./output/index.html` y `./output/.grimoir-history.json` locales. Respalda o regenera `./output` después si necesitas conservar el historial local.
+
 ---
 
 ## 🧪 Pruebas de Compatibilidad con Node.js

@@ -22,6 +22,7 @@ export const STANDARD_K6_METRICS = new Set<string>([
   'data_sent',
   'data_received',
   'checks',
+  'dropped_iterations',
 ]);
 
 const HTTP_PHASE_DEFINITIONS: ReadonlyArray<{ key: string; label: string }> = [
@@ -62,9 +63,9 @@ export interface K6CheckItem {
 export interface K6HttpPhaseMetric {
   key: string;
   label: string;
-  avgMs: number;
-  p95Ms: number;
-  maxMs: number;
+  avgMs: number | null;
+  p95Ms: number | null;
+  maxMs: number | null;
 }
 
 /**
@@ -250,12 +251,14 @@ function extractChecksFromGroup(group: unknown, acc: K6CheckItem[]): void {
     const passes = rawPasses !== null && rawPasses >= 0 ? Math.round(rawPasses) : 0;
     const fails = rawFails !== null && rawFails >= 0 ? Math.round(rawFails) : 0;
     const total = passes + fails;
-    const passRate = total > 0 ? Number(((passes / total) * 100).toFixed(2)) : 100;
-    const status: 'passed' | 'failed' = fails > 0 ? 'failed' : 'passed';
+    const passRate = total > 0 ? Number(((passes / total) * 100).toFixed(2)) : 0;
+    const status: 'passed' | 'failed' = total === 0 || fails > 0 ? 'failed' : 'passed';
     const reason =
-      fails > 0
-        ? `Check '${name}' failed ${fails} of ${total} assertions (${passRate}% pass rate)`
-        : `All ${total} assertions passed (100%)`;
+      total === 0
+        ? `Check '${name}' had 0 evaluated assertions`
+        : fails > 0
+          ? `Check '${name}' failed ${fails} of ${total} assertions (${passRate}% pass rate)`
+          : `All ${total} assertions passed (100%)`;
 
     acc.push({
       name,
@@ -461,9 +464,9 @@ export function parseK6(rawJson: Record<string, unknown>): K6Report {
       httpPhases.push({
         key: phaseDef.key,
         label: phaseDef.label,
-        avgMs: avg ?? 0,
-        p95Ms: p95 ?? 0,
-        maxMs: max ?? 0,
+        avgMs: avg,
+        p95Ms: p95,
+        maxMs: max,
       });
     }
   }

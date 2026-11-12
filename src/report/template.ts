@@ -838,11 +838,15 @@ export const generateHTML = (playwright: PlaywrightReport, k6: K6Report | null, 
         primaryValue = `p(95): ${cm.values.p95 ?? 'N/A'}${unit}`;
         breakdown = `min: ${cm.values.min ?? 'N/A'}${unit} · med: ${cm.values.med ?? 'N/A'}${unit} · avg: ${cm.values.avg ?? 'N/A'}${unit} · p90: ${cm.values.p90 ?? 'N/A'}${unit} · max: ${cm.values.max ?? 'N/A'}${unit}`;
       } else if (cm.type === 'rate') {
+        const passesStr = cm.values.passes !== null && cm.values.passes !== undefined ? String(cm.values.passes) : 'N/A';
+        const failsStr = cm.values.fails !== null && cm.values.fails !== undefined ? String(cm.values.fails) : 'N/A';
         primaryValue = `${cm.values.rate ?? 'N/A'}%`;
-        breakdown = `passes: ${cm.values.passes ?? 0} · fails: ${cm.values.fails ?? 0}`;
+        breakdown = `passes: ${passesStr} · fails: ${failsStr}`;
       } else if (cm.type === 'counter') {
-        primaryValue = `${(cm.values.count ?? 0).toLocaleString()}`;
-        breakdown = `throughput: ${cm.values.rate ?? 0}/s`;
+        const countStr = cm.values.count !== null && cm.values.count !== undefined ? cm.values.count.toLocaleString() : 'N/A';
+        const rateStr = cm.values.rate !== null && cm.values.rate !== undefined ? `${cm.values.rate}/s` : 'N/A';
+        primaryValue = countStr;
+        breakdown = `throughput: ${rateStr}`;
       } else {
         primaryValue = `${cm.values.value ?? 'N/A'}`;
         breakdown = `min: ${cm.values.min ?? 'N/A'} · max: ${cm.values.max ?? 'N/A'}`;

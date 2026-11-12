@@ -44,13 +44,13 @@ export interface K6MetricsSummary {
     p95: number | null;
   };
   volume: {
-    totalRequests: number;
-    requestRate: number; // req/s
+    totalRequests: number | null;
+    requestRate: number | null; // req/s
   };
   health: {
-    errorRate: number; // porcentaje (0 a 100)
-    successRate: number; // 100 - errorRate
-    vus: number; // Virtual Users
+    errorRate: number | null; // porcentaje (0 a 100)
+    successRate: number | null; // 100 - errorRate
+    vus: number | null; // Virtual Users
   };
   thresholds: Array<{
     name: string;

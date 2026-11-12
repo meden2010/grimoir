@@ -26,15 +26,16 @@ export interface HistoricalRun {
   };
 }
 
-const resolveTestStatus = (isFailed: boolean, lastResultStatus: string): 'passed' | 'failed' | 'skipped' => {
+const resolveTestStatus = (isFailed: boolean, lastResultStatus: string): 'passed' | 'failed' | 'flaky' | 'skipped' => {
   if (isFailed) return 'failed';
-  if (['passed', 'expected', 'flaky'].includes(lastResultStatus)) return 'passed';
+  if (lastResultStatus === 'flaky') return 'flaky';
+  if (['passed', 'expected'].includes(lastResultStatus)) return 'passed';
   return 'skipped';
 };
 
 export interface TestHistoryItem {
   date: string;
-  status: 'passed' | 'failed' | 'skipped';
+  status: 'passed' | 'failed' | 'flaky' | 'skipped';
   duration: number;
   error?: string;
 }
@@ -412,12 +413,25 @@ export const createProgram = (): Command => {
       }
 
       const platform = process.platform;
-      const command = platform === 'darwin' ? 'open' : platform === 'win32' ? 'cmd' : 'xdg-open';
-      const args = platform === 'win32' ? ['/c', 'start', '""', targetPath] : [targetPath];
+      const command = platform === 'darwin' ? 'open' : platform === 'win32' ? 'powershell.exe' : 'xdg-open';
+      const args =
+        platform === 'win32'
+          ? ['-NoProfile', '-Command', 'Start-Process -FilePath $env:GRIMOIR_OPEN_TARGET']
+          : [targetPath];
 
-      const child = spawn(command, args, { detached: true, stdio: 'ignore' });
-      child.unref();
-      Logger.info(`🔮 Opening report: ${targetPath}`);
+      const child = spawn(command, args, {
+        detached: true,
+        stdio: 'ignore',
+        env: platform === 'win32' ? { ...process.env, GRIMOIR_OPEN_TARGET: targetPath } : process.env,
+      });
+      child.on('error', (err: Error) => {
+        Logger.error(`❌ Failed to open report: ${err.message}`);
+        process.exitCode = 1;
+      });
+      child.on('spawn', () => {
+        child.unref();
+        Logger.info(`🔮 Opening report: ${targetPath}`);
+      });
     });
 
   prog

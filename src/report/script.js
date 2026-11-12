@@ -566,6 +566,7 @@
           P90: "90th percentile latency (p(90))",
           P95: "95th percentile SLA benchmark (p(95))",
         };
+        let currentTrendUnit = "ms";
         tabCharts.perf = new Chart(ctx, {
           type: "bar",
           data: {
@@ -610,8 +611,16 @@
                     return metricDescriptions[lbl] || lbl;
                   },
                   label: (context) => {
-                    const raw = Number(context.raw) || 0;
-                    return ` Latency: ${raw.toFixed(2)} ms (${formatDuration(raw)})`;
+                    if (context.raw === null || context.raw === undefined) {
+                      return " Value: N/A";
+                    }
+                    const raw = Number(context.raw);
+                    if (currentTrendUnit === "ms") {
+                      return ` Latency: ${raw.toFixed(2)} ms (${formatDuration(raw)})`;
+                    }
+                    return currentTrendUnit
+                      ? ` Value: ${raw.toFixed(2)} ${currentTrendUnit}`
+                      : ` Value: ${raw.toFixed(2)}`;
                   },
                 },
               },
@@ -627,7 +636,7 @@
                 ticks: {
                   color: "#C4C9D4",
                   font: { family: "JetBrains Mono", size: 11 },
-                  callback: (val) => `${val}ms`,
+                  callback: (val) => (currentTrendUnit ? `${val}${currentTrendUnit}` : `${val}`),
                 },
               },
             },
@@ -694,7 +703,11 @@
             const entry = K6_TRENDS_CATALOG[selectedKey];
             if (!entry) return;
 
+            currentTrendUnit = entry.unit || "";
             if (tabCharts.perf && Array.isArray(entry.data)) {
+              tabCharts.perf.data.datasets[0].label = entry.unit
+                ? `Latency (${entry.unit})`
+                : "Value";
               tabCharts.perf.data.datasets[0].data = entry.data;
               tabCharts.perf.update();
             }
@@ -743,8 +756,12 @@
         if (!Array.isArray(K6_PHASES_DATA) || K6_PHASES_DATA.length === 0) return;
 
         const phaseLabels = K6_PHASES_DATA.map((p) => p.label || p.key);
-        const avgData = K6_PHASES_DATA.map((p) => Number(p.avgMs) || 0);
-        const p95Data = K6_PHASES_DATA.map((p) => Number(p.p95Ms) || 0);
+        const avgData = K6_PHASES_DATA.map((p) =>
+          p.avgMs !== null && p.avgMs !== undefined ? Number(p.avgMs) : null,
+        );
+        const p95Data = K6_PHASES_DATA.map((p) =>
+          p.p95Ms !== null && p.p95Ms !== undefined ? Number(p.p95Ms) : null,
+        );
 
         tabCharts.perfPhases = new Chart(ctx, {
           type: "bar",
@@ -790,7 +807,10 @@
                     const phase = K6_PHASES_DATA[idx];
                     const isAvg = context.datasetIndex === 0;
                     const rawVal = phase ? (isAvg ? phase.avgMs : phase.p95Ms) : context.raw;
-                    return ` ${context.dataset.label}: ${Number(rawVal || 0).toFixed(2)} ms`;
+                    if (rawVal === null || rawVal === undefined) {
+                      return ` ${context.dataset.label}: N/A`;
+                    }
+                    return ` ${context.dataset.label}: ${Number(rawVal).toFixed(2)} ms`;
                   },
                   afterBody: (items) => {
                     const idx = items[0]?.dataIndex;
@@ -892,9 +912,9 @@
           const baselineRun = k6Runs[0];
           const baselineSummary = baselineRun
             ? `<div class="mt-2 inline-flex items-center gap-3 px-3 py-1.5 rounded-lg bg-surface-container border border-outline-variant/60 text-xs font-mono text-on-surface">
-                 <span>Baseline P95: <strong class="text-primary-container">${baselineRun.k6.p95LatencyMs !== null ? escapeHtml(baselineRun.k6.p95LatencyMs) + " ms" : "N/A"}</strong></span>
+                 <span>Baseline P95: <strong class="text-primary-container">${baselineRun.k6.p95LatencyMs !== null && baselineRun.k6.p95LatencyMs !== undefined ? escapeHtml(String(baselineRun.k6.p95LatencyMs)) + " ms" : "N/A"}</strong></span>
                  <span class="text-outline">•</span>
-                 <span>Throughput: <strong class="text-secondary-container">${baselineRun.k6.throughputRps !== null ? escapeHtml(baselineRun.k6.throughputRps) + " req/s" : "N/A"}</strong></span>
+                 <span>Throughput: <strong class="text-secondary-container">${baselineRun.k6.throughputRps !== null && baselineRun.k6.throughputRps !== undefined ? escapeHtml(String(baselineRun.k6.throughputRps)) + " req/s" : "N/A"}</strong></span>
                </div>`
             : "";
           container.innerHTML = `<div class="absolute inset-0 flex flex-col items-center justify-center text-on-surface-variant p-4 text-center">
