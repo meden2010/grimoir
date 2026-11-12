@@ -26,3 +26,6 @@ When processing and transforming arrays (e.g., filtering failures and mapping th
 *   **The Issue:** Chaining `.filter()` and `.map()` results in a time complexity of `O(2N)` and allocates an intermediate array for the filtered results before mapping them. This introduces unnecessary CPU overhead and Garbage Collection pressure, particularly when processing thousands of test execution rows.
 *   **The Solution:** Replace the `.filter().map()` chain with a single standard `for` loop that iterates over the original array once, conditionally pushing the transformed objects into a new accumulator array.
 *   **Example:** In `src/report/template.ts`'s `buildFailures` function, replacing the chain with a `for` loop eliminated an intermediate array allocation and reduced CPU overhead from `O(2N)` to `O(N)` when parsing large JSON datasets.
+
+- For high-performance string encoding like HTML escaping, replace chained `.replace()` calls with a single regex pass and a dictionary lookup map to eliminate intermediate string allocations and redundant traversals.
+- In performance-critical hot paths (like parsing large JSON objects or generating large reports), prefer standard indexed `for` loops over `for...of` or `.forEach()` to avoid the overhead of iterator object and callback allocations.
