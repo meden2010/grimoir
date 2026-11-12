@@ -116,12 +116,17 @@ interface Failure {
 }
 
 const buildFailures = (playwright: PlaywrightReport, k6: K6Report | null): Failure[] => {
-  const automatedFailures = extractAutomatedRows(playwright.suites)
-    .filter(row => row.status === 'failed')
-    .map(row => {
+  // ⚡ Bolt Optimization:
+  // Merged .filter() and .map() passes into a single loop.
+  // Eliminates an intermediate array allocation and reduces CPU overhead from O(2N) to O(N) when parsing thousands of test executions.
+  const automatedFailures: Failure[] = [];
+  const rows = extractAutomatedRows(playwright.suites);
+  for (let i = 0; i < rows.length; i++) {
+    const row = rows[i];
+    if (row.status === 'failed') {
       const errObj = row.error || {};
       const errMsg = typeof errObj === 'string' ? errObj : errObj.message || 'Unknown error';
-      return {
+      automatedFailures.push({
         type: 'Automated' as const,
         suite: row.suite,
         test: row.test,
@@ -129,8 +134,9 @@ const buildFailures = (playwright: PlaywrightReport, k6: K6Report | null): Failu
         location: errObj.location,
         snippet: errObj.snippet,
         duration: row.duration,
-      };
-    });
+      });
+    }
+  }
 
   const performanceFailures: Failure[] = [];
   if (k6) {
