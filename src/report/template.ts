@@ -150,24 +150,45 @@ const buildFailures = (playwright: PlaywrightReport, k6: K6Report | null): Failu
         if (!t.pass) {
           performanceFailures.push({
             type: 'Performance' as const,
-            suite: t.metric,
-            test: `Threshold: ${t.name}`,
-            error: `k6 threshold breached on metric '${t.metric}': '${t.name}' failed`,
-            duration: 0,
+            suite: 'k6 Thresholds',
+            test: `${t.metric} (${t.name})`,
+            error: t.reason
+              ? `k6 threshold breached on metric '${t.metric}': '${t.name}' failed — ${t.reason}`
+              : `k6 threshold breached on metric '${t.metric}': '${t.name}' failed`,
+            snippet: t.actualValue
+              ? `Rule: ${t.name} | Observed Value: ${t.actualValue} | Metric: ${t.metric}`
+              : undefined,
+            duration: k6.stats.duration || 0,
           });
         }
       }
     }
-    // 2. Scenario failures if any
+    // 2. Check failures from k6 summary
+    if (Array.isArray(k6.checks)) {
+      for (const c of k6.checks) {
+        if (c.fails > 0 || c.status === 'failed') {
+          performanceFailures.push({
+            type: 'Performance' as const,
+            suite: 'k6 Checks',
+            test: c.path ? `${c.name} (${c.path})` : c.name,
+            error: c.reason || `Check '${c.name}' failed ${c.fails} of ${c.passes + c.fails} assertions (${c.passRate}% pass rate)`,
+            snippet: `Passes: ${c.passes} | Fails: ${c.fails} | Pass Rate: ${c.passRate}% | Path: ${c.path || '::'}`,
+            duration: k6.stats.duration || 0,
+          });
+        }
+      }
+    }
+    // 3. Scenario failures if any
     if (k6.scenarios) {
       for (const [name, scenario] of Object.entries(k6.scenarios)) {
         if (scenario && scenario.status === 'failed') {
           performanceFailures.push({
             type: 'Performance' as const,
-            suite: name,
+            suite: 'k6 Load Test',
             test: name,
-            error: 'Performance scenario failed',
-            duration: 0,
+            error: scenario.reason ? `Performance scenario failed — ${scenario.reason}` : 'Performance scenario failed',
+            snippet: `Scenario: ${name} | VUs: ${scenario.vus} | Iterations: ${scenario.iterations}`,
+            duration: k6.stats.duration || 0,
           });
         }
       }
@@ -370,8 +391,8 @@ const generateTableWrapper = (title: string, ariaLabel: string, headersHtml: str
   return `
       <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter mt-base">
         <h3 class="font-display text-base font-semibold text-on-surface tracking-wide uppercase mb-base">${title}</h3>
-        <div class="overflow-x-auto" tabindex="0" role="region" aria-label="${ariaLabel}">
-          <table class="w-full text-left border-collapse">
+        <div class="overflow-x-auto grimoir-table-wrapper" tabindex="0" role="region" aria-label="${ariaLabel}">
+          <table class="w-full text-left grimoir-data-table">
             <thead>
               ${headersHtml}
             </thead>
@@ -451,20 +472,6 @@ export const generateHTML = (playwright: PlaywrightReport, k6: K6Report | null, 
   const passedPerformanceScenariosValue = k6Stats.passedScenarios;
   const failedPerformanceScenarios = Math.max(0, totalPerformanceScenarios - passedPerformanceScenariosValue);
 
-  const totalExecutionUnits: number = totalAutomatedCases + k6ThresholdsTotal;
-  const passedExecutionUnits: number = passedAutomatedCases + k6ThresholdsPassed;
-  const executionSuccessRate: number = totalExecutionUnits > 0
-    ? Math.round((passedExecutionUnits / totalExecutionUnits) * 100)
-    : 100;
-
-  const healthStatus: string = executionSuccessRate >= 95 ? 'HEALTHY' : executionSuccessRate >= 85 ? 'DEGRADED' : 'CRITICAL';
-  const healthColor: string = executionSuccessRate >= 95 ? 'bg-emerald-400' : executionSuccessRate >= 85 ? 'bg-amber-400' : 'bg-error';
-  const healthScoreColorHex: string = executionSuccessRate >= 95 ? '#34d399' : executionSuccessRate >= 85 ? '#fbbf24' : '#ef4444';
-  const healthLabel: string = executionSuccessRate >= 95 ? 'All systems operational — ready for release' :
-    executionSuccessRate >= 85 ? 'Some tests need attention' : 'Multiple failures detected — investigate immediately';
-  const healthScoreArcLength: number = Math.round(Math.PI * 80 * 100) / 100;
-  const healthScoreStrokeDashoffset: number = Math.round(healthScoreArcLength * (1 - executionSuccessRate / 100) * 100) / 100;
-
   const isAutomatedActive: boolean = playwright.stats.total > 0;
   const isPerformanceActive: boolean = !!k6 && (
     k6.metrics.p95LatencyMs !== null ||
@@ -474,6 +481,30 @@ export const generateHTML = (playwright: PlaywrightReport, k6: K6Report | null, 
     k6.stats.totalRequests > 0 ||
     k6.warnings.length > 0
   );
+
+  const totalExecutionUnits: number = totalAutomatedCases + k6ThresholdsTotal;
+  const passedExecutionUnits: number = passedAutomatedCases + k6ThresholdsPassed;
+  const hasNoK6Thresholds: boolean = isPerformanceActive && k6ThresholdsTotal === 0;
+  const executionSuccessRate: number = totalExecutionUnits > 0
+    ? Math.round((passedExecutionUnits / totalExecutionUnits) * 100)
+    : hasNoK6Thresholds ? 0 : 100;
+
+  let healthStatus: string = executionSuccessRate >= 95 ? 'HEALTHY' : executionSuccessRate >= 85 ? 'DEGRADED' : 'CRITICAL';
+  let healthColor: string = executionSuccessRate >= 95 ? 'bg-emerald-400' : executionSuccessRate >= 85 ? 'bg-amber-400' : 'bg-error';
+  let healthScoreColorHex: string = executionSuccessRate >= 95 ? '#34d399' : executionSuccessRate >= 85 ? '#fbbf24' : '#ef4444';
+  let healthLabel: string = executionSuccessRate >= 95 ? 'All systems operational — ready for release' :
+    executionSuccessRate >= 85 ? 'Some tests need attention' : 'Multiple failures detected — investigate immediately';
+
+  if (hasNoK6Thresholds && (totalExecutionUnits === 0 || executionSuccessRate >= 95)) {
+    healthStatus = 'UNVERIFIED';
+    healthColor = 'bg-amber-400';
+    healthScoreColorHex = '#fbbf24';
+    healthLabel = totalExecutionUnits === 0
+      ? 'No k6 thresholds configured — SLA unverified'
+      : 'Automated tests passed, but k6 thresholds are not configured';
+  }
+  const healthScoreArcLength: number = Math.round(Math.PI * 80 * 100) / 100;
+  const healthScoreStrokeDashoffset: number = Math.round(healthScoreArcLength * (1 - executionSuccessRate / 100) * 100) / 100;
 
   const coverageTypes: number = Number(isAutomatedActive) + Number(isPerformanceActive);
   const totalCoverage: number = 4;
@@ -534,6 +565,8 @@ export const generateHTML = (playwright: PlaywrightReport, k6: K6Report | null, 
   const k6AvgDisplay = avgVal !== null && avgVal !== undefined ? `${avgVal} ms` : 'N/A';
   const minVal = k6?.metrics?.minLatencyMs;
   const k6MinDisplay = minVal !== null && minVal !== undefined ? `${minVal} ms` : 'N/A';
+  const medVal = k6?.metrics?.medLatencyMs;
+  const k6MedDisplay = medVal !== null && medVal !== undefined ? `${medVal} ms` : 'N/A';
   const maxVal = k6?.metrics?.maxLatencyMs;
   const k6MaxDisplay = maxVal !== null && maxVal !== undefined ? `${maxVal} ms` : 'N/A';
   const p90Val = k6?.metrics?.p90LatencyMs;
@@ -547,10 +580,77 @@ export const generateHTML = (playwright: PlaywrightReport, k6: K6Report | null, 
   const k6DataArray = JSON.stringify([
     avgVal ?? null,
     minVal ?? null,
+    medVal ?? null,
     maxVal ?? null,
     p90Val ?? null,
     p95Val ?? null,
   ]);
+
+  const trendsCatalog: Record<string, {
+    label: string;
+    unit: string;
+    min: number | null;
+    med: number | null;
+    avg: number | null;
+    p90: number | null;
+    p95: number | null;
+    max: number | null;
+    data: Array<number | null>;
+  }> = {
+    http_req_duration: {
+      label: 'http_req_duration (Standard HTTP)',
+      unit: 'ms',
+      min: minVal ?? null,
+      med: medVal ?? null,
+      avg: avgVal ?? null,
+      p90: p90Val ?? null,
+      p95: p95Val ?? null,
+      max: maxVal ?? null,
+      data: [avgVal ?? null, minVal ?? null, medVal ?? null, maxVal ?? null, p90Val ?? null, p95Val ?? null],
+    },
+  };
+
+  const standardTrendOptions: string[] = [
+    `<option value="http_req_duration">http_req_duration (Standard HTTP)</option>`,
+  ];
+  const customTrendOptions: string[] = [];
+
+  for (const cm of k6?.customMetrics ?? []) {
+    if (cm.type === 'trend') {
+      trendsCatalog[cm.name] = {
+        label: `${cm.name} (Custom Trend)`,
+        unit: cm.contains === 'time' ? 'ms' : '',
+        min: cm.values.min ?? null,
+        med: cm.values.med ?? null,
+        avg: cm.values.avg ?? null,
+        p90: cm.values.p90 ?? null,
+        p95: cm.values.p95 ?? null,
+        max: cm.values.max ?? null,
+        data: [
+          cm.values.avg ?? null,
+          cm.values.min ?? null,
+          cm.values.med ?? null,
+          cm.values.max ?? null,
+          cm.values.p90 ?? null,
+          cm.values.p95 ?? null,
+        ],
+      };
+      customTrendOptions.push(
+        `<option value="${escapeHtml(cm.name)}">${escapeHtml(cm.name)} (Custom Trend)</option>`
+      );
+    }
+  }
+
+  const k6TrendsCatalogJson = safe(JSON.stringify(trendsCatalog).replace(/</g, '\\u003c'));
+  const trendSelectorMarkup = customTrendOptions.length > 0
+    ? `<optgroup label="Standard HTTP">${standardTrendOptions.join('')}</optgroup><optgroup label="Custom Trends">${customTrendOptions.join('')}</optgroup>`
+    : standardTrendOptions.join('');
+  const k6TrendSelectorOptions = safe(trendSelectorMarkup);
+  const k6TrendSelectorVisible = Object.keys(trendsCatalog).length > 1 ? '' : 'hidden';
+
+  const httpPhases = k6?.httpPhases ?? [];
+  const k6PhasesDataJson = safe(JSON.stringify(httpPhases).replace(/</g, '\\u003c'));
+  const k6PhasesSectionVisible = httpPhases.length > 0 ? '' : 'hidden';
 
   const errRateVal = k6?.metrics?.errorRatePercent;
   const k6ErrorRateDisplay = errRateVal !== null && errRateVal !== undefined
@@ -605,10 +705,20 @@ export const generateHTML = (playwright: PlaywrightReport, k6: K6Report | null, 
       const badge = t.pass
         ? `<span class="px-2 py-0.5 rounded text-xs font-mono font-bold bg-emerald-950/40 text-emerald-400 border border-emerald-500/30">PASS</span>`
         : `<span class="px-2 py-0.5 rounded text-xs font-mono font-bold bg-error/10 text-error border border-error/30">FAIL</span>`;
+      const actualBadge = t.actualValue && t.actualValue !== 'N/A'
+        ? `<span class="inline-block px-1.5 py-0.5 mr-2 rounded bg-surface-container text-on-surface font-mono font-bold text-xs border border-outline-variant/40">${escapeHtml(t.actualValue)}</span>`
+        : '';
+      const reasonText = escapeHtml(t.reason || (t.pass ? 'Threshold met' : 'Threshold breached'));
       return `
         <tr class="border-b border-outline-variant/30 hover:bg-surface-container/30 transition-colors perf-metric-row">
           <td class="p-gutter font-mono text-xs text-on-surface">${escapeHtml(t.name)}</td>
           <td class="p-gutter font-mono text-xs text-on-surface-variant">${escapeHtml(t.metric)}</td>
+          <td class="p-gutter">
+            <div class="flex flex-wrap items-center gap-1">
+              ${actualBadge}
+              <span class="text-xs font-mono ${t.pass ? 'text-on-surface-variant' : 'text-error/90'}">${reasonText}</span>
+            </div>
+          </td>
           <td class="p-gutter text-right">${badge}</td>
         </tr>`;
     }).join('');
@@ -619,6 +729,7 @@ export const generateHTML = (playwright: PlaywrightReport, k6: K6Report | null, 
       `<tr class="bg-surface-container-low/50 border-b border-outline-variant text-xs font-label-caps uppercase text-on-surface-variant">
                 <th scope="col" class="p-gutter">Rule / Threshold</th>
                 <th scope="col" class="p-gutter">Metric Target</th>
+                <th scope="col" class="p-gutter">Observed &amp; Reason</th>
                 <th scope="col" class="p-gutter text-right">Status</th>
               </tr>`,
       rows
@@ -632,11 +743,15 @@ export const generateHTML = (playwright: PlaywrightReport, k6: K6Report | null, 
       const badge = isPassed
         ? `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-emerald-950/40 text-emerald-400 border border-emerald-500/30"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400" aria-hidden="true"></span><span class="visually-hidden">Status: </span>PASSED</span>`
         : `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-error/10 text-error border border-error/30"><span class="w-1.5 h-1.5 rounded-full bg-error" aria-hidden="true"></span><span class="visually-hidden">Status: </span>FAILED</span>`;
+      const detailsText = escapeHtml(sc.reason || (isPassed ? `Completed ${sc.iterations} iterations` : 'Performance scenario failed'));
       return `
         <tr class="border-b border-outline-variant/30 hover:bg-surface-container/30 transition-colors perf-metric-row">
           <td class="p-gutter font-mono text-xs text-on-surface font-semibold">${escapeHtml(name)}</td>
           <td class="p-gutter font-mono text-xs text-on-surface-variant">${sc.vus} VUs</td>
           <td class="p-gutter font-mono text-xs text-on-surface-variant">${sc.iterations.toLocaleString()} iterations</td>
+          <td class="p-gutter">
+            <span class="text-xs font-mono ${isPassed ? 'text-on-surface-variant' : 'text-error/90'}">${detailsText}</span>
+          </td>
           <td class="p-gutter text-right">${badge}</td>
         </tr>`;
     }).join('');
@@ -648,9 +763,110 @@ export const generateHTML = (playwright: PlaywrightReport, k6: K6Report | null, 
                 <th scope="col" class="p-gutter">Scenario</th>
                 <th scope="col" class="p-gutter">Virtual Users</th>
                 <th scope="col" class="p-gutter">Iterations</th>
+                <th scope="col" class="p-gutter">Execution Details / Why</th>
                 <th scope="col" class="p-gutter text-right">Status</th>
               </tr>`,
       sRows
+    );
+  }
+
+  let k6ChecksTable = '';
+  if (k6?.checks && k6.checks.length > 0) {
+    const checkRows = k6.checks.map(c => {
+      const isPassed = c.fails === 0 && c.status === 'passed';
+      const badge = isPassed
+        ? `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-emerald-950/40 text-emerald-400 border border-emerald-500/30"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400" aria-hidden="true"></span><span class="visually-hidden">Status: </span>PASSED</span>`
+        : `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-error/10 text-error border border-error/30"><span class="w-1.5 h-1.5 rounded-full bg-error" aria-hidden="true"></span><span class="visually-hidden">Status: </span>FAILED</span>`;
+      const barColor = c.fails > 0 ? 'bg-error' : 'bg-emerald-400';
+      return `
+        <tr class="border-b border-outline-variant/30 hover:bg-surface-container/30 transition-colors perf-metric-row">
+          <td class="p-gutter font-mono text-xs text-on-surface font-semibold">${escapeHtml(c.name)}</td>
+          <td class="p-gutter font-mono text-xs text-on-surface-variant">${escapeHtml(c.path || '::')}</td>
+          <td class="p-gutter font-mono text-xs">
+            <span class="text-emerald-400">${c.passes.toLocaleString()}</span> / <span class="${c.fails > 0 ? 'text-error font-bold' : 'text-on-surface-variant'}">${c.fails.toLocaleString()}</span>
+          </td>
+          <td class="p-gutter">
+            <div class="flex items-center gap-2">
+              <div class="w-16 h-1.5 bg-surface-container rounded-full overflow-hidden">
+                <div class="h-full ${barColor}" style="width: ${Math.max(0, Math.min(100, c.passRate))}%"></div>
+              </div>
+              <span class="font-mono text-xs text-on-surface font-semibold">${c.passRate}%</span>
+            </div>
+            <div class="text-xs font-mono ${c.fails > 0 ? 'text-error/90' : 'text-on-surface-variant'} mt-0.5">${escapeHtml(c.reason)}</div>
+          </td>
+          <td class="p-gutter text-right">${badge}</td>
+        </tr>`;
+    }).join('');
+
+    k6ChecksTable = generateTableWrapper(
+      'k6 Check Assertions',
+      'k6 Check Assertions',
+      `<tr class="bg-surface-container-low/50 border-b border-outline-variant text-xs font-label-caps uppercase text-on-surface-variant">
+                <th scope="col" class="p-gutter">Check Name</th>
+                <th scope="col" class="p-gutter">Group Path</th>
+                <th scope="col" class="p-gutter">Passes / Fails</th>
+                <th scope="col" class="p-gutter">Pass Rate &amp; Why</th>
+                <th scope="col" class="p-gutter text-right">Status</th>
+              </tr>`,
+      checkRows
+    );
+  }
+
+  let k6CustomMetricsTable = '';
+  if (k6?.customMetrics && k6.customMetrics.length > 0) {
+    const cmRows = k6.customMetrics.map(cm => {
+      const unit = cm.contains === 'time' ? 'ms' : '';
+      let typeBadge = '';
+      switch (cm.type) {
+        case 'trend':
+          typeBadge = `<span class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-primary/15 text-primary border border-primary/30 uppercase">TREND</span>`;
+          break;
+        case 'rate':
+          typeBadge = `<span class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-emerald-950/40 text-emerald-400 border border-emerald-500/30 uppercase">RATE</span>`;
+          break;
+        case 'counter':
+          typeBadge = `<span class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-secondary/15 text-secondary border border-secondary/30 uppercase">COUNTER</span>`;
+          break;
+        case 'gauge':
+          typeBadge = `<span class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-surface-container text-on-surface-variant border border-outline-variant uppercase">GAUGE</span>`;
+          break;
+      }
+
+      let primaryValue = '';
+      let breakdown = '';
+      if (cm.type === 'trend') {
+        primaryValue = `p(95): ${cm.values.p95 ?? 'N/A'}${unit}`;
+        breakdown = `min: ${cm.values.min ?? 'N/A'}${unit} · med: ${cm.values.med ?? 'N/A'}${unit} · avg: ${cm.values.avg ?? 'N/A'}${unit} · p90: ${cm.values.p90 ?? 'N/A'}${unit} · max: ${cm.values.max ?? 'N/A'}${unit}`;
+      } else if (cm.type === 'rate') {
+        primaryValue = `${cm.values.rate ?? 'N/A'}%`;
+        breakdown = `passes: ${cm.values.passes ?? 0} · fails: ${cm.values.fails ?? 0}`;
+      } else if (cm.type === 'counter') {
+        primaryValue = `${(cm.values.count ?? 0).toLocaleString()}`;
+        breakdown = `throughput: ${cm.values.rate ?? 0}/s`;
+      } else {
+        primaryValue = `${cm.values.value ?? 'N/A'}`;
+        breakdown = `min: ${cm.values.min ?? 'N/A'} · max: ${cm.values.max ?? 'N/A'}`;
+      }
+
+      return `
+        <tr class="border-b border-outline-variant/30 hover:bg-surface-container/30 transition-colors perf-metric-row">
+          <td class="p-gutter font-mono text-xs text-on-surface font-semibold">${escapeHtml(cm.name)}</td>
+          <td class="p-gutter">${typeBadge}</td>
+          <td class="p-gutter font-mono text-xs text-primary font-bold">${escapeHtml(primaryValue)}</td>
+          <td class="p-gutter font-mono text-xs text-on-surface-variant">${escapeHtml(breakdown)}</td>
+        </tr>`;
+    }).join('');
+
+    k6CustomMetricsTable = generateTableWrapper(
+      'Custom k6 Metrics',
+      'Custom k6 Metrics',
+      `<tr class="bg-surface-container-low/50 border-b border-outline-variant text-xs font-label-caps uppercase text-on-surface-variant">
+                <th scope="col" class="p-gutter">Metric Name</th>
+                <th scope="col" class="p-gutter">Type</th>
+                <th scope="col" class="p-gutter">Primary Value</th>
+                <th scope="col" class="p-gutter">Distribution / Breakdown</th>
+              </tr>`,
+      cmRows
     );
   }
 
@@ -695,11 +911,17 @@ export const generateHTML = (playwright: PlaywrightReport, k6: K6Report | null, 
     k6P95Display,
     k6AvgDisplay,
     k6MinDisplay,
+    k6MedDisplay,
     k6MaxDisplay,
     k6P90Display,
     k6VusDisplay,
     k6VusMaxDisplay,
     k6DataArray: safe(k6DataArray),
+    k6TrendsCatalogJson,
+    k6TrendSelectorOptions,
+    k6TrendSelectorVisible,
+    k6PhasesDataJson,
+    k6PhasesSectionVisible,
     k6ErrorRateDisplay,
     k6ErrorRateColor,
     k6ThroughputDisplay,
@@ -708,6 +930,8 @@ export const generateHTML = (playwright: PlaywrightReport, k6: K6Report | null, 
     k6WarningsContainer: safe(k6WarningsContainer),
     k6ThresholdsTable: safe(k6ThresholdsTable),
     k6ScenariosTable: safe(k6ScenariosTable),
+    k6ChecksTable: safe(k6ChecksTable),
+    k6CustomMetricsTable: safe(k6CustomMetricsTable),
     overallStatusArray: safe(overallStatusArray),
     durationLabels: safe(durationLabels),
     durationData: safe(durationData),

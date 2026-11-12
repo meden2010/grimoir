@@ -11,7 +11,11 @@
 
           // Initialize charts/trees immediately when their tab becomes visible
           if (panel.id === "tab-automated") renderAutomatedTree();
-          if (panel.id === "tab-perf") initPerfChart();
+          if (panel.id === "tab-perf") {
+            initPerfChart();
+            initPerfPhasesChart();
+            initPerfHistoryChart();
+          }
 
           if (typeof anime !== "undefined" && !prefersReducedMotion) {
             // Strip any residual CSS keyframe classes inside the panel so they never conflict with top-to-bottom stagger
@@ -535,7 +539,20 @@
       const tabCharts = {
         automated: null,
         perf: null,
+        perfPhases: null,
+        perfHistory: null,
       };
+
+      const K6_TRENDS_CATALOG =
+        typeof __K6_TRENDS_CATALOG_JSON__ !== "undefined" &&
+        __K6_TRENDS_CATALOG_JSON__
+          ? __K6_TRENDS_CATALOG_JSON__
+          : {};
+      const K6_PHASES_DATA =
+        typeof __K6_PHASES_DATA_JSON__ !== "undefined" &&
+        Array.isArray(__K6_PHASES_DATA_JSON__)
+          ? __K6_PHASES_DATA_JSON__
+          : [];
 
       function initPerfChart() {
         if (tabCharts.perf) return;
@@ -544,6 +561,7 @@
         const metricDescriptions = {
           Avg: "Mean response time (http_req_duration.avg)",
           Min: "Fastest request observed (http_req_duration.min)",
+          Med: "Median 50th percentile response time (med / p(50))",
           Max: "Peak tail latency (http_req_duration.max)",
           P90: "90th percentile latency (p(90))",
           P95: "95th percentile SLA benchmark (p(95))",
@@ -551,7 +569,7 @@
         tabCharts.perf = new Chart(ctx, {
           type: "bar",
           data: {
-            labels: ["Avg", "Min", "Max", "P90", "P95"],
+            labels: ["Avg", "Min", "Med", "Max", "P90", "P95"],
             datasets: [
               {
                 label: "Latency (ms)",
@@ -559,6 +577,7 @@
                 backgroundColor: [
                   "rgba(69, 162, 158, 0.78)",
                   "rgba(46, 204, 113, 0.78)",
+                  "rgba(56, 189, 248, 0.78)",
                   "rgba(243, 156, 18, 0.78)",
                   "rgba(229, 197, 131, 0.85)",
                   "rgba(138, 79, 255, 0.9)",
@@ -566,6 +585,7 @@
                 borderColor: [
                   "#45A29E",
                   "#2ECC71",
+                  "#38BDF8",
                   "#F39C12",
                   "#E5C583",
                   "#B388FF",
@@ -613,6 +633,401 @@
             },
           },
           plugins: [barLabelsPlugin],
+        });
+
+        const trendSelector = document.getElementById("perfTrendSelector");
+        const trendSearch = document.getElementById("perfTrendSearch");
+
+        if (trendSearch && trendSelector && !trendSearch.dataset.bound) {
+          trendSearch.dataset.bound = "true";
+          trendSearch.addEventListener("input", (e) => {
+            const query = String(e.target.value || "").trim().toLowerCase();
+            const currentVal = trendSelector.value;
+            const keys = Object.keys(K6_TRENDS_CATALOG);
+            const matching = keys.filter(
+              (k) =>
+                k.toLowerCase().includes(query) ||
+                String(K6_TRENDS_CATALOG[k]?.label || "")
+                  .toLowerCase()
+                  .includes(query),
+            );
+
+            trendSelector.innerHTML = "";
+            const stdMatches = matching.filter((k) => k === "http_req_duration");
+            const customMatches = matching.filter((k) => k !== "http_req_duration");
+
+            const appendGroup = (label, groupKeys) => {
+              if (groupKeys.length === 0) return;
+              const grp = document.createElement("optgroup");
+              grp.label = label;
+              for (const k of groupKeys) {
+                const opt = document.createElement("option");
+                opt.value = k;
+                opt.textContent = K6_TRENDS_CATALOG[k]?.label || k;
+                grp.appendChild(opt);
+              }
+              trendSelector.appendChild(grp);
+            };
+
+            appendGroup("Standard HTTP", stdMatches);
+            appendGroup("Custom Trends", customMatches);
+
+            if (matching.length === 0) {
+              const opt = document.createElement("option");
+              opt.value = "";
+              opt.textContent = "No matching trends";
+              opt.disabled = true;
+              trendSelector.appendChild(opt);
+            } else if (matching.includes(currentVal)) {
+              trendSelector.value = currentVal;
+            } else {
+              trendSelector.value = matching[0];
+              trendSelector.dispatchEvent(new Event("change"));
+            }
+          });
+        }
+
+        if (trendSelector && !trendSelector.dataset.bound) {
+          trendSelector.dataset.bound = "true";
+          trendSelector.addEventListener("change", (e) => {
+            const selectedKey = e.target.value;
+            const entry = K6_TRENDS_CATALOG[selectedKey];
+            if (!entry) return;
+
+            if (tabCharts.perf && Array.isArray(entry.data)) {
+              tabCharts.perf.data.datasets[0].data = entry.data;
+              tabCharts.perf.update();
+            }
+
+            const fmtVal = (v) =>
+              v !== null && v !== undefined
+                ? entry.unit
+                  ? `${v} ${entry.unit}`
+                  : `${v}`
+                : "N/A";
+
+            const elMin = document.getElementById("perfStatMin");
+            const elMed = document.getElementById("perfStatMed");
+            const elAvg = document.getElementById("perfStatAvg");
+            const elP90 = document.getElementById("perfStatP90");
+            const elP95 = document.getElementById("perfStatP95");
+            const elMax = document.getElementById("perfStatMax");
+
+            if (elMin) elMin.textContent = fmtVal(entry.min);
+            if (elMed) elMed.textContent = fmtVal(entry.med);
+            if (elAvg) elAvg.textContent = fmtVal(entry.avg);
+            if (elP90) elP90.textContent = fmtVal(entry.p90);
+            if (elP95) elP95.textContent = fmtVal(entry.p95);
+            if (elMax) elMax.textContent = fmtVal(entry.max);
+
+            const breakdownSub = document.getElementById("perfBreakdownSubtitle");
+            if (breakdownSub) {
+              breakdownSub.textContent = entry.unit
+                ? `${selectedKey} (${entry.unit})`
+                : selectedKey;
+            }
+            const chartSub = document.getElementById("perfChartSubtitle");
+            if (chartSub) {
+              chartSub.textContent = entry.unit
+                ? `Metric: ${selectedKey} (${entry.unit})`
+                : `Metric: ${selectedKey}`;
+            }
+          });
+        }
+      }
+
+      function initPerfPhasesChart() {
+        if (tabCharts.perfPhases) return;
+        const ctx = document.getElementById("perfPhasesChart");
+        if (!ctx) return;
+        if (!Array.isArray(K6_PHASES_DATA) || K6_PHASES_DATA.length === 0) return;
+
+        const phaseLabels = K6_PHASES_DATA.map((p) => p.label || p.key);
+        const avgData = K6_PHASES_DATA.map((p) => Number(p.avgMs) || 0);
+        const p95Data = K6_PHASES_DATA.map((p) => Number(p.p95Ms) || 0);
+
+        tabCharts.perfPhases = new Chart(ctx, {
+          type: "bar",
+          data: {
+            labels: phaseLabels,
+            datasets: [
+              {
+                label: "Avg (ms)",
+                data: avgData,
+                backgroundColor: "rgba(69, 162, 158, 0.8)",
+                borderColor: "#45A29E",
+                borderWidth: 1,
+                borderRadius: 4,
+              },
+              {
+                label: "P95 (ms)",
+                data: p95Data,
+                backgroundColor: "rgba(138, 79, 255, 0.85)",
+                borderColor: "#B388FF",
+                borderWidth: 1,
+                borderRadius: 4,
+              },
+            ],
+          },
+          options: {
+            ...tabChartOptions,
+            indexAxis: "y",
+            plugins: {
+              ...tabChartOptions.plugins,
+              legend: {
+                position: "bottom",
+                labels: {
+                  color: "#C4C9D4",
+                  usePointStyle: true,
+                  font: { family: "'Inter', sans-serif", size: 12 },
+                },
+              },
+              tooltip: {
+                ...tabChartOptions.plugins.tooltip,
+                callbacks: {
+                  label: (context) => {
+                    const idx = context.dataIndex;
+                    const phase = K6_PHASES_DATA[idx];
+                    const isAvg = context.datasetIndex === 0;
+                    const rawVal = phase ? (isAvg ? phase.avgMs : phase.p95Ms) : context.raw;
+                    return ` ${context.dataset.label}: ${Number(rawVal || 0).toFixed(2)} ms`;
+                  },
+                  afterBody: (items) => {
+                    const idx = items[0]?.dataIndex;
+                    const phase = K6_PHASES_DATA[idx];
+                    if (phase && phase.maxMs !== undefined && phase.maxMs !== null) {
+                      return [`Peak Max: ${phase.maxMs} ms (${phase.key})`];
+                    }
+                    return [];
+                  },
+                },
+              },
+            },
+            scales: {
+              x: {
+                type: "linear",
+                beginAtZero: true,
+                grid: { color: "rgba(138, 79, 255, 0.09)" },
+                ticks: {
+                  color: "#C4C9D4",
+                  font: { family: "JetBrains Mono", size: 11 },
+                  callback: (val) => `${val}ms`,
+                },
+              },
+              y: {
+                grid: { display: false },
+                ticks: {
+                  color: "#C4C9D4",
+                  font: { family: "JetBrains Mono", size: 11 },
+                },
+              },
+            },
+          },
+        });
+
+        const btnLinear = document.getElementById("perfPhasesScaleLinear");
+        const btnLog = document.getElementById("perfPhasesScaleLog");
+        const setPhasesScale = (mode) => {
+          const chart = tabCharts.perfPhases;
+          if (!chart) return;
+          const isLog = mode === "logarithmic";
+          chart.data.datasets[0].data = avgData.map((v) =>
+            isLog ? Math.max(0.1, Number(v) || 0.1) : v,
+          );
+          chart.data.datasets[1].data = p95Data.map((v) =>
+            isLog ? Math.max(0.1, Number(v) || 0.1) : v,
+          );
+          chart.options.scales.x.type = isLog ? "logarithmic" : "linear";
+          if (isLog) {
+            chart.options.scales.x.min = 0.1;
+            delete chart.options.scales.x.beginAtZero;
+          } else {
+            delete chart.options.scales.x.min;
+            chart.options.scales.x.beginAtZero = true;
+          }
+          chart.update();
+
+          if (btnLinear && btnLog) {
+            btnLinear.setAttribute("aria-pressed", String(!isLog));
+            btnLog.setAttribute("aria-pressed", String(isLog));
+            btnLinear.className = !isLog
+              ? "px-2.5 py-1 rounded-md bg-primary-container/20 text-primary-container font-semibold transition-colors"
+              : "px-2.5 py-1 rounded-md text-on-surface-variant hover:text-on-surface transition-colors";
+            btnLog.className = isLog
+              ? "px-2.5 py-1 rounded-md bg-primary-container/20 text-primary-container font-semibold transition-colors"
+              : "px-2.5 py-1 rounded-md text-on-surface-variant hover:text-on-surface transition-colors";
+          }
+        };
+
+        if (btnLinear && !btnLinear.dataset.wired) {
+          btnLinear.dataset.wired = "true";
+          btnLinear.addEventListener("click", () => setPhasesScale("linear"));
+        }
+        if (btnLog && !btnLog.dataset.wired) {
+          btnLog.dataset.wired = "true";
+          btnLog.addEventListener("click", () => setPhasesScale("logarithmic"));
+        }
+      }
+
+      function initPerfHistoryChart() {
+        if (tabCharts.perfHistory) return;
+        const container = document.getElementById("perfHistoryChartContainer");
+        if (!container) return;
+
+        const allRuns =
+          typeof GRIMOIR_HISTORY !== "undefined"
+            ? Array.isArray(GRIMOIR_HISTORY)
+              ? GRIMOIR_HISTORY
+              : GRIMOIR_HISTORY.runs || []
+            : [];
+
+        const k6Runs = allRuns.filter(
+          (r) =>
+            r &&
+            r.k6 &&
+            (r.k6.p95LatencyMs !== null || r.k6.throughputRps !== null),
+        );
+
+        if (k6Runs.length < 2) {
+          const baselineRun = k6Runs[0];
+          const baselineSummary = baselineRun
+            ? `<div class="mt-2 inline-flex items-center gap-3 px-3 py-1.5 rounded-lg bg-surface-container border border-outline-variant/60 text-xs font-mono text-on-surface">
+                 <span>Baseline P95: <strong class="text-primary-container">${baselineRun.k6.p95LatencyMs !== null ? escapeHtml(baselineRun.k6.p95LatencyMs) + " ms" : "N/A"}</strong></span>
+                 <span class="text-outline">•</span>
+                 <span>Throughput: <strong class="text-secondary-container">${baselineRun.k6.throughputRps !== null ? escapeHtml(baselineRun.k6.throughputRps) + " req/s" : "N/A"}</strong></span>
+               </div>`
+            : "";
+          container.innerHTML = `<div class="absolute inset-0 flex flex-col items-center justify-center text-on-surface-variant p-4 text-center">
+            <span class="material-symbols-outlined text-4xl mb-2 text-primary/50" aria-hidden="true">ssid_chart</span>
+            <p class="text-sm font-display uppercase tracking-wider">Awaiting Historical k6 Runs</p>
+            <p class="text-xs text-outline mt-1">Historical P95 latency &amp; throughput trends appear after 2+ k6 test runs.</p>
+            ${baselineSummary}
+          </div>`;
+          return;
+        }
+
+        const canvas = document.getElementById("perfHistoryChart");
+        if (!canvas) return;
+        const ctx = canvas.getContext("2d");
+
+        const p95Grad = ctx.createLinearGradient(0, 0, 0, 250);
+        p95Grad.addColorStop(0, "rgba(138, 79, 255, 0.28)");
+        p95Grad.addColorStop(1, "rgba(138, 79, 255, 0.02)");
+
+        const labels = k6Runs.map((r, idx) => {
+          const d = new Date(r.date);
+          const dateLabel = !isNaN(d.getTime())
+            ? d.toLocaleDateString(undefined, { month: "short", day: "numeric" })
+            : `Run ${idx + 1}`;
+          return `#${idx + 1} (${dateLabel})`;
+        });
+
+        const p95Series = k6Runs.map((r) => r.k6.p95LatencyMs);
+        const rpsSeries = k6Runs.map((r) => r.k6.throughputRps);
+
+        tabCharts.perfHistory = new Chart(ctx, {
+          type: "line",
+          data: {
+            labels,
+            datasets: [
+              {
+                label: "P95 Latency (ms)",
+                data: p95Series,
+                yAxisID: "y",
+                borderColor: "#8A4FFF",
+                backgroundColor: p95Grad,
+                pointBackgroundColor: "#B388FF",
+                pointHoverRadius: 5,
+                borderWidth: 2,
+                fill: true,
+                tension: 0.35,
+              },
+              {
+                label: "Throughput (req/s)",
+                data: rpsSeries,
+                yAxisID: "y1",
+                borderColor: "#E5C583",
+                backgroundColor: "rgba(229, 197, 131, 0.1)",
+                pointBackgroundColor: "#E5C583",
+                pointHoverRadius: 5,
+                borderWidth: 2,
+                borderDash: [5, 4],
+                fill: false,
+                tension: 0.35,
+              },
+            ],
+          },
+          options: {
+            ...tabChartOptions,
+            interaction: {
+              mode: "index",
+              intersect: false,
+            },
+            plugins: {
+              ...tabChartOptions.plugins,
+              legend: {
+                position: "bottom",
+                labels: {
+                  color: "#C4C9D4",
+                  usePointStyle: true,
+                  font: { family: "'Inter', sans-serif", size: 12 },
+                },
+              },
+              tooltip: {
+                ...tabChartOptions.plugins.tooltip,
+                callbacks: {
+                  afterBody: (items) => {
+                    const idx = items[0]?.dataIndex;
+                    const run = k6Runs[idx];
+                    if (!run || !run.k6) return [];
+                    const lines = [];
+                    if (run.k6.avgLatencyMs !== undefined && run.k6.avgLatencyMs !== null) {
+                      lines.push(`Avg Latency: ${run.k6.avgLatencyMs} ms`);
+                    }
+                    const errRate = run.k6.errorRatePercent ?? run.k6.errorRatePct;
+                    if (errRate !== undefined && errRate !== null) {
+                      lines.push(`Error Rate: ${errRate}%`);
+                    }
+                    return lines;
+                  },
+                },
+              },
+            },
+            scales: {
+              x: {
+                grid: { display: false },
+                ticks: {
+                  color: "#C4C9D4",
+                  maxRotation: 0,
+                  font: { family: "JetBrains Mono", size: 11 },
+                },
+              },
+              y: {
+                type: "linear",
+                display: true,
+                position: "left",
+                beginAtZero: true,
+                grid: { color: "rgba(138, 79, 255, 0.09)" },
+                ticks: {
+                  color: "#B388FF",
+                  font: { family: "JetBrains Mono", size: 11 },
+                  callback: (val) => `${val}ms`,
+                },
+              },
+              y1: {
+                type: "linear",
+                display: true,
+                position: "right",
+                beginAtZero: true,
+                grid: { drawOnChartArea: false },
+                ticks: {
+                  color: "#E5C583",
+                  font: { family: "JetBrains Mono", size: 11 },
+                  callback: (val) => `${val}/s`,
+                },
+              },
+            },
+          },
         });
       }
 

@@ -91,6 +91,7 @@ For AI agents supporting modular skills and plugin architectures:
   - [grimoir-parser-builder](file:///Users/saul.sosa/Desktop/Proyectos/grimoir/.agents/skills/grimoir-parser-builder/SKILL.md): Step-by-step runbook for adding or extending test parsers.
   - [grimoir-report-designer](file:///Users/saul.sosa/Desktop/Proyectos/grimoir/.agents/skills/grimoir-report-designer/SKILL.md): Runbook for editing report HTML/CSS/JS and live previewing.
   - [grimoir-compat-verifier](file:///Users/saul.sosa/Desktop/Proyectos/grimoir/.agents/skills/grimoir-compat-verifier/SKILL.md): Static audit and real multi-version Node execution procedures.
+  - [grimoir-brain](file:///Users/saul.sosa/Desktop/Proyectos/grimoir/.agents/skills/grimoir-brain/SKILL.md): Operating and updating the persistent Obsidian Second Brain vault in `docs/` and `Grimoir Brain.md`.
 - **Specialized Roles (`.agents/plugins/grimoir-devkit/agents/`):**
   - [lifecycle-orchestrator](file:///Users/saul.sosa/Desktop/Proyectos/grimoir/.agents/plugins/grimoir-devkit/agents/lifecycle-orchestrator.md): Tech lead and end-to-end delivery pipeline orchestrator.
   - [product-planner](file:///Users/saul.sosa/Desktop/Proyectos/grimoir/.agents/plugins/grimoir-devkit/agents/product-planner.md): Feature specifications, acceptance criteria, and implementation planning.
@@ -134,6 +135,7 @@ Grimoir keeps its project-specific skills (`grimoir-*` and `impeccable`) in `.ag
 | Version bumps, changelog, GitHub Actions, release prep   | `release-engineer`       | `grimoir-compat-verifier`, `grimoir-dev-workflow`, `github-actions`, `gh-fix-ci`, `verification-before-completion`                   | `npm publish` or `git push`                                                                                                                                   |
 | End-to-end delivery orchestration                        | `lifecycle-orchestrator` | `orchestration`, section 5.2 routing table, pre-PR quality gate                                                                      | Direct file editing                                                                                                                                           |
 | Daily dev loop, build, lint                              | any                      | `grimoir-dev-workflow`                                                                                                               | none                                                                                                                                                          |
+| Knowledge capture, ADRs, post-mortems, roadmap          | any                      | `grimoir-brain`                                                                                                                      | none                                                                                                                                                          |
 | Logo, favicon, icons                                     | general                  | `logo-design`, `logo-designer`, `logo-generator`, `icon-generator`                                                                   | none                                                                                                                                                          |
 
 ### 5.3 Lifecycle Delivery Flow
@@ -176,3 +178,16 @@ These skills belong to stacks Grimoir does not use. Do not load them unless the 
 Include in the prompt: the task, the files involved, the exact skills from 5.2, the rules that apply (for example Rule 1 or Rule 3), and the verification command from section 3. Example:
 
 > Add a Vitest parser. Use `grimoir-parser-builder`, `test-driven-development` and `api-and-interface-design`. Follow Rule 3 and add fixtures in `tests/fixtures/vitest/`. Finish by running `bun test && bun run lint && bun run audit:compat`.
+
+---
+
+## 6. Obsidian Second Brain Workflow
+
+Grimoir maintains a persistent **Second Brain** as an Obsidian vault located at the repository root and `docs/`, with its central Map of Content (MOC) at `[[Grimoir Brain.md]]`.
+
+### 6.1 Operating Rules for Agents
+- **Context Grounding**: Before starting major architectural changes or releases, consult `Grimoir Brain.md` and related notes in `docs/02_Arquitectura/`.
+- **Bug Post-Mortems**: Whenever fixing a non-trivial defect or regression (especially via `bug-triager`), log the root cause, symptom, solution, and regression test in `docs/04_Bitacora_Bugs/Bitacora de Postmortems.md`.
+- **Roadmap Updates**: When completing a feature, parser, or visual component, update status in `docs/01_Roadmap/Roadmap y Backlog.md`.
+- **Architectural Decisions**: When introducing new constraints, file contracts, or design choices, create an ADR in `docs/03_ADRs/`.
+- **Obsidian Conventions**: Always format notes with wikilinks (`[[Note Name]]`), valid Obsidian callouts (`> [!NOTE]`, `> [!TIP]`, `> [!WARNING]`), and relevant tags (`#grimoir/...`).

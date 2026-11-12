@@ -119,6 +119,31 @@ grimoir serve -f ./grimoir-report/index.html -p 8080
 grimoir clean -o ./grimoir-report
 ```
 
+### 5. Open an Existing Report
+
+```bash
+grimoir open -f ./grimoir-report/index.html
+```
+
+---
+
+## 📈 CI/CD History Persistence (`.grimoir-history.json`)
+
+Grimoir tracks up to 20 historical runs (including Playwright pass rates and k6 `p95LatencyMs`, `avgLatencyMs`, `errorRatePercent`, and `throughputRps`) in `<output>/.grimoir-history.json`.
+
+In ephemeral CI runners, `.grimoir-history.json` will not persist between builds unless you cache or restore it before running `grimoir generate`:
+
+```yaml
+# GitHub Actions example
+- name: Restore Grimoir History
+  uses: actions/cache@v4
+  with:
+    path: ./grimoir-report/.grimoir-history.json
+    key: grimoir-history-${{ github.ref_name }}-${{ github.run_id }}
+    restore-keys: |
+      grimoir-history-${{ github.ref_name }}-
+```
+
 ---
 
 ## 🔌 Playwright Reporter Integration
