@@ -1,5 +1,39 @@
 {
   "duration": 45000,
+  "root_group": {
+    "name": "",
+    "path": "",
+    "id": "root",
+    "checks": [
+      {
+        "name": "portal status is 200",
+        "path": "::portal status is 200",
+        "passes": 14120,
+        "fails": 80
+      },
+      {
+        "name": "sanctuary payload schema valid",
+        "path": "::sanctuary payload schema valid",
+        "passes": 14200,
+        "fails": 0
+      }
+    ],
+    "groups": [
+      {
+        "name": "Auth Ritual Group",
+        "path": "::Auth Ritual Group",
+        "checks": [
+          {
+            "name": "arcane token signature verified",
+            "path": "::Auth Ritual Group::arcane token signature verified",
+            "passes": 4990,
+            "fails": 10
+          }
+        ],
+        "groups": []
+      }
+    ]
+  },
   "metrics": {
     "http_req_duration": {
       "type": "trend",
@@ -7,6 +41,7 @@
       "values": {
         "avg": 168.4,
         "min": 42.1,
+        "med": 142.5,
         "max": 980.2,
         "p(90)": 245.8,
         "p(95)": 380.6
@@ -15,6 +50,78 @@
         "p(95)<400": {
           "ok": true
         }
+      }
+    },
+    "http_req_blocked": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "avg": 1.8,
+        "min": 0.1,
+        "med": 1.2,
+        "max": 24.5,
+        "p(90)": 3.4,
+        "p(95)": 5.2
+      }
+    },
+    "http_req_connecting": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "avg": 4.2,
+        "min": 0,
+        "med": 2.8,
+        "max": 48,
+        "p(90)": 8.1,
+        "p(95)": 12.6
+      }
+    },
+    "http_req_tls_handshaking": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "avg": 9.6,
+        "min": 0,
+        "med": 7.4,
+        "max": 82.3,
+        "p(90)": 18.5,
+        "p(95)": 26.4
+      }
+    },
+    "http_req_sending": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "avg": 2.1,
+        "min": 0.3,
+        "med": 1.7,
+        "max": 19.8,
+        "p(90)": 4,
+        "p(95)": 5.9
+      }
+    },
+    "http_req_waiting": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "avg": 138.2,
+        "min": 34,
+        "med": 118.4,
+        "max": 840.5,
+        "p(90)": 202.1,
+        "p(95)": 312.8
+      }
+    },
+    "http_req_receiving": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "avg": 12.5,
+        "min": 2.1,
+        "med": 9.8,
+        "max": 95.4,
+        "p(90)": 21.3,
+        "p(95)": 31.7
       }
     },
     "http_req_failed": {
@@ -49,6 +156,61 @@
       "values": {
         "count": 14200
       }
+    },
+    "ritual_checkout_duration": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "min": 85.2,
+        "med": 260,
+        "avg": 295.4,
+        "p(90)": 480.1,
+        "p(95)": 620.4,
+        "max": 1420
+      },
+      "thresholds": {
+        "p(95)<500": {
+          "ok": false
+        }
+      }
+    },
+    "grimoire_search_latency": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "min": 18,
+        "med": 64.2,
+        "avg": 72.5,
+        "p(90)": 115,
+        "p(95)": 148.3,
+        "max": 410
+      }
+    },
+    "spells_cast_total": {
+      "type": "counter",
+      "contains": "default",
+      "values": {
+        "count": 9420,
+        "rate": 209.33
+      }
+    },
+    "mana_sync_success": {
+      "type": "rate",
+      "contains": "default",
+      "values": {
+        "rate": 0.985,
+        "passes": 9279,
+        "fails": 141
+      }
+    },
+    "active_leyline_channels": {
+      "type": "gauge",
+      "contains": "default",
+      "values": {
+        "value": 48,
+        "min": 12,
+        "max": 64
+      }
     }
   },
   "scenarios": {
@@ -65,7 +227,8 @@
     "unstable_leyline_burst": {
       "vus": 200,
       "iterations": 1200,
-      "status": "failed"
+      "status": "failed",
+      "reason": "Scenario 'unstable_leyline_burst' aborted due to ritual_checkout_duration threshold breach at 200 VUs"
     }
   }
 }

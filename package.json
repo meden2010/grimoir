@@ -33,6 +33,8 @@
     "audit:compat": "bun scripts/audit-node-compat.ts",
     "test:compat": "bun run build && bun scripts/generate-demo-data.ts && node dist/cli/index.js generate --input tests/fixtures/demo-output --output ./output --no-serve && node dist/cli/index.js clean --output ./output",
     "dev:demo": "bun scripts/generate-demo-data.ts && bun src/cli/index.ts generate --input tests/fixtures/demo-output --output ./output",
+    "dev:open": "bun scripts/generate-demo-data.ts && bun src/cli/index.ts generate --input tests/fixtures/demo-output --output ./output --no-serve && bun src/cli/index.ts open",
+    "open": "bun src/cli/index.ts open",
     "gate": "bun test && bun run lint && bun run audit:compat && bun run test:compat && bun run build"
   },
   "repository": {

@@ -18,7 +18,14 @@ colors:
   radiant-gold: "#E5C583"
   amber-gold: "#FBBF24"
   sorcery-violet: "#8B5CF6"
+  sorcery-violet-vivid: "#8A4FFF"
+  sorcery-violet-glow: "#B388FF"
   ether-cyan: "#45A29E"
+  arcane-sky: "#38BDF8"
+  chart-axis-text: "#C4C9D4"
+  muted-slate: "#A3ACB9"
+  muted-ash: "#9BA3AE"
+  surface-parchment: "#F0ECE1"
   sanctified-emerald: "#2ECC71"
   corrupted-crimson: "#E74C3C"
   unstable-amber: "#F39C12"
@@ -86,6 +93,11 @@ components:
     textColor: "{colors.on-surface}"
     rounded: "{rounded.lg}"
     padding: "16px"
+  perf-control:
+    backgroundColor: "{colors.surface-container}"
+    textColor: "{colors.on-surface}"
+    rounded: "{rounded.md}"
+    padding: "6px 12px"
 ---
 
 # Design System: Grimoir
@@ -162,6 +174,7 @@ The palette pairs deep nocturnal surfaces with metallic gold, sorcery violet, an
 - **Navigation**: Top horizontal tab bar (`Overview`, `Automated`, `Performance`) with animated bottom indicator.
 - **Overview Grid**: 3-column top summary (Total Execution + 2-column Health Score gauge), followed by framework coverage strip, 2-column chart row, full-width Failures triage table, historical trend chart, and collapsible KPI sections.
 - **Automated Explorer**: Responsive split-pane (`1/3` filterable suite/test tree on left, `2/3` step/error/artifact inspector on right) with expandable Allure-style full-screen modal.
+- **Performance Dashboard (`#tab-perf`)**: 6-card KPI summary grid, 2-column latency breakdown + interactive Chart.js percentile bar chart (with searchable grouped `<optgroup>` trend selector), 2-column HTTP timing phases (Linear/Log scale toggle) + 20-run historical trend chart, and full-width detail tables (`Thresholds`, `Checks`, `Custom Metrics`, `Scenarios`).
 - **Avoid Nested Cards**: Prefer clean dividers (`border-outline-variant/30`), spacing, and tonal background shifts over placing bordered cards inside bordered cards.
 
 ## Elevation & Depth

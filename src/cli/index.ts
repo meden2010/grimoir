@@ -4,6 +4,7 @@ import { Command } from 'commander';
 import { readFileSync, mkdirSync, watch, existsSync, rmSync, realpathSync, promises as fsPromises } from 'fs';
 import { join, basename, resolve, parse } from 'path';
 import { createServer, IncomingMessage, ServerResponse } from 'http';
+import { spawn } from 'child_process';
 import { parsePlaywright, PlaywrightReport, PlaywrightSuite } from '../parsers/playwright.parser';
 import { parseK6, K6Report } from '../parsers/k6.parser';
 import { generateHTML } from '../report/template';
@@ -17,17 +18,24 @@ export interface HistoricalRun {
   failed: number;
   skipped: number;
   duration: number;
+  k6?: {
+    p95LatencyMs: number | null;
+    avgLatencyMs: number | null;
+    errorRatePercent: number | null;
+    throughputRps: number | null;
+  };
 }
 
-const resolveTestStatus = (isFailed: boolean, lastResultStatus: string): 'passed' | 'failed' | 'skipped' => {
+const resolveTestStatus = (isFailed: boolean, lastResultStatus: string): 'passed' | 'failed' | 'flaky' | 'skipped' => {
   if (isFailed) return 'failed';
-  if (['passed', 'expected', 'flaky'].includes(lastResultStatus)) return 'passed';
+  if (lastResultStatus === 'flaky') return 'flaky';
+  if (['passed', 'expected'].includes(lastResultStatus)) return 'passed';
   return 'skipped';
 };
 
 export interface TestHistoryItem {
   date: string;
-  status: 'passed' | 'failed' | 'skipped';
+  status: 'passed' | 'failed' | 'flaky' | 'skipped';
   duration: number;
   error?: string;
 }
@@ -170,6 +178,14 @@ export const buildReport = async (inputPath: string, outputPath: string, clean: 
     failed: playwrightReport.stats.failed,
     skipped: playwrightReport.stats.skipped,
     duration: playwrightReport.stats.duration,
+    ...(k6Report ? {
+      k6: {
+        p95LatencyMs: k6Report.metrics.p95LatencyMs ?? null,
+        avgLatencyMs: k6Report.metrics.avgLatencyMs ?? null,
+        errorRatePercent: k6Report.metrics.errorRatePercent ?? null,
+        throughputRps: k6Report.metrics.throughputRps ?? null,
+      }
+    } : {}),
   };
 
   historyData.runs.push(currentRun);
@@ -254,6 +270,13 @@ export const buildReport = async (inputPath: string, outputPath: string, clean: 
     Logger.info(`   Error Rate:    ${k6Report.metrics.errorRatePercent !== null ? `${k6Report.metrics.errorRatePercent}%` : 'N/A'}`);
     Logger.info(`   Throughput:    ${k6Report.metrics.throughputRps !== null ? `${k6Report.metrics.throughputRps} req/s` : 'N/A'}`);
     Logger.info(`   Thresholds:    ${k6Report.thresholds.status.toUpperCase()} (${k6Report.thresholds.passed}/${k6Report.thresholds.total})`);
+    if (k6Report.checks && k6Report.checks.length > 0) {
+      const passedChecks = k6Report.checks.filter(c => c.status === 'passed').length;
+      Logger.info(`   Checks:        ${passedChecks}/${k6Report.checks.length} passed`);
+    }
+    if (k6Report.customMetrics && k6Report.customMetrics.length > 0) {
+      Logger.info(`   Custom Metrics: ${k6Report.customMetrics.length}`);
+    }
     if (k6Report.warnings.length > 0) {
       Logger.info(`   ⚠️ Warnings:   ${k6Report.warnings.join(' | ')}`);
     }
@@ -374,6 +397,40 @@ export const createProgram = (): Command => {
         Logger.info(`🌐 Serving report from: ${options.file}`);
         Logger.info(`   Report available at: ${url}`);
         Logger.info(`   Press Ctrl+C to stop the server\n`);
+      });
+    });
+
+  prog
+    .command('open')
+    .description('Open an existing report in your default browser')
+    .option('-f, --file <path>', 'Path to the report HTML file', './output/index.html')
+    .action((options: { file: string }): void => {
+      const targetPath = resolve(options.file);
+      if (!existsSync(targetPath)) {
+        Logger.error(`❌ Report file not found: ${targetPath}`);
+        process.exitCode = 1;
+        return;
+      }
+
+      const platform = process.platform;
+      const command = platform === 'darwin' ? 'open' : platform === 'win32' ? 'powershell.exe' : 'xdg-open';
+      const args =
+        platform === 'win32'
+          ? ['-NoProfile', '-Command', 'Start-Process -FilePath $env:GRIMOIR_OPEN_TARGET']
+          : [targetPath];
+
+      const child = spawn(command, args, {
+        detached: true,
+        stdio: 'ignore',
+        env: platform === 'win32' ? { ...process.env, GRIMOIR_OPEN_TARGET: targetPath } : process.env,
+      });
+      child.on('error', (err: Error) => {
+        Logger.error(`❌ Failed to open report: ${err.message}`);
+        process.exitCode = 1;
+      });
+      child.on('spawn', () => {
+        child.unref();
+        Logger.info(`🔮 Opening report: ${targetPath}`);
       });
     });
 

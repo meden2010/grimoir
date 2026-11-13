@@ -1,4 +1,7 @@
 :root {
+        color-scheme: dark;
+        accent-color: #8A4FFF;
+        scrollbar-color: rgba(197, 160, 89, 0.45) #13171F;
         --bg-primary: #0B0C10;
         --bg-surface-1: #13171F;
         --bg-surface-2: #1F2833;
@@ -755,6 +758,31 @@
         transition:
           opacity 0.65s var(--ease-out),
           transform 0.65s var(--ease-out);
+      }
+
+      ::selection {
+        background-color: rgba(138, 79, 255, 0.35);
+        color: #F0ECE1;
+      }
+
+      .grimoir-table-wrapper {
+        overflow: auto;
+        max-inline-size: 100%;
+        max-block-size: min(520px, 75vh);
+        container-type: inline-size;
+      }
+
+      .grimoir-data-table {
+        border-collapse: separate;
+        border-spacing: 0;
+      }
+
+      .grimoir-data-table thead {
+        position: sticky;
+        inset-block-start: 0;
+        z-index: 2;
+        background-color: #15121b;
+        backdrop-filter: blur(8px);
       }
 
       /* Accessibility & Animate Skill: Eliminate spatial movement under reduced motion while preserving gentle opacity/color comprehension */

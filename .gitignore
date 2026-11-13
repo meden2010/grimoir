@@ -147,6 +147,7 @@ test-results/
 
 # IDE files
 .vscode/
+.obsidian/
 
 # Impeccable local artifacts & cache
 .impeccable/design.json
