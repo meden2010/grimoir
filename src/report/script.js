@@ -433,16 +433,25 @@
           const ctx = chart.ctx;
           const meta = chart.getDatasetMeta(0);
 
+          const customFormatter = chart.options?.plugins?.barLabels?.formatter;
+
           meta.data.forEach((bar, index) => {
             const val = chart.data.datasets[0].data[index];
-            if (!val) return;
+            if (val === null || val === undefined || (!customFormatter && !val)) return;
 
             ctx.save();
             ctx.font = "bold 11px 'JetBrains Mono', monospace";
             const numVal = Number(val);
-            const text = numVal < 60
-              ? `${numVal.toFixed(1)}s`
-              : `${Math.floor(numVal / 60)}m ${Math.round(numVal % 60)}s`;
+            if (!Number.isFinite(numVal)) {
+              ctx.restore();
+              return;
+            }
+            const text =
+              typeof customFormatter === "function"
+                ? customFormatter(numVal)
+                : numVal < 60
+                  ? `${numVal.toFixed(1)}s`
+                  : `${Math.floor(numVal / 60)}m ${Math.round(numVal % 60)}s`;
             const textWidth = ctx.measureText(text).width;
 
             const paddingX = 8;
@@ -603,6 +612,14 @@
             plugins: {
               ...tabChartOptions.plugins,
               legend: { display: false },
+              barLabels: {
+                formatter: (numVal) => {
+                  const formatted = Number.isInteger(numVal)
+                    ? String(numVal)
+                    : numVal.toFixed(2).replace(/\.?0+$/, "");
+                  return currentTrendUnit ? `${formatted} ${currentTrendUnit}` : formatted;
+                },
+              },
               tooltip: {
                 ...tabChartOptions.plugins.tooltip,
                 callbacks: {
