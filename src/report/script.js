@@ -1670,7 +1670,15 @@
       function sanitizeMediaUrl(url, options) {
         if (!url || typeof url !== "string") return "";
         const trimmed = url.trim();
-        if (!trimmed || trimmed.startsWith("//")) return "";
+        if (
+          !trimmed ||
+          /[\x00-\x1f\x7f]/.test(trimmed) ||
+          trimmed.startsWith("//") ||
+          trimmed.startsWith("/\\") ||
+          trimmed.startsWith("\\")
+        ) {
+          return "";
+        }
         if (/^https?:\/\//i.test(trimmed)) return trimmed;
         if (
           options &&
