@@ -427,32 +427,31 @@
       hoverGrad.addColorStop(0, "#B388FF");
       hoverGrad.addColorStop(1, "rgba(229, 197, 131, 0.45)");
 
-      const barLabelsPlugin = {
-        id: "barLabels",
-        afterDatasetsDraw(chart) {
-          const ctx = chart.ctx;
-          const meta = chart.getDatasetMeta(0);
+      function createBarLabelsPlugin(formatFn) {
+        return {
+          id: "barLabels",
+          afterDatasetsDraw(chart) {
+            const ctx = chart.ctx;
+            const meta = chart.getDatasetMeta(0);
 
-          const customFormatter = chart.options?.plugins?.barLabels?.formatter;
+            meta.data.forEach((bar, index) => {
+              const val = chart.data.datasets[0].data[index];
+              if (val === null || val === undefined || (!formatFn && !val)) return;
 
-          meta.data.forEach((bar, index) => {
-            const val = chart.data.datasets[0].data[index];
-            if (val === null || val === undefined || (!customFormatter && !val)) return;
-
-            ctx.save();
-            ctx.font = "bold 11px 'JetBrains Mono', monospace";
-            const numVal = Number(val);
-            if (!Number.isFinite(numVal)) {
-              ctx.restore();
-              return;
-            }
-            const text =
-              typeof customFormatter === "function"
-                ? customFormatter(numVal)
-                : numVal < 60
-                  ? `${numVal.toFixed(1)}s`
-                  : `${Math.floor(numVal / 60)}m ${Math.round(numVal % 60)}s`;
-            const textWidth = ctx.measureText(text).width;
+              ctx.save();
+              ctx.font = "bold 11px 'JetBrains Mono', monospace";
+              const numVal = Number(val);
+              if (!Number.isFinite(numVal)) {
+                ctx.restore();
+                return;
+              }
+              const text =
+                typeof formatFn === "function"
+                  ? formatFn(numVal)
+                  : numVal < 60
+                    ? `${numVal.toFixed(1)}s`
+                    : `${Math.floor(numVal / 60)}m ${Math.round(numVal % 60)}s`;
+              const textWidth = ctx.measureText(text).width;
 
             const paddingX = 8;
             const boxWidth = textWidth + paddingX * 2;
@@ -478,8 +477,9 @@
             ctx.fillText(text, bar.x, boxY + boxHeight / 2 + 1);
             ctx.restore();
           });
-        },
-      };
+          },
+        };
+      }
 
       const overviewDurationChartInstance = new Chart(ctxDuration, {
         type: "bar",
@@ -541,7 +541,7 @@
             },
           },
         },
-        plugins: [glowPlugin, barLabelsPlugin],
+        plugins: [glowPlugin, createBarLabelsPlugin()],
       });
 
       // Lazy chart initializers for secondary tabs
@@ -612,14 +612,6 @@
             plugins: {
               ...tabChartOptions.plugins,
               legend: { display: false },
-              barLabels: {
-                formatter: (numVal) => {
-                  const formatted = Number.isInteger(numVal)
-                    ? String(numVal)
-                    : numVal.toFixed(2).replace(/\.?0+$/, "");
-                  return currentTrendUnit ? `${formatted} ${currentTrendUnit}` : formatted;
-                },
-              },
               tooltip: {
                 ...tabChartOptions.plugins.tooltip,
                 callbacks: {
@@ -658,7 +650,14 @@
               },
             },
           },
-          plugins: [barLabelsPlugin],
+          plugins: [
+            createBarLabelsPlugin((numVal) => {
+              const formatted = Number.isInteger(numVal)
+                ? String(numVal)
+                : numVal.toFixed(2).replace(/\.?0+$/, "");
+              return currentTrendUnit ? `${formatted} ${currentTrendUnit}` : formatted;
+            }),
+          ],
         });
 
         const trendSelector = document.getElementById("perfTrendSelector");
