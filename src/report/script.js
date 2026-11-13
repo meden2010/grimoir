@@ -1667,6 +1667,24 @@
         return String(unsafe).replace(ESCAPE_REGEX, (m) => ESCAPE_MAP[m]);
       }
 
+      function sanitizeMediaUrl(url, options) {
+        if (!url || typeof url !== "string") return "";
+        const trimmed = url.trim();
+        if (!trimmed || trimmed.startsWith("//")) return "";
+        if (/^https?:\/\//i.test(trimmed)) return trimmed;
+        if (
+          options &&
+          options.allowDataImage &&
+          /^data:image\/(?:png|jpeg|jpg|gif|webp);base64,[A-Za-z0-9+/=]+$/i.test(trimmed)
+        ) {
+          return trimmed;
+        }
+        if (!/^[a-zA-Z][a-zA-Z\d+\-.]*:/i.test(trimmed)) {
+          return trimmed;
+        }
+        return "";
+      }
+
       function formatDuration(ms) {
         if (ms == null) return "0ms";
         const num = Math.round(Number(ms));
@@ -2294,13 +2312,14 @@
                         <div class="text-xs font-bold text-on-surface mb-2 font-label-caps uppercase">Option 1: View in Browser</div>
                         <div class="flex items-center justify-between gap-2">
                           <span class="text-xs text-on-surface-variant flex-1 leading-relaxed">Download the trace and drop it into <a href="https://trace.playwright.dev" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">trace.playwright.dev</a></span>
-                          ${
-                            att.path
-                              ? `<a href="${escapeHtml(att.path)}" download class="shrink-0 flex items-center gap-1.5 bg-primary/15 text-primary border border-primary/30 px-3 py-1.5 rounded text-xs font-bold hover:bg-primary hover:text-on-primary transition-colors">
+                          ${(() => {
+                            const safeTracePath = sanitizeMediaUrl(att.path);
+                            return safeTracePath
+                              ? `<a href="${escapeHtml(safeTracePath)}" download class="shrink-0 flex items-center gap-1.5 bg-primary/15 text-primary border border-primary/30 px-3 py-1.5 rounded text-xs font-bold hover:bg-primary hover:text-on-primary transition-colors">
                             <span class="material-symbols-outlined text-sm" aria-hidden="true">download</span> Download
                           </a>`
-                              : `<span class="text-xs text-error">File path missing</span>`
-                          }
+                              : `<span class="text-xs text-error">File path missing</span>`;
+                          })()}
                         </div>
                       </div>
                     </div>
@@ -2310,14 +2329,25 @@
                 att.contentType &&
                 att.contentType.startsWith("image/")
               ) {
-                artiHtml += `<img src="${att.path || "data:image/png;base64," + (att.body || "")}" alt="${escapeHtml(att.name)}" class="rounded max-w-full border border-outline-variant shadow-sm" />`;
+                const safeImgSrc = att.path
+                  ? sanitizeMediaUrl(att.path)
+                  : att.body
+                    ? sanitizeMediaUrl("data:image/png;base64," + String(att.body).trim(), { allowDataImage: true })
+                    : "";
+                artiHtml += safeImgSrc
+                  ? `<img src="${escapeHtml(safeImgSrc)}" alt="${escapeHtml(att.name)}" class="rounded max-w-full border border-outline-variant shadow-sm" />`
+                  : `<span class="text-xs text-error">Invalid image source</span>`;
               } else if (
                 att.contentType &&
                 att.contentType.startsWith("video/")
               ) {
-                artiHtml += `<video controls src="${att.path || ""}" class="rounded max-w-full border border-outline-variant shadow-sm"></video>`;
+                const safeVideoSrc = sanitizeMediaUrl(att.path);
+                artiHtml += safeVideoSrc
+                  ? `<video controls src="${escapeHtml(safeVideoSrc)}" class="rounded max-w-full border border-outline-variant shadow-sm"></video>`
+                  : `<span class="text-xs text-error">Invalid video source</span>`;
               } else {
-                artiHtml += `<a href="${att.path || "#"}" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline text-sm flex items-center gap-1"><span class="material-symbols-outlined text-base" aria-hidden="true">download</span> Download File</a>`;
+                const safeFileHref = sanitizeMediaUrl(att.path) || "#";
+                artiHtml += `<a href="${escapeHtml(safeFileHref)}" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline text-sm flex items-center gap-1"><span class="material-symbols-outlined text-base" aria-hidden="true">download</span> Download File</a>`;
               }
               artiHtml += `
                     </div>

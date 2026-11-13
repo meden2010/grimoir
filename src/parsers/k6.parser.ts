@@ -343,22 +343,17 @@ export function parseK6(rawJson: Record<string, unknown>): K6Report {
   let p90LatencyMs: number | null = null;
   const durationValues = extractValues(metricsObj[K6_METRIC_KEYS.HTTP_REQ_DURATION]);
   if (durationValues) {
-    const p95 = durationValues['p(95)'] ?? durationValues['p95'];
-    if (typeof p95 === 'number' && !Number.isNaN(p95)) {
-      p95LatencyMs = Number(p95.toFixed(2));
+    const p95 = round2(durationValues['p(95)'] ?? durationValues['p95']);
+    if (p95 !== null) {
+      p95LatencyMs = p95;
     } else {
       warnings.push(`Missing metric: ${K6_METRIC_KEYS.HTTP_REQ_DURATION}.values['p(95)']`);
     }
-    const avg = durationValues['avg'];
-    if (typeof avg === 'number' && !Number.isNaN(avg)) avgLatencyMs = Number(avg.toFixed(2));
-    const min = durationValues['min'];
-    if (typeof min === 'number' && !Number.isNaN(min)) minLatencyMs = Number(min.toFixed(2));
-    const med = durationValues['med'] ?? durationValues['p(50)'] ?? durationValues['p50'];
-    if (typeof med === 'number' && !Number.isNaN(med)) medLatencyMs = Number(med.toFixed(2));
-    const max = durationValues['max'];
-    if (typeof max === 'number' && !Number.isNaN(max)) maxLatencyMs = Number(max.toFixed(2));
-    const p90 = durationValues['p(90)'] ?? durationValues['p90'];
-    if (typeof p90 === 'number' && !Number.isNaN(p90)) p90LatencyMs = Number(p90.toFixed(2));
+    avgLatencyMs = round2(durationValues['avg']);
+    minLatencyMs = round2(durationValues['min']);
+    medLatencyMs = round2(durationValues['med'] ?? durationValues['p(50)'] ?? durationValues['p50']);
+    maxLatencyMs = round2(durationValues['max']);
+    p90LatencyMs = round2(durationValues['p(90)'] ?? durationValues['p90']);
   } else {
     warnings.push(`Missing metric: ${K6_METRIC_KEYS.HTTP_REQ_DURATION} (p95 latency is unavailable)`);
   }
@@ -368,18 +363,18 @@ export function parseK6(rawJson: Record<string, unknown>): K6Report {
   let vusMax: number | null = null;
   const vusValues = extractValues(metricsObj['vus']);
   if (vusValues) {
-    const val = vusValues['value'] ?? vusValues['vus'];
-    if (typeof val === 'number' && !Number.isNaN(val)) vus = Math.round(val);
-    const maxVal = vusValues['max'];
-    if (typeof maxVal === 'number' && !Number.isNaN(maxVal)) vusMax = Math.round(maxVal);
+    const val = toValidNumber(vusValues['value'] ?? vusValues['vus']);
+    if (val !== null) vus = Math.round(val);
+    const maxVal = toValidNumber(vusValues['max']);
+    if (maxVal !== null) vusMax = Math.round(maxVal);
   }
 
   // 2. Tasa de error (http_req_failed) en %
   let errorRatePercent: number | null = null;
   const failedValues = extractValues(metricsObj[K6_METRIC_KEYS.HTTP_REQ_FAILED]);
   if (failedValues) {
-    const rate = failedValues['rate'];
-    if (typeof rate === 'number' && !Number.isNaN(rate)) {
+    const rate = toValidNumber(failedValues['rate']);
+    if (rate !== null) {
       errorRatePercent = Number((rate * 100).toFixed(2));
     } else {
       warnings.push(`Missing metric: ${K6_METRIC_KEYS.HTTP_REQ_FAILED}.values.rate`);
@@ -392,8 +387,8 @@ export function parseK6(rawJson: Record<string, unknown>): K6Report {
   let throughputRps: number | null = null;
   const reqsValues = extractValues(metricsObj[K6_METRIC_KEYS.HTTP_REQS]);
   if (reqsValues) {
-    const rate = reqsValues['rate'];
-    if (typeof rate === 'number' && !Number.isNaN(rate)) {
+    const rate = toValidNumber(reqsValues['rate']);
+    if (rate !== null) {
       throughputRps = Number(rate.toFixed(2));
     } else {
       warnings.push(`Missing metric: ${K6_METRIC_KEYS.HTTP_REQS}.values.rate`);
@@ -567,13 +562,16 @@ export function parseK6(rawJson: Record<string, unknown>): K6Report {
 
   // Scenarios extraction
   const scenarios: Record<string, K6Scenario> = {};
+  const toFiniteOrZero = (v: unknown): number =>
+    toValidNumber(typeof v === 'string' && v.trim() !== '' ? Number(v) : v) ?? 0;
+
   const rawScenarios = rawJson['scenarios'];
   if (rawScenarios && typeof rawScenarios === 'object') {
     for (const [key, val] of Object.entries(rawScenarios as Record<string, unknown>)) {
       if (val && typeof val === 'object') {
         const s = val as Record<string, unknown>;
-        const vusNum = Number(s['vus'] ?? 0);
-        const iterationsNum = Number(s['iterations'] ?? 0);
+        const vusNum = toFiniteOrZero(s['vus']);
+        const iterationsNum = toFiniteOrZero(s['iterations']);
         const scStatus: 'passed' | 'failed' = s['status'] === 'failed' ? 'failed' : 'passed';
         const explicitReason =
           typeof s['reason'] === 'string' && s['reason'].trim()
@@ -600,11 +598,11 @@ export function parseK6(rawJson: Record<string, unknown>): K6Report {
   const totalScenarios = scenarioEntries.length;
   const passedScenarios = scenarioEntries.filter(([, s]) => s.status === 'passed').length;
 
-  const totalRequests = typeof reqsValues?.['count'] === 'number' ? Number(reqsValues['count']) : 0;
-  const failedRate = typeof failedValues?.['rate'] === 'number' ? Number(failedValues['rate']) : 0;
+  const totalRequests = toValidNumber(reqsValues?.['count']) ?? 0;
+  const failedRate = toValidNumber(failedValues?.['rate']) ?? 0;
   const failedRequests = Math.round(totalRequests * failedRate);
   const successRate = totalRequests > 0 ? Math.max(0, Math.min(100, Math.round((1 - failedRate) * 100))) : 100;
-  const rawDuration = typeof rawJson['duration'] === 'number' ? rawJson['duration'] : (Number(durationValues?.['avg'] ?? 0));
+  const rawDuration = toValidNumber(rawJson['duration']) ?? toFiniteOrZero(durationValues?.['avg']);
 
   return {
     type: 'k6',
