@@ -594,15 +594,51 @@ export function parseK6(rawJson: Record<string, unknown>): K6Report {
     }
   }
 
-  const scenarioEntries = Object.entries(scenarios);
-  const totalScenarios = scenarioEntries.length;
-  const passedScenarios = scenarioEntries.filter(([, s]) => s.status === 'passed').length;
-
   const totalRequests = toValidNumber(reqsValues?.['count']) ?? 0;
   const failedRate = toValidNumber(failedValues?.['rate']) ?? 0;
   const failedRequests = Math.round(totalRequests * failedRate);
   const successRate = totalRequests > 0 ? Math.max(0, Math.min(100, Math.round((1 - failedRate) * 100))) : 100;
   const rawDuration = toValidNumber(rawJson['duration']) ?? toFiniteOrZero(durationValues?.['avg']);
+
+  const iterationsValues = extractValues(metricsObj['iterations']);
+  const iterationsCount = toValidNumber(iterationsValues?.['count']) ?? 0;
+  const vusMaxMetricValues = extractValues(metricsObj['vus_max']);
+  const implicitVusMax = toValidNumber(vusMaxMetricValues?.['max'] ?? vusMaxMetricValues?.['value']);
+  if (vusMax === null && implicitVusMax !== null) {
+    vusMax = Math.round(implicitVusMax);
+  }
+
+  // Synthesize implicit 'default' scenario when k6 --summary-export omits top-level scenarios (e.g. stages)
+  if (Object.keys(scenarios).length === 0) {
+    const hasExecutionEvidence =
+      totalRequests > 0 ||
+      iterationsCount > 0 ||
+      vus !== null ||
+      vusMax !== null ||
+      totalThresholds > 0 ||
+      checks.length > 0;
+
+    if (hasExecutionEvidence) {
+      const defaultVus = Math.round(vusMax ?? vus ?? 0);
+      const defaultIterations = Math.round(iterationsCount);
+      const defaultStatus: 'passed' | 'failed' = failedThresholds > 0 ? 'failed' : 'passed';
+      const defaultReason =
+        defaultStatus === 'failed'
+          ? `Default scenario failed (${failedThresholds} threshold(s) breached; ${defaultVus} VUs, ${defaultIterations} iterations)`
+          : `Implicit default scenario (${defaultIterations} iterations, ${defaultVus} VUs)`;
+
+      scenarios['default'] = {
+        vus: defaultVus,
+        iterations: defaultIterations,
+        status: defaultStatus,
+        reason: defaultReason,
+      };
+    }
+  }
+
+  const scenarioEntries = Object.entries(scenarios);
+  const totalScenarios = scenarioEntries.length;
+  const passedScenarios = scenarioEntries.filter(([, s]) => s.status === 'passed').length;
 
   return {
     type: 'k6',

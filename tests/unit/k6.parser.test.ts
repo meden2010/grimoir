@@ -337,4 +337,51 @@ describe('k6 Parser (v1 Scope: 3 Metrics + Thresholds + Warnings)', () => {
       reason: "Threshold 'p(95)<500' breached on 'ritual_checkout_duration' (observed: 620.4 ms)",
     });
   });
+
+  test('Sintetiza scenario default implícito cuando k6 --summary-export omite scenarios top-level', () => {
+    const summaryWithStages = {
+      metrics: {
+        http_reqs: { values: { count: 1200, rate: 40 } },
+        http_req_duration: {
+          values: { avg: 85, 'p(95)': 190 },
+          thresholds: { 'p(95)<500': { ok: true } },
+        },
+        http_req_failed: { values: { rate: 0 } },
+        vus: { values: { value: 10, max: 20 } },
+        vus_max: { values: { value: 25, max: 25 } },
+        iterations: { values: { count: 300 } },
+      },
+    };
+
+    const passedReport = parseK6(summaryWithStages);
+    expect(passedReport.stats.totalScenarios).toBe(1);
+    expect(passedReport.stats.passedScenarios).toBe(1);
+    expect(passedReport.metrics.vusMax).toBe(20);
+    expect(passedReport.scenarios['default']).toEqual({
+      vus: 20,
+      iterations: 300,
+      status: 'passed',
+      reason: 'Implicit default scenario (300 iterations, 20 VUs)',
+    });
+
+    const summaryFailedThreshold = {
+      metrics: {
+        http_reqs: { values: { count: 500, rate: 25 } },
+        http_req_duration: {
+          values: { avg: 420, 'p(95)': 890 },
+          thresholds: { 'p(95)<500': { ok: false } },
+        },
+        vus_max: { values: { max: 30 } },
+        iterations: { values: { count: 150 } },
+      },
+    };
+
+    const failedReport = parseK6(summaryFailedThreshold);
+    expect(failedReport.metrics.vusMax).toBe(30);
+    expect(failedReport.stats.totalScenarios).toBe(1);
+    expect(failedReport.stats.passedScenarios).toBe(0);
+    expect(failedReport.scenarios['default'].status).toBe('failed');
+    expect(failedReport.scenarios['default'].vus).toBe(30);
+    expect(failedReport.scenarios['default'].iterations).toBe(150);
+  });
 });
