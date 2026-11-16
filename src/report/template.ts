@@ -404,6 +404,89 @@ const generateTableWrapper = (title: string, ariaLabel: string, headersHtml: str
       </div>`;
 };
 
+export const generateK6EndpointsTable = (k6: K6Report | null): string => {
+  if (!k6 || !k6.endpoints || k6.endpoints.length === 0) {
+    return '';
+  }
+
+  const fmtMs = (val: number | null | undefined): string =>
+    val !== null && val !== undefined ? `${val} ms` : '—';
+
+  const rows = k6.endpoints.map(ep => {
+    let methodBadge = '';
+    if (ep.method) {
+      const m = ep.method.toUpperCase();
+      let badgeClasses = 'bg-surface-container text-on-surface-variant border-outline-variant';
+      if (m === 'GET') {
+        badgeClasses = 'bg-tertiary/15 text-teal-300 border-tertiary/35';
+      } else if (m === 'POST') {
+        badgeClasses = 'bg-primary/15 text-primary-container border-primary/35';
+      } else if (m === 'PUT' || m === 'PATCH') {
+        badgeClasses = 'bg-amber-950/40 text-amber-400 border-amber-500/30';
+      } else if (m === 'DELETE') {
+        badgeClasses = 'bg-error/10 text-error border-error/30';
+      }
+      methodBadge = `<span class="px-2 py-0.5 rounded text-[11px] font-mono font-bold border uppercase mr-2 shrink-0 ${badgeClasses}">${escapeHtml(m)}</span>`;
+    }
+
+    let statusCell = `<span class="text-xs font-mono text-outline">—</span>`;
+    if (ep.status === 'passed') {
+      const summaryLabel = ep.thresholdSummary ? ` (${escapeHtml(ep.thresholdSummary)})` : '';
+      statusCell = `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-emerald-950/40 text-emerald-400 border border-emerald-500/30"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400" aria-hidden="true"></span>PASS${summaryLabel}</span>`;
+    } else if (ep.status === 'failed') {
+      const summaryLabel = ep.thresholdSummary ? ` (${escapeHtml(ep.thresholdSummary)})` : '';
+      statusCell = `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-error/10 text-error border border-error/30"><span class="w-1.5 h-1.5 rounded-full bg-error" aria-hidden="true"></span>FAIL${summaryLabel}</span>`;
+    }
+
+    return `
+        <tr class="border-b border-outline-variant/30 hover:bg-surface-container/30 transition-colors perf-metric-row">
+          <td class="p-gutter">
+            <div class="flex items-center">
+              ${methodBadge}
+              <span class="font-mono text-xs text-on-surface">${escapeHtml(ep.path)}</span>
+            </div>
+          </td>
+          <td class="p-gutter text-right font-mono text-xs text-on-surface-variant tabular-nums">${fmtMs(ep.values.min)}</td>
+          <td class="p-gutter text-right font-mono text-xs text-on-surface-variant tabular-nums">${fmtMs(ep.values.med)}</td>
+          <td class="p-gutter text-right font-mono text-xs text-on-surface-variant tabular-nums">${fmtMs(ep.values.avg)}</td>
+          <td class="p-gutter text-right font-mono text-xs text-on-surface-variant tabular-nums">${fmtMs(ep.values.p90)}</td>
+          <td class="p-gutter text-right font-mono text-xs text-primary-container font-bold tabular-nums">${fmtMs(ep.values.p95)}</td>
+          <td class="p-gutter text-right font-mono text-xs text-amber-400 tabular-nums">${fmtMs(ep.values.max)}</td>
+          <td class="p-gutter text-right">${statusCell}</td>
+        </tr>`;
+  }).join('');
+
+  return `
+      <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter mt-base">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-base">
+          <div>
+            <h3 class="font-display text-base font-semibold text-on-surface tracking-wide uppercase">Endpoint Summary</h3>
+            <p class="text-xs text-on-surface-variant font-mono">Per-endpoint latency percentiles (ms) sorted by P95 bottleneck</p>
+          </div>
+          <span class="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-surface-container text-secondary-container border border-outline-variant">${k6.endpoints.length} ENDPOINTS</span>
+        </div>
+        <div class="overflow-x-auto grimoir-table-wrapper" tabindex="0" role="region" aria-label="k6 Endpoint Summary">
+          <table class="w-full text-left grimoir-data-table">
+            <thead>
+              <tr class="bg-surface-container-low/50 border-b border-outline-variant text-xs font-label-caps uppercase text-on-surface-variant">
+                <th scope="col" class="p-gutter">Endpoint</th>
+                <th scope="col" class="p-gutter text-right">Min</th>
+                <th scope="col" class="p-gutter text-right">Med</th>
+                <th scope="col" class="p-gutter text-right">Avg</th>
+                <th scope="col" class="p-gutter text-right">P90</th>
+                <th scope="col" class="p-gutter text-right">P95</th>
+                <th scope="col" class="p-gutter text-right">Max</th>
+                <th scope="col" class="p-gutter text-right">SLA / Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows}
+            </tbody>
+          </table>
+        </div>
+      </div>`;
+};
+
 const generateCoverageChips = (isAutomatedActive: boolean, isPerformanceActive: boolean): string => {
   const types = [
     { label: 'Automated', active: isAutomatedActive },
@@ -874,6 +957,8 @@ export const generateHTML = (playwright: PlaywrightReport, k6: K6Report | null, 
     );
   }
 
+  const k6EndpointsTable = generateK6EndpointsTable(k6);
+
   const template = loadTemplate();
 
   return replacePlaceholders(template, {
@@ -936,6 +1021,7 @@ export const generateHTML = (playwright: PlaywrightReport, k6: K6Report | null, 
     k6ScenariosTable: safe(k6ScenariosTable),
     k6ChecksTable: safe(k6ChecksTable),
     k6CustomMetricsTable: safe(k6CustomMetricsTable),
+    k6EndpointsTable: safe(k6EndpointsTable),
     overallStatusArray: safe(overallStatusArray),
     durationLabels: safe(durationLabels),
     durationData: safe(durationData),

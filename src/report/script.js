@@ -247,6 +247,11 @@
               "flex items-center justify-between gap-3 cursor-pointer p-2 rounded-lg border border-outline-variant/40 bg-surface-container-low/60 hover:bg-surface-container hover:border-primary/40 transition-colors duration-500 text-left w-full";
             li.onclick = () => {
               chart.toggleDataVisibility(item.index);
+              const ds = chart.data.datasets[0];
+              const visibleNonZero = ds.data.filter(
+                (v, i) => v > 0 && chart.getDataVisibility(i),
+              ).length;
+              ds.borderWidth = visibleNonZero > 1 ? 2 : 0;
               chart.update();
             };
 
@@ -355,16 +360,21 @@
       skippedGrad.addColorStop(0, "#95A5A6");
       skippedGrad.addColorStop(1, "#7F8C8D");
 
+      const statusData = __OVERALL_STATUS_ARRAY__;
+      const nonZeroStatusSlices = Array.isArray(statusData)
+        ? statusData.filter((v) => v > 0).length
+        : 0;
+
       const overviewStatusChartInstance = new Chart(ctxStatus, {
         type: "pie",
         data: {
           labels: ["Passed", "Failed", "Skipped"],
           datasets: [
             {
-              data: __OVERALL_STATUS_ARRAY__,
+              data: statusData,
               backgroundColor: [passedGrad, failedGrad, skippedGrad],
               borderColor: "#13171F",
-              borderWidth: 2,
+              borderWidth: nonZeroStatusSlices > 1 ? 2 : 0,
               hoverOffset: 14,
             },
           ],
@@ -414,18 +424,24 @@
         overviewStatusChartInstance.update("none");
       }, 50);
 
-      // Overview execution duration by type chart (Sorcery Violet primary + subtle Arcane Gold highlight)
-      const ctxDuration = document
-        .getElementById("overviewDurationChart")
-        .getContext("2d");
-      const durationGrad = ctxDuration.createLinearGradient(0, 0, 0, 350);
-      durationGrad.addColorStop(0, "rgba(138, 79, 255, 0.92)");
-      durationGrad.addColorStop(0.75, "rgba(109, 53, 217, 0.55)");
-      durationGrad.addColorStop(1, "rgba(197, 160, 89, 0.28)");
+      function formatChartSeconds(sec) {
+        if (sec < 60) return `${sec.toFixed(1)}s`;
+        const totalSec = Math.round(sec);
+        const mins = Math.floor(totalSec / 60);
+        const remSec = totalSec % 60;
+        return `${mins}m ${remSec}s`;
+      }
 
-      const hoverGrad = ctxDuration.createLinearGradient(0, 0, 0, 350);
-      hoverGrad.addColorStop(0, "#B388FF");
-      hoverGrad.addColorStop(1, "rgba(229, 197, 131, 0.45)");
+      function hexToRgba(hex, alpha) {
+        if (typeof hex !== "string") return `rgba(138, 79, 255, ${alpha})`;
+        const clean = hex.replace("#", "").trim();
+        if (clean.length !== 6) return `rgba(138, 79, 255, ${alpha})`;
+        const r = parseInt(clean.slice(0, 2), 16);
+        const g = parseInt(clean.slice(2, 4), 16);
+        const b = parseInt(clean.slice(4, 6), 16);
+        if ([r, g, b].some(Number.isNaN)) return `rgba(138, 79, 255, ${alpha})`;
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+      }
 
       function createBarLabelsPlugin(formatFn) {
         return {
@@ -448,9 +464,7 @@
               const text =
                 typeof formatFn === "function"
                   ? formatFn(numVal)
-                  : numVal < 60
-                    ? `${numVal.toFixed(1)}s`
-                    : `${Math.floor(numVal / 60)}m ${Math.round(numVal % 60)}s`;
+                  : formatChartSeconds(numVal);
               const textWidth = ctx.measureText(text).width;
 
             const paddingX = 8;
@@ -481,68 +495,111 @@
         };
       }
 
-      const overviewDurationChartInstance = new Chart(ctxDuration, {
-        type: "bar",
-        data: {
-          labels: __DURATION_LABELS__,
-          datasets: [
-            {
-              label: "Duration (s)",
-              data: __DURATION_DATA__,
-              backgroundColor: durationGrad,
-              borderRadius: 6,
-              barPercentage: 0.32,
-              categoryPercentage: 0.55,
-              borderWidth: 1,
-              borderColor: "rgba(179, 136, 255, 0.58)",
-              hoverBackgroundColor: hoverGrad,
-              animation: {
-                delay: (context) => context.dataIndex * 180,
+      // Overview execution duration by type chart (per-suite Arcane Dark colors + empty state)
+      (function () {
+        const durationContainer = document.getElementById("durationChartContainer");
+        const durationCanvas = document.getElementById("overviewDurationChart");
+        const durationLabels = __DURATION_LABELS__;
+        const durationData = __DURATION_DATA__;
+        const durationColors = __DURATION_COLORS__;
+
+        if (!Array.isArray(durationData) || durationData.length === 0) {
+          if (durationContainer) {
+            durationContainer.innerHTML = `<div class="absolute inset-0 flex flex-col items-center justify-center text-on-surface-variant p-4 text-center">
+              <span class="material-symbols-outlined text-4xl mb-2 text-primary/50" aria-hidden="true">timer_off</span>
+              <p class="text-sm font-display uppercase tracking-wider">No Duration Telemetry</p>
+              <p class="text-xs text-outline mt-1">Run at least one suite with measurable duration to compare execution times.</p>
+            </div>`;
+          }
+          return;
+        }
+
+        if (!durationCanvas) return;
+        const ctxDuration = durationCanvas.getContext("2d");
+
+        const barBackgrounds = durationData.map((_, idx) => {
+          const baseHex = Array.isArray(durationColors) && durationColors[idx] ? durationColors[idx] : "#8A4FFF";
+          const grad = ctxDuration.createLinearGradient(0, 0, 0, 350);
+          grad.addColorStop(0, hexToRgba(baseHex, 0.92));
+          grad.addColorStop(0.75, hexToRgba(baseHex, 0.55));
+          grad.addColorStop(1, hexToRgba(baseHex, 0.22));
+          return grad;
+        });
+
+        const barHoverBackgrounds = durationData.map((_, idx) => {
+          const baseHex = Array.isArray(durationColors) && durationColors[idx] ? durationColors[idx] : "#B388FF";
+          const grad = ctxDuration.createLinearGradient(0, 0, 0, 350);
+          grad.addColorStop(0, baseHex);
+          grad.addColorStop(1, hexToRgba(baseHex, 0.45));
+          return grad;
+        });
+
+        const barBorders = durationData.map((_, idx) => {
+          const baseHex = Array.isArray(durationColors) && durationColors[idx] ? durationColors[idx] : "#B388FF";
+          return hexToRgba(baseHex, 0.75);
+        });
+
+        new Chart(ctxDuration, {
+          type: "bar",
+          data: {
+            labels: durationLabels,
+            datasets: [
+              {
+                label: "Duration (s)",
+                data: durationData,
+                backgroundColor: barBackgrounds,
+                borderRadius: 6,
+                barPercentage: 0.32,
+                categoryPercentage: 0.55,
+                borderWidth: 1,
+                borderColor: barBorders,
+                hoverBackgroundColor: barHoverBackgrounds,
+                animation: {
+                  delay: (context) => context.dataIndex * 180,
+                },
+              },
+            ],
+          },
+          options: {
+            ...chartOptions,
+            layout: { padding: { top: 28 } },
+            plugins: {
+              ...chartOptions.plugins,
+              legend: { display: false },
+              tooltip: {
+                ...chartOptions.plugins?.tooltip,
+                callbacks: {
+                  label: (context) => {
+                    const s = Number(context.raw);
+                    return ` ${context.label}: ${formatChartSeconds(s)} (${Math.round(s * 1000).toLocaleString()} ms)`;
+                  },
+                },
               },
             },
-          ],
-        },
-        options: {
-          ...chartOptions,
-          layout: { padding: { top: 28 } },
-          plugins: {
-            ...chartOptions.plugins,
-            legend: { display: false },
-            tooltip: {
-              ...chartOptions.plugins?.tooltip,
-              callbacks: {
-                label: (context) => {
-                  const s = Number(context.raw);
-                  const formatted = s < 60
-                    ? `${s.toFixed(1)}s`
-                    : `${Math.floor(s / 60)}m ${Math.round(s % 60)}s`;
-                  return ` ${context.label}: ${formatted} (${Math.round(s * 1000).toLocaleString()} ms)`;
+            scales: {
+              x: {
+                grid: {
+                  display: false,
+                },
+                ticks: { color: "#C4C9D4", font: { family: "JetBrains Mono", size: 12 } },
+              },
+              y: {
+                beginAtZero: true,
+                grid: {
+                  color: "rgba(138, 79, 255, 0.09)",
+                  drawBorder: false,
+                },
+                ticks: {
+                  color: "#C4C9D4",
+                  font: { family: "JetBrains Mono", size: 11 },
+                  callback: (val) => `${val}s`,
                 },
               },
             },
           },
-          scales: {
-            x: {
-              grid: {
-                display: false,
-              },
-              ticks: { color: "#C4C9D4", font: { family: "JetBrains Mono", size: 12 } },
-            },
-            y: {
-              grid: {
-                color: "rgba(138, 79, 255, 0.09)",
-                drawBorder: false,
-              },
-              ticks: {
-                color: "#C4C9D4",
-                font: { family: "JetBrains Mono", size: 11 },
-                callback: (val) => `${val}s`,
-              },
-            },
-          },
-        },
-        plugins: [glowPlugin, createBarLabelsPlugin()],
-      });
+          plugins: [glowPlugin, createBarLabelsPlugin()],
+        });
+      })();
 
       // Lazy chart initializers for secondary tabs
       const tabCharts = {
@@ -1067,72 +1124,142 @@
         });
       }
 
-      // Collapsible sections with smooth atmospheric height animation and aria-expanded
+      // Collapsible sections with race-free atmospheric height/opacity/slide animation and aria-expanded
       (function () {
+        const prefersReducedMotion =
+          window.matchMedia &&
+          window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+        function resizeChartsInSection() {
+          [tabCharts.perf, tabCharts.perfPhases, tabCharts.perfHistory].forEach((c) => {
+            if (c && typeof c.resize === "function") {
+              try {
+                c.resize();
+              } catch (_) {}
+            }
+          });
+        }
+
         document.querySelectorAll(".collapsible-section").forEach((section) => {
           const header = section.querySelector(".collapsible-header");
           const content = section.querySelector(".collapsible-content");
           const icon = section.querySelector(".toggle-icon");
           if (!header || !content) return;
 
-          header.addEventListener("click", () => {
-            const expanded = section.getAttribute("data-expanded") === "true";
-            const nextState = !expanded;
-            section.setAttribute("data-expanded", String(nextState));
-            header.setAttribute("aria-expanded", String(nextState));
+          let animToken = 0;
 
-            if (expanded) {
-              // Collapse
-              const naturalHeight = content.scrollHeight;
-              content.style.height = naturalHeight + "px";
-              content.classList.add("animating");
-              if (typeof anime !== "undefined") {
-                anime({
-                  targets: content,
-                  height: 0,
-                  opacity: 0,
-                  duration: 780,
-                  easing: "easeOutCubic",
-                  complete: () => {
-                    content.classList.add("hidden");
-                    content.classList.remove("animating");
-                    content.style.height = "";
-                  },
-                });
-              } else {
-                content.classList.add("hidden");
-                content.classList.remove("animating");
-              }
-            } else {
-              // Expand
-              content.classList.remove("hidden");
-              content.classList.add("animating");
-              const naturalHeight = content.scrollHeight;
-              content.style.height = "0px";
-              content.style.opacity = "0";
-              if (typeof anime !== "undefined") {
-                anime({
-                  targets: content,
-                  height: naturalHeight,
-                  opacity: 1,
-                  duration: 820,
-                  easing: "easeOutCubic",
-                  complete: () => {
-                    content.classList.remove("animating");
-                    content.style.height = "auto";
-                  },
-                });
-              } else {
-                content.classList.remove("animating");
-                content.style.height = "auto";
-                content.style.opacity = "1";
-              }
+          header.addEventListener("click", () => {
+            animToken += 1;
+            const currentToken = animToken;
+
+            if (typeof anime !== "undefined") {
+              anime.remove(content);
             }
 
-            if (icon)
-              icon.style.transform = expanded
-                ? "rotate(-90deg)"
-                : "rotate(0deg)";
+            // Determine current visual state reliably (never get stuck if clicked mid-animation)
+            const isCurrentlyHidden =
+              content.classList.contains("hidden") ||
+              section.getAttribute("data-expanded") === "false";
+            const shouldExpand = isCurrentlyHidden;
+
+            section.setAttribute("data-expanded", String(shouldExpand));
+            header.setAttribute("aria-expanded", String(shouldExpand));
+
+            if (icon) {
+              icon.style.transform = shouldExpand
+                ? "rotate(0deg)"
+                : "rotate(-90deg)";
+            }
+
+            if (!shouldExpand) {
+              // Collapse
+              const startHeight =
+                content.getBoundingClientRect().height || content.scrollHeight;
+              const computedOpacity = parseFloat(
+                window.getComputedStyle(content).opacity,
+              );
+              const startOpacity = Number.isFinite(computedOpacity)
+                ? computedOpacity
+                : 1;
+
+              if (prefersReducedMotion || typeof anime === "undefined" || startHeight === 0) {
+                content.classList.remove("animating");
+                content.classList.add("hidden");
+                content.style.height = "";
+                content.style.opacity = "";
+                content.style.transform = "";
+                return;
+              }
+
+              content.style.height = startHeight + "px";
+              content.style.opacity = String(startOpacity);
+              content.classList.add("animating");
+
+              anime({
+                targets: content,
+                height: [startHeight, 0],
+                opacity: [startOpacity, 0],
+                translateY: [0, -6],
+                duration: 340,
+                easing: "easeOutQuart",
+                complete: () => {
+                  if (currentToken !== animToken) return;
+                  content.classList.add("hidden");
+                  content.classList.remove("animating");
+                  content.style.height = "";
+                  content.style.opacity = "";
+                  content.style.transform = "";
+                },
+              });
+            } else {
+              // Expand
+              const wasAnimating = content.classList.contains("animating");
+              const startHeight = wasAnimating
+                ? content.getBoundingClientRect().height
+                : 0;
+              const computedOpacity = parseFloat(
+                window.getComputedStyle(content).opacity,
+              );
+              const startOpacity =
+                wasAnimating && Number.isFinite(computedOpacity)
+                  ? computedOpacity
+                  : 0;
+
+              content.classList.remove("hidden");
+              content.style.height = "auto";
+              resizeChartsInSection();
+              const targetHeight = content.scrollHeight;
+
+              if (prefersReducedMotion || typeof anime === "undefined" || targetHeight === 0) {
+                content.classList.remove("animating");
+                content.style.height = "";
+                content.style.opacity = "1";
+                content.style.transform = "";
+                resizeChartsInSection();
+                return;
+              }
+
+              content.classList.add("animating");
+              content.style.height = startHeight + "px";
+              content.style.opacity = String(startOpacity);
+
+              anime({
+                targets: content,
+                height: [startHeight, targetHeight],
+                opacity: [startOpacity, 1],
+                translateY: [wasAnimating ? 0 : -6, 0],
+                duration: 400,
+                easing: "easeOutQuart",
+                complete: () => {
+                  if (currentToken !== animToken) return;
+                  content.classList.remove("animating");
+                  content.style.height = "";
+                  content.style.opacity = "";
+                  content.style.transform = "";
+                  resizeChartsInSection();
+                },
+              });
+            }
           });
         });
       })();

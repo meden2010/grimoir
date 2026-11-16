@@ -400,6 +400,69 @@ const mockK6 = {
         },
       },
     },
+    'http_req_duration{endpoint:POST /api/rituals/checkout}': {
+      type: 'trend',
+      contains: 'time',
+      values: {
+        min: 92.4,
+        med: 248.0,
+        avg: 284.6,
+        'p(90)': 465.2,
+        'p(95)': 612.8,
+        max: 980.2,
+      },
+      thresholds: {
+        'p(95)<500': {
+          ok: false,
+        },
+      },
+    },
+    'http_req_duration{endpoint:GET /api/shipments/get-all?page=1}': {
+      type: 'trend',
+      contains: 'time',
+      values: {
+        min: 54.0,
+        med: 158.2,
+        avg: 176.5,
+        'p(90)': 268.4,
+        'p(95)': 342.1,
+        max: 640.0,
+      },
+      thresholds: {
+        'p(95)<400': {
+          ok: true,
+        },
+      },
+    },
+    'http_req_duration{endpoint:POST /signin}': {
+      type: 'trend',
+      contains: 'time',
+      values: {
+        min: 48.5,
+        med: 112.0,
+        avg: 124.8,
+        'p(90)': 182.0,
+        'p(95)': 218.5,
+        max: 420.3,
+      },
+      thresholds: {
+        'p(95)<300': {
+          ok: true,
+        },
+      },
+    },
+    'http_req_duration{endpoint:GET /api/spellbook/catalog}': {
+      type: 'trend',
+      contains: 'time',
+      values: {
+        min: 42.1,
+        med: 68.4,
+        avg: 74.2,
+        'p(90)': 115.6,
+        'p(95)': 142.0,
+        max: 290.5,
+      },
+    },
     http_req_blocked: {
       type: 'trend',
       contains: 'time',

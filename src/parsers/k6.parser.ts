@@ -68,6 +68,22 @@ export interface K6HttpPhaseMetric {
   maxMs: number | null;
 }
 
+export interface K6EndpointItem {
+  endpoint: string;
+  method: string | null;
+  path: string;
+  values: {
+    min: number | null;
+    med: number | null;
+    avg: number | null;
+    p90: number | null;
+    p95: number | null;
+    max: number | null;
+  };
+  status: 'passed' | 'failed' | 'none';
+  thresholdSummary: string | null;
+}
+
 /**
  * Normalized custom k6 metric (Trend, Counter, Rate, or Gauge).
  * Note: For `type === 'rate'`, `values.rate` is normalized to a percentage (0..100)
@@ -119,6 +135,7 @@ export interface K6Report {
   thresholds: K6ThresholdSummary;
   checks: K6CheckItem[];
   httpPhases: K6HttpPhaseMetric[];
+  endpoints: K6EndpointItem[];
   customMetrics: K6CustomMetric[];
   warnings: string[];
   stats: {
@@ -311,6 +328,7 @@ export function parseK6(rawJson: Record<string, unknown>): K6Report {
       },
       checks: [],
       httpPhases: [],
+      endpoints: [],
       customMetrics: [],
       warnings,
       stats: {
@@ -466,6 +484,91 @@ export function parseK6(rawJson: Record<string, unknown>): K6Report {
     }
   }
 
+  // Tagged http_req_duration endpoints extraction
+  const endpoints: K6EndpointItem[] = [];
+  for (const [metricKey, metricValue] of Object.entries(metricsObj)) {
+    if (!metricKey.startsWith('http_req_duration{') || !metricKey.endsWith('}')) {
+      continue;
+    }
+    if (!metricValue || typeof metricValue !== 'object') {
+      continue;
+    }
+    const innerTags = metricKey.slice('http_req_duration{'.length, -1);
+    const tagMatch =
+      innerTags.match(/(?:^|,)\s*endpoint:([^,}]+)/) ??
+      innerTags.match(/(?:^|,)\s*name:([^,}]+)/) ??
+      innerTags.match(/(?:^|,)\s*url:([^,}]+)/);
+    if (!tagMatch) {
+      continue;
+    }
+    const endpointLabel = tagMatch[1].trim();
+    if (!endpointLabel) {
+      continue;
+    }
+
+    const methodMatch = endpointLabel.match(/^(GET|POST|PUT|PATCH|DELETE|HEAD|OPTIONS)\s+(.+)$/i);
+    const method = methodMatch ? methodMatch[1].toUpperCase() : null;
+    const path = methodMatch ? methodMatch[2].trim() : endpointLabel;
+
+    const mObj = metricValue as Record<string, unknown>;
+    const vals = extractValues(mObj) ?? {};
+    const min = round2(vals['min']);
+    const med = round2(vals['med'] ?? vals['p(50)'] ?? vals['p50']);
+    const avg = round2(vals['avg']);
+    const p90 = round2(vals['p(90)'] ?? vals['p90']);
+    const p95 = round2(vals['p(95)'] ?? vals['p95']);
+    const max = round2(vals['max']);
+
+    let epStatus: 'passed' | 'failed' | 'none' = 'none';
+    let thresholdSummary: string | null = null;
+    const rawEpThresholds = mObj['thresholds'];
+    if (rawEpThresholds && typeof rawEpThresholds === 'object' && !Array.isArray(rawEpThresholds)) {
+      const threshEntries = Object.entries(rawEpThresholds as Record<string, unknown>);
+      if (threshEntries.length > 0) {
+        const ruleNames: string[] = [];
+        let hasFailed = false;
+        for (const [tName, tVal] of threshEntries) {
+          ruleNames.push(tName);
+          const isFailed =
+            tVal === false ||
+            !tVal ||
+            (typeof tVal === 'object' && (tVal as Record<string, unknown>)['ok'] === false) ||
+            (typeof tVal === 'object' && (tVal as Record<string, unknown>)['ok'] !== true);
+          if (isFailed) {
+            hasFailed = true;
+          }
+        }
+        epStatus = hasFailed ? 'failed' : 'passed';
+        thresholdSummary = ruleNames.join(', ');
+      }
+    }
+
+    endpoints.push({
+      endpoint: endpointLabel,
+      method,
+      path,
+      values: {
+        min,
+        med,
+        avg,
+        p90,
+        p95,
+        max,
+      },
+      status: epStatus,
+      thresholdSummary,
+    });
+  }
+
+  endpoints.sort((a, b) => {
+    const aP95 = a.values.p95;
+    const bP95 = b.values.p95;
+    if (aP95 === null && bP95 === null) return 0;
+    if (aP95 === null) return 1;
+    if (bP95 === null) return -1;
+    return bP95 - aP95;
+  });
+
   // Custom metrics extraction
   const customMetrics: K6CustomMetric[] = [];
   for (const [metricKey, metricValue] of Object.entries(metricsObj)) {
@@ -598,7 +701,20 @@ export function parseK6(rawJson: Record<string, unknown>): K6Report {
   const failedRate = toValidNumber(failedValues?.['rate']) ?? 0;
   const failedRequests = Math.round(totalRequests * failedRate);
   const successRate = totalRequests > 0 ? Math.max(0, Math.min(100, Math.round((1 - failedRate) * 100))) : 100;
-  const rawDuration = toValidNumber(rawJson['duration']) ?? toFiniteOrZero(durationValues?.['avg']);
+  const rawState = rawJson['state'];
+  const stateObj =
+    rawState && typeof rawState === 'object' && !Array.isArray(rawState)
+      ? (rawState as Record<string, unknown>)
+      : undefined;
+  const stateDurationMs = stateObj ? toValidNumber(stateObj['testRunDurationMs']) : null;
+  const derivedDurationMs =
+    totalRequests > 0 && throughputRps !== null && throughputRps > 0
+      ? Math.round((totalRequests / throughputRps) * 1000)
+      : 0;
+  const rawDuration =
+    toValidNumber(rawJson['duration']) ??
+    stateDurationMs ??
+    derivedDurationMs;
 
   const iterationsValues = extractValues(metricsObj['iterations']);
   const iterationsCount = toValidNumber(iterationsValues?.['count']) ?? 0;
@@ -663,6 +779,7 @@ export function parseK6(rawJson: Record<string, unknown>): K6Report {
     },
     checks,
     httpPhases,
+    endpoints,
     customMetrics,
     warnings,
     stats: {
