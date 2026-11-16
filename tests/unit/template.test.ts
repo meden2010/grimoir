@@ -78,6 +78,7 @@ describe('generateHTML', () => {
     },
     checks: [],
     httpPhases: [],
+    endpoints: [],
     customMetrics: [],
     warnings: [],
     scenarios: {
@@ -280,6 +281,7 @@ describe('generateHTML', () => {
       },
       checks: [],
       httpPhases: [],
+      endpoints: [],
       customMetrics: [],
       warnings: ['Test warning 1', 'Test warning 2'],
       scenarios: {}
@@ -376,6 +378,24 @@ describe('generateHTML', () => {
         { key: 'http_req_blocked', label: 'Blocked', avgMs: 1.8, p95Ms: 5.2, maxMs: 24.5 },
         { key: 'http_req_waiting', label: 'Waiting (TTFB)', avgMs: 138.2, p95Ms: 312.8, maxMs: 840.5 },
         { key: 'http_req_receiving', label: 'Receiving', avgMs: 12.5, p95Ms: 31.7, maxMs: 95.4 },
+      ],
+      endpoints: [
+        {
+          endpoint: 'POST /api/rituals/checkout',
+          method: 'POST',
+          path: '/api/rituals/checkout',
+          values: { min: 92.4, med: 248.0, avg: 284.6, p90: 465.2, p95: 612.8, max: 980.2 },
+          status: 'failed',
+          thresholdSummary: 'p(95)<500',
+        },
+        {
+          endpoint: 'GET /api/shipments/get-all?page=1',
+          method: 'GET',
+          path: '/api/shipments/get-all?page=1',
+          values: { min: 54.0, med: 158.2, avg: 176.5, p90: 268.4, p95: 342.1, max: 640.0 },
+          status: 'passed',
+          thresholdSummary: 'p(95)<400',
+        },
       ],
       customMetrics: [
         {
@@ -475,6 +495,20 @@ describe('generateHTML', () => {
     expect(html).toContain('Completed 9200 iterations with 30 VUs');
     expect(html).toContain("Scenario &#039;spike_ritual_checkout&#039; failed during load execution (20 VUs, 5000 iterations)");
     expect(html).toContain("Performance scenario failed — Scenario &#039;spike_ritual_checkout&#039; failed during load execution (20 VUs, 5000 iterations)");
+
+    // 7. Endpoint Summary table & 3 collapsible Performance categories
+    expect(html).toContain('Endpoint Summary');
+    expect(html).toContain('Per-endpoint latency percentiles (ms) sorted by P95 bottleneck');
+    expect(html).toContain('2 ENDPOINTS');
+    expect(html).toContain('/api/rituals/checkout');
+    expect(html).toContain('/api/shipments/get-all?page=1');
+    expect(html).toContain('612.8 ms');
+    expect(html).toContain('342.1 ms');
+    expect(html).toContain('FAIL (p(95)&lt;500)');
+    expect(html).toContain('PASS (p(95)&lt;400)');
+    expect(html).toContain('Latency &amp; Endpoints');
+    expect(html).toContain('Reliability, SLA &amp; Trends');
+    expect(html).toContain('Execution &amp; Custom Metrics');
   });
 
   test('should defensively escape XSS payloads in custom metric names, check names/paths, and threshold rules', () => {
@@ -529,6 +563,16 @@ describe('generateHTML', () => {
           maxMs: 3,
         },
       ],
+      endpoints: [
+        {
+          endpoint: 'GET /api/<script>alert("xss-ep")</script>',
+          method: 'GET"><img src=x onerror=alert(1)>',
+          path: '/api/<script>alert("xss-ep")</script>',
+          values: { min: 1, med: 2, avg: 3, p90: 4, p95: 5, max: 6 },
+          status: 'failed',
+          thresholdSummary: 'p(95)<100<script>alert("xss-ep-thresh")</script>',
+        },
+      ],
       customMetrics: [
         {
           name: '</script><script>alert("xss-cm")</script>',
@@ -561,12 +605,16 @@ describe('generateHTML', () => {
     expect(html).not.toContain('</script><script>alert("xss-cm")</script>');
     expect(html).not.toContain('<script>alert("xss-scenario")</script>');
     expect(html).not.toContain('<iframe src="javascript:alert(1)">');
+    expect(html).not.toContain('<script>alert("xss-ep")</script>');
+    expect(html).not.toContain('<script>alert("xss-ep-thresh")</script>');
 
     // Escaped HTML entities and Unicode JSON escapes (\u003c) must be present
     expect(html).toContain('&lt;script&gt;alert(&quot;xss-thresh&quot;)&lt;/script&gt;');
     expect(html).toContain('&lt;img src=x onerror=&quot;alert(&#039;xss-check&#039;)&quot;&gt;');
     expect(html).toContain('::&lt;script&gt;alert(&quot;xss-path&quot;)&lt;/script&gt;');
     expect(html).toContain('&lt;/script&gt;&lt;script&gt;alert(&quot;xss-cm&quot;)&lt;/script&gt;');
+    expect(html).toContain('&lt;script&gt;alert(&quot;xss-ep&quot;)&lt;/script&gt;');
+    expect(html).toContain('&lt;script&gt;alert(&quot;xss-ep-thresh&quot;)&lt;/script&gt;');
     expect(html).toContain('\\u003c/script>\\u003cscript>alert(\\"xss-cm\\")\\u003c/script>');
     expect(html).toContain('\\u003c/script>\\u003cscript>alert(\\"xss-phase\\")\\u003c/script>');
   });
@@ -606,6 +654,7 @@ describe('generateHTML', () => {
       },
       checks: [],
       httpPhases: [],
+      endpoints: [],
       customMetrics: [
         {
           name: 'custom_checkout_ms',
@@ -626,5 +675,24 @@ describe('generateHTML', () => {
     expect(html).not.toContain('All systems operational — ready for release');
     expect(html).toContain('<optgroup label="Standard HTTP">');
     expect(html).toContain('<optgroup label="Custom Trends">');
+  });
+
+  test('should inject per-suite duration colors, empty state handler, and centered tspan Health Score %', () => {
+    const k6WithDuration: K6Report = {
+      ...sampleK6Report,
+      stats: { ...sampleK6Report.stats, duration: 5000 },
+    };
+    const html = generateHTML(samplePlaywrightReport, k6WithDuration);
+    expect(html).toContain('const durationColors = ["#8B5CF6","#FBBF24"];');
+    expect(html).toContain('id="durationChartContainer"');
+    expect(html).toContain('No Duration Telemetry');
+    expect(html).toContain('formatChartSeconds');
+    expect(html).toContain('beginAtZero: true');
+    expect(html).toContain('data-target="50"');
+    expect(html).toContain('dx="2"');
+
+    const emptyHtml = generateHTML(emptyPlaywrightReport, null);
+    expect(emptyHtml).toContain('const durationData = [];');
+    expect(emptyHtml).not.toContain('__DURATION_COLORS__');
   });
 });

@@ -517,18 +517,15 @@
                     x="100"
                     y="85"
                     text-anchor="middle"
-                    class="font-display text-4xl font-bold fill-on-surface tabular-nums counter"
-                    data-target="__HEALTH_SCORE__"
                   >
-                    0
-                  </text>
-                  <text
-                    x="132"
-                    y="76"
-                    text-anchor="start"
-                    class="font-display text-base fill-outline font-medium"
-                  >
-                    %
+                    <tspan
+                      class="font-display text-4xl font-bold fill-on-surface tabular-nums counter"
+                      data-target="__HEALTH_SCORE__"
+                    >0</tspan><tspan
+                      dx="2"
+                      dy="-9"
+                      class="font-display text-base fill-outline font-medium"
+                    >%</tspan>
                   </text>
                 </svg>
                 <div class="flex flex-col text-center sm:text-left">
@@ -590,7 +587,7 @@
             <h3
               class="font-display text-lg font-semibold text-on-surface tracking-wide uppercase mb-base"
             >
-              Execution Status Distribution
+              Status Breakdown
             </h3>
             <div class="flex flex-col md:flex-row items-center gap-4">
               <div
@@ -619,9 +616,9 @@
             <h3
               class="font-display text-lg font-semibold text-on-surface tracking-wide uppercase mb-base"
             >
-              Execution Duration by Suite Type
+              Suite Duration
             </h3>
-            <div class="chart-wrap">
+            <div id="durationChartContainer" class="chart-wrap">
               <canvas
                 id="overviewDurationChart"
                 aria-label="Bar chart showing execution duration by test type"
@@ -765,7 +762,7 @@
             <h3
               class="font-display text-lg font-semibold text-on-surface tracking-wide uppercase mb-base"
             >
-              Historical Trends (Last 20 Runs)
+              Historical Trends
             </h3>
             <div
               class="chart-wrap relative h-[250px] w-full"
@@ -798,7 +795,7 @@
                     aria-hidden="true"
                     >bolt</span
                   >
-                  <span>Automated Test Suite Summary</span>
+                  <span>Automated Summary</span>
                 </span>
                 <span
                   class="material-symbols-outlined toggle-icon text-xl transition-transform"
@@ -943,7 +940,7 @@
                     aria-hidden="true"
                     >insights</span
                   >
-                  <span>Performance Load Summary</span>
+                  <span>Performance Summary</span>
                 </span>
                 <span
                   class="material-symbols-outlined toggle-icon text-xl transition-transform"
@@ -1638,241 +1635,349 @@
           </div>
         </div>
 
-        <!-- Latency Distribution Breakdown (Rule 4: avg, min, med, max, p90, p95) & Chart -->
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter mt-1">
-          <div
-            class="lg:col-span-5 bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter flex flex-col justify-between card-hover tab-anim-item"
-          >
-            <div>
-              <h3
-                class="font-display text-lg font-semibold text-on-surface tracking-wide uppercase mb-1"
-              >
-                Latency Distribution Breakdown
-              </h3>
-              <p id="perfBreakdownSubtitle" class="text-xs text-on-surface-variant font-mono mb-4">
-                http_req_duration (milliseconds)
-              </p>
-            </div>
-            <dl
-              class="grid grid-cols-2 sm:grid-cols-3 gap-y-4 gap-x-4 my-auto border-y border-outline-variant/40 py-4"
-            >
-              <div>
-                <dt
-                  class="text-xs font-label-caps text-on-surface-variant uppercase"
-                >
-                  Min
-                </dt>
-                <dd
-                  id="perfStatMin"
-                  class="font-mono text-lg font-bold text-emerald-400 tabular-nums mt-1"
-                >
-                  __K6_MIN_DISPLAY__
-                </dd>
-              </div>
-              <div>
-                <dt
-                  class="text-xs font-label-caps text-on-surface-variant uppercase"
-                >
-                  Med (P50)
-                </dt>
-                <dd
-                  id="perfStatMed"
-                  class="font-mono text-lg font-bold text-teal-300 tabular-nums mt-1"
-                >
-                  __K6_MED_DISPLAY__
-                </dd>
-              </div>
-              <div>
-                <dt
-                  class="text-xs font-label-caps text-on-surface-variant uppercase"
-                >
-                  Average
-                </dt>
-                <dd
-                  id="perfStatAvg"
-                  class="font-mono text-lg font-bold text-on-surface tabular-nums mt-1"
-                >
-                  __K6_AVG_DISPLAY__
-                </dd>
-              </div>
-              <div>
-                <dt
-                  class="text-xs font-label-caps text-on-surface-variant uppercase"
-                >
-                  P90
-                </dt>
-                <dd
-                  id="perfStatP90"
-                  class="font-mono text-lg font-bold text-secondary-container tabular-nums mt-1"
-                >
-                  __K6_P90_DISPLAY__
-                </dd>
-              </div>
-              <div>
-                <dt
-                  class="text-xs font-label-caps text-primary-container uppercase"
-                >
-                  P95
-                </dt>
-                <dd
-                  id="perfStatP95"
-                  class="font-mono text-lg font-bold text-primary-container tabular-nums mt-1"
-                >
-                  __K6_P95_DISPLAY__
-                </dd>
-              </div>
-              <div>
-                <dt
-                  class="text-xs font-label-caps text-on-surface-variant uppercase"
-                >
-                  Max
-                </dt>
-                <dd
-                  id="perfStatMax"
-                  class="font-mono text-lg font-bold text-amber-400 tabular-nums mt-1"
-                >
-                  __K6_MAX_DISPLAY__
-                </dd>
-              </div>
-            </dl>
-            <p class="text-xs text-outline font-mono mt-4">
-              Scenarios evaluated: __PASSED_PERFORMANCE_SCENARIOS__ /
-              __TOTAL_PERFORMANCE_SCENARIOS__ passed
-            </p>
-          </div>
-
-          <div
-            class="lg:col-span-7 bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter card-hover tab-anim-item"
-          >
-            <div class="flex flex-wrap items-center justify-between gap-2 mb-base">
-              <div>
-                <h3 class="font-display text-lg font-semibold text-on-surface tracking-wide uppercase">
-                  Response Time Percentiles
-                </h3>
-                <p id="perfChartSubtitle" class="text-xs text-on-surface-variant font-mono">
-                  Metric: http_req_duration (ms)
-                </p>
-              </div>
-              <div class="flex flex-wrap items-center gap-2 __K6_TREND_SELECTOR_VISIBLE__">
-                <input
-                  id="perfTrendSearch"
-                  type="search"
-                  placeholder="Filter trends..."
-                  aria-label="Filter k6 trend metrics"
-                  class="bg-surface-container border border-outline-variant rounded-lg px-2.5 py-1.5 text-xs font-mono text-on-surface placeholder:text-outline focus:outline-none focus:border-primary-container transition-colors w-36"
-                />
-                <label for="perfTrendSelector" class="text-xs font-label-caps uppercase text-on-surface-variant">
-                  Metric:
-                </label>
-                <select
-                  id="perfTrendSelector"
-                  aria-label="Select k6 trend metric to inspect"
-                  class="bg-surface-container border border-outline-variant rounded-lg px-3 py-1.5 text-xs font-mono text-on-surface focus:outline-none focus:border-primary-container transition-colors max-w-[240px]"
-                >
-                  __K6_TREND_SELECTOR_OPTIONS__
-                </select>
-              </div>
-            </div>
-            <div class="chart-wrap h-[240px]">
-              <canvas
-                id="perfChart"
-                aria-label="Bar chart of k6 latency percentiles: Avg, Min, Med, Max, P90, P95"
-                role="img"
-              ></canvas>
-            </div>
-          </div>
-        </div>
-
-        <!-- HTTP Timing Breakdown & Historical Trend Row -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-gutter mt-1">
-          <!-- HTTP Timing Phases Breakdown -->
-          <div
-            class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter card-hover tab-anim-item __K6_PHASES_SECTION_VISIBLE__"
-          >
-            <div class="flex flex-wrap items-center justify-between gap-2 mb-base">
-              <div>
-                <h3
-                  class="font-display text-lg font-semibold text-on-surface tracking-wide uppercase"
-                >
-                  HTTP Timing Breakdown (Avg vs P95)
-                </h3>
-                <p class="text-xs text-on-surface-variant font-mono">
-                  Network, TLS &amp; TTFB latency phases in milliseconds
-                </p>
-              </div>
-              <div
-                class="inline-flex items-center rounded-lg border border-outline-variant bg-surface-container p-0.5 text-xs font-mono"
-                role="group"
-                aria-label="HTTP timing chart scale"
-              >
-                <button
-                  id="perfPhasesScaleLinear"
-                  type="button"
-                  aria-pressed="true"
-                  class="px-2.5 py-1 rounded-md bg-primary-container/20 text-primary-container font-semibold transition-colors"
-                >
-                  Linear
-                </button>
-                <button
-                  id="perfPhasesScaleLog"
-                  type="button"
-                  aria-pressed="false"
-                  class="px-2.5 py-1 rounded-md text-on-surface-variant hover:text-on-surface transition-colors"
-                >
-                  Log
-                </button>
-              </div>
-            </div>
-            <div class="chart-wrap h-[250px]">
-              <canvas
-                id="perfPhasesChart"
-                aria-label="Horizontal bar chart of k6 HTTP request timing phases"
-                role="img"
-              ></canvas>
-            </div>
-          </div>
-
-          <!-- Performance Historical Trend (Last 20 Runs) -->
-          <div
-            class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter card-hover tab-anim-item flex-1"
-          >
-            <div class="mb-base">
-              <h3
-                class="font-display text-lg font-semibold text-on-surface tracking-wide uppercase"
-              >
-                Performance Historical Trend (Last 20 Runs)
-              </h3>
-              <p class="text-xs text-on-surface-variant font-mono">
-                P95 Latency (ms) &amp; Throughput (req/s) evolution across runs
-              </p>
-            </div>
-            <div
-              id="perfHistoryChartContainer"
-              class="chart-wrap relative h-[250px] w-full"
-            >
-              <canvas
-                id="perfHistoryChart"
-                aria-label="Line chart of historical k6 P95 latency and throughput"
-                role="img"
-              ></canvas>
-            </div>
-          </div>
-        </div>
-
         <!-- Ingestion Warnings Container (if any) -->
         __K6_WARNINGS_CONTAINER__
 
-        <!-- Thresholds Detail Table (with Observed Value & Why) -->
-        __K6_THRESHOLDS_TABLE__
+        <!-- ==================== CATEGORY 1: Latency & Endpoints ==================== -->
+        <section
+          class="flex flex-col gap-3 collapsible-section mt-2"
+          data-expanded="true"
+        >
+          <div
+            class="flex items-center justify-between border-b border-outline-variant pb-2"
+          >
+            <h2
+              class="font-display text-xl font-bold text-on-surface tracking-wider uppercase flex-1"
+            >
+              <button
+                type="button"
+                aria-expanded="true"
+                class="collapsible-header w-full text-left cursor-pointer select-none flex items-center justify-between hover:text-primary transition-colors py-1"
+              >
+                <span class="flex items-center gap-2">
+                  <span
+                    class="material-symbols-outlined text-secondary-container text-lg"
+                    aria-hidden="true"
+                    >speed</span
+                  >
+                  <span>Latency &amp; Endpoints</span>
+                </span>
+                <span
+                  class="material-symbols-outlined toggle-icon text-xl transition-transform"
+                  aria-hidden="true"
+                  >expand_more</span
+                >
+              </button>
+            </h2>
+          </div>
 
-        <!-- Checks Detail Table (with Passes/Fails & Why) -->
-        __K6_CHECKS_TABLE__
+          <div class="collapsible-content flex flex-col gap-gutter pt-1">
+            <!-- Latency Distribution Breakdown (Rule 4: avg, min, med, max, p90, p95) & Chart -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+              <div
+                class="lg:col-span-5 bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter flex flex-col justify-between card-hover tab-anim-item"
+              >
+                <div>
+                  <h3
+                    class="font-display text-lg font-semibold text-on-surface tracking-wide uppercase mb-1"
+                  >
+                    Latency Breakdown
+                  </h3>
+                  <p id="perfBreakdownSubtitle" class="text-xs text-on-surface-variant font-mono mb-4">
+                    http_req_duration (milliseconds)
+                  </p>
+                </div>
+                <dl
+                  class="grid grid-cols-2 sm:grid-cols-3 gap-y-4 gap-x-4 my-auto border-y border-outline-variant/40 py-4"
+                >
+                  <div>
+                    <dt
+                      class="text-xs font-label-caps text-on-surface-variant uppercase"
+                    >
+                      Min
+                    </dt>
+                    <dd
+                      id="perfStatMin"
+                      class="font-mono text-lg font-bold text-emerald-400 tabular-nums mt-1"
+                    >
+                      __K6_MIN_DISPLAY__
+                    </dd>
+                  </div>
+                  <div>
+                    <dt
+                      class="text-xs font-label-caps text-on-surface-variant uppercase"
+                    >
+                      Med (P50)
+                    </dt>
+                    <dd
+                      id="perfStatMed"
+                      class="font-mono text-lg font-bold text-teal-300 tabular-nums mt-1"
+                    >
+                      __K6_MED_DISPLAY__
+                    </dd>
+                  </div>
+                  <div>
+                    <dt
+                      class="text-xs font-label-caps text-on-surface-variant uppercase"
+                    >
+                      Average
+                    </dt>
+                    <dd
+                      id="perfStatAvg"
+                      class="font-mono text-lg font-bold text-on-surface tabular-nums mt-1"
+                    >
+                      __K6_AVG_DISPLAY__
+                    </dd>
+                  </div>
+                  <div>
+                    <dt
+                      class="text-xs font-label-caps text-on-surface-variant uppercase"
+                    >
+                      P90
+                    </dt>
+                    <dd
+                      id="perfStatP90"
+                      class="font-mono text-lg font-bold text-secondary-container tabular-nums mt-1"
+                    >
+                      __K6_P90_DISPLAY__
+                    </dd>
+                  </div>
+                  <div>
+                    <dt
+                      class="text-xs font-label-caps text-primary-container uppercase"
+                    >
+                      P95
+                    </dt>
+                    <dd
+                      id="perfStatP95"
+                      class="font-mono text-lg font-bold text-primary-container tabular-nums mt-1"
+                    >
+                      __K6_P95_DISPLAY__
+                    </dd>
+                  </div>
+                  <div>
+                    <dt
+                      class="text-xs font-label-caps text-on-surface-variant uppercase"
+                    >
+                      Max
+                    </dt>
+                    <dd
+                      id="perfStatMax"
+                      class="font-mono text-lg font-bold text-amber-400 tabular-nums mt-1"
+                    >
+                      __K6_MAX_DISPLAY__
+                    </dd>
+                  </div>
+                </dl>
+                <p class="text-xs text-outline font-mono mt-4">
+                  Scenarios evaluated: __PASSED_PERFORMANCE_SCENARIOS__ /
+                  __TOTAL_PERFORMANCE_SCENARIOS__ passed
+                </p>
+              </div>
 
-        <!-- Custom Metrics Table (Trend, Counter, Rate, Gauge) -->
-        __K6_CUSTOM_METRICS_TABLE__
+              <div
+                class="lg:col-span-7 bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter card-hover tab-anim-item"
+              >
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-base">
+                  <div>
+                    <h3 class="font-display text-lg font-semibold text-on-surface tracking-wide uppercase">
+                      Latency Percentiles
+                    </h3>
+                    <p id="perfChartSubtitle" class="text-xs text-on-surface-variant font-mono">
+                      Metric: http_req_duration (ms)
+                    </p>
+                  </div>
+                  <div class="flex flex-wrap items-center gap-2 __K6_TREND_SELECTOR_VISIBLE__">
+                    <input
+                      id="perfTrendSearch"
+                      type="search"
+                      placeholder="Filter trends..."
+                      aria-label="Filter k6 trend metrics"
+                      class="bg-surface-container border border-outline-variant rounded-lg px-2.5 py-1.5 text-xs font-mono text-on-surface placeholder:text-outline focus:outline-none focus:border-primary-container transition-colors w-36"
+                    />
+                    <label for="perfTrendSelector" class="text-xs font-label-caps uppercase text-on-surface-variant">
+                      Metric:
+                    </label>
+                    <select
+                      id="perfTrendSelector"
+                      aria-label="Select k6 trend metric to inspect"
+                      class="bg-surface-container border border-outline-variant rounded-lg px-3 py-1.5 text-xs font-mono text-on-surface focus:outline-none focus:border-primary-container transition-colors max-w-[240px]"
+                    >
+                      __K6_TREND_SELECTOR_OPTIONS__
+                    </select>
+                  </div>
+                </div>
+                <div class="chart-wrap h-[240px]">
+                  <canvas
+                    id="perfChart"
+                    aria-label="Bar chart of k6 latency percentiles: Avg, Min, Med, Max, P90, P95"
+                    role="img"
+                  ></canvas>
+                </div>
+              </div>
+            </div>
 
-        <!-- Scenarios Table (with Execution Details / Why) -->
-        __K6_SCENARIOS_TABLE__
+            <!-- HTTP Timing Phases Breakdown -->
+            <div
+              class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter card-hover tab-anim-item __K6_PHASES_SECTION_VISIBLE__"
+            >
+              <div class="flex flex-wrap items-center justify-between gap-2 mb-base">
+                <div>
+                  <h3
+                    class="font-display text-lg font-semibold text-on-surface tracking-wide uppercase"
+                  >
+                    HTTP Timing Phases
+                  </h3>
+                  <p class="text-xs text-on-surface-variant font-mono">
+                    Network, TLS &amp; TTFB latency phases in milliseconds
+                  </p>
+                </div>
+                <div
+                  class="inline-flex items-center rounded-lg border border-outline-variant bg-surface-container p-0.5 text-xs font-mono"
+                  role="group"
+                  aria-label="HTTP timing chart scale"
+                >
+                  <button
+                    id="perfPhasesScaleLinear"
+                    type="button"
+                    aria-pressed="true"
+                    class="px-2.5 py-1 rounded-md bg-primary-container/20 text-primary-container font-semibold transition-colors"
+                  >
+                    Linear
+                  </button>
+                  <button
+                    id="perfPhasesScaleLog"
+                    type="button"
+                    aria-pressed="false"
+                    class="px-2.5 py-1 rounded-md text-on-surface-variant hover:text-on-surface transition-colors"
+                  >
+                    Log
+                  </button>
+                </div>
+              </div>
+              <div class="chart-wrap h-[250px]">
+                <canvas
+                  id="perfPhasesChart"
+                  aria-label="Horizontal bar chart of k6 HTTP request timing phases"
+                  role="img"
+                ></canvas>
+              </div>
+            </div>
+
+            <!-- Endpoint Summary Table -->
+            __K6_ENDPOINTS_TABLE__
+          </div>
+        </section>
+
+        <!-- ==================== CATEGORY 2: Reliability, SLA & Trends ==================== -->
+        <section
+          class="flex flex-col gap-3 collapsible-section mt-2"
+          data-expanded="true"
+        >
+          <div
+            class="flex items-center justify-between border-b border-outline-variant pb-2"
+          >
+            <h2
+              class="font-display text-xl font-bold text-on-surface tracking-wider uppercase flex-1"
+            >
+              <button
+                type="button"
+                aria-expanded="true"
+                class="collapsible-header w-full text-left cursor-pointer select-none flex items-center justify-between hover:text-primary transition-colors py-1"
+              >
+                <span class="flex items-center gap-2">
+                  <span
+                    class="material-symbols-outlined text-secondary-container text-lg"
+                    aria-hidden="true"
+                    >verified_user</span
+                  >
+                  <span>Reliability, SLA &amp; Trends</span>
+                </span>
+                <span
+                  class="material-symbols-outlined toggle-icon text-xl transition-transform"
+                  aria-hidden="true"
+                  >expand_more</span
+                >
+              </button>
+            </h2>
+          </div>
+
+          <div class="collapsible-content flex flex-col gap-gutter pt-1">
+            <!-- Performance Historical Trend (Last 20 Runs) -->
+            <div
+              class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter card-hover tab-anim-item"
+            >
+              <div class="mb-base">
+                <h3
+                  class="font-display text-lg font-semibold text-on-surface tracking-wide uppercase"
+                >
+                  Performance Trends
+                </h3>
+                <p class="text-xs text-on-surface-variant font-mono">
+                  P95 Latency (ms) &amp; Throughput (req/s) evolution across runs
+                </p>
+              </div>
+              <div
+                id="perfHistoryChartContainer"
+                class="chart-wrap relative h-[250px] w-full"
+              >
+                <canvas
+                  id="perfHistoryChart"
+                  aria-label="Line chart of historical k6 P95 latency and throughput"
+                  role="img"
+                ></canvas>
+              </div>
+            </div>
+
+            <!-- Thresholds Detail Table (with Observed Value & Why) -->
+            __K6_THRESHOLDS_TABLE__
+
+            <!-- Checks Detail Table (with Passes/Fails & Why) -->
+            __K6_CHECKS_TABLE__
+          </div>
+        </section>
+
+        <!-- ==================== CATEGORY 3: Execution & Custom Metrics ==================== -->
+        <section
+          class="flex flex-col gap-3 collapsible-section mt-2"
+          data-expanded="true"
+        >
+          <div
+            class="flex items-center justify-between border-b border-outline-variant pb-2"
+          >
+            <h2
+              class="font-display text-xl font-bold text-on-surface tracking-wider uppercase flex-1"
+            >
+              <button
+                type="button"
+                aria-expanded="true"
+                class="collapsible-header w-full text-left cursor-pointer select-none flex items-center justify-between hover:text-primary transition-colors py-1"
+              >
+                <span class="flex items-center gap-2">
+                  <span
+                    class="material-symbols-outlined text-secondary-container text-lg"
+                    aria-hidden="true"
+                    >tune</span
+                  >
+                  <span>Execution &amp; Custom Metrics</span>
+                </span>
+                <span
+                  class="material-symbols-outlined toggle-icon text-xl transition-transform"
+                  aria-hidden="true"
+                  >expand_more</span
+                >
+              </button>
+            </h2>
+          </div>
+
+          <div class="collapsible-content flex flex-col gap-gutter pt-1">
+            <!-- Scenarios Table (with Execution Details / Why) -->
+            __K6_SCENARIOS_TABLE__
+
+            <!-- Custom Metrics Table (Trend, Counter, Rate, Gauge) -->
+            __K6_CUSTOM_METRICS_TABLE__
+          </div>
+        </section>
       </div>
 
       <!-- Error Detail Modal -->

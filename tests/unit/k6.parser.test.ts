@@ -384,4 +384,143 @@ describe('k6 Parser (v1 Scope: 3 Metrics + Thresholds + Warnings)', () => {
     expect(failedReport.scenarios['default'].vus).toBe(30);
     expect(failedReport.scenarios['default'].iterations).toBe(150);
   });
+
+  test('Extrae duración total desde state.testRunDurationMs o deriva desde http_reqs (sin usar http_req_duration.avg)', () => {
+    const withStateDuration = parseK6({
+      state: { testRunDurationMs: 45200 },
+      metrics: {
+        http_req_duration: { values: { avg: 150, 'p(95)': 300 } },
+        http_reqs: { values: { count: 1000, rate: 50 } },
+      },
+    });
+    expect(withStateDuration.stats.duration).toBe(45200);
+
+    const derivedFromReqs = parseK6({
+      metrics: {
+        http_req_duration: { values: { avg: 150, 'p(95)': 300 } },
+        http_reqs: { values: { count: 500, rate: 25 } },
+      },
+    });
+    expect(derivedFromReqs.stats.duration).toBe(20000);
+  });
+
+  test('Extrae endpoints desde http_req_duration{endpoint:...}, separa method/path, ordena por P95 descendente y evalúa thresholds por endpoint', () => {
+    const rawJson = {
+      metrics: {
+        http_req_duration: {
+          values: { avg: 150, 'p(95)': 400 },
+        },
+        'http_req_duration{expected_response:true}': {
+          values: { avg: 140, 'p(95)': 380 },
+        },
+        'http_req_duration{endpoint:POST /signin}': {
+          values: { min: 48.5, med: 112.0, avg: 124.8, 'p(90)': 182.0, 'p(95)': 218.5, max: 420.3 },
+          thresholds: { 'p(95)<300': { ok: true } },
+        },
+        'http_req_duration{endpoint:GET /api/shipments/get-all?page=1}': {
+          values: { min: 92.4, 'p(50)': 248.0, avg: 284.6, 'p(90)': 465.2, 'p(95)': 612.8, max: 980.2 },
+          thresholds: { 'p(95)<500': { ok: false } },
+        },
+        'http_req_duration{name:DELETE /api/users/42}': {
+          values: { min: 30, med: 50, avg: 60, p90: 90, p95: 110, max: 150 },
+        },
+        'http_req_duration{url:https://grimoir.dev/health}': {
+          values: { min: 10, med: 15, avg: 18 },
+        },
+      },
+    };
+
+    const report = parseK6(rawJson);
+    expect(report.endpoints).toHaveLength(4);
+
+    // Slowest P95 first
+    expect(report.endpoints[0]).toEqual({
+      endpoint: 'GET /api/shipments/get-all?page=1',
+      method: 'GET',
+      path: '/api/shipments/get-all?page=1',
+      values: {
+        min: 92.4,
+        med: 248,
+        avg: 284.6,
+        p90: 465.2,
+        p95: 612.8,
+        max: 980.2,
+      },
+      status: 'failed',
+      thresholdSummary: 'p(95)<500',
+    });
+
+    expect(report.endpoints[1]).toEqual({
+      endpoint: 'POST /signin',
+      method: 'POST',
+      path: '/signin',
+      values: {
+        min: 48.5,
+        med: 112,
+        avg: 124.8,
+        p90: 182,
+        p95: 218.5,
+        max: 420.3,
+      },
+      status: 'passed',
+      thresholdSummary: 'p(95)<300',
+    });
+
+    expect(report.endpoints[2]).toEqual({
+      endpoint: 'DELETE /api/users/42',
+      method: 'DELETE',
+      path: '/api/users/42',
+      values: {
+        min: 30,
+        med: 50,
+        avg: 60,
+        p90: 90,
+        p95: 110,
+        max: 150,
+      },
+      status: 'none',
+      thresholdSummary: null,
+    });
+
+    // Null P95 sorted last, no HTTP method prefix
+    expect(report.endpoints[3]).toEqual({
+      endpoint: 'https://grimoir.dev/health',
+      method: null,
+      path: 'https://grimoir.dev/health',
+      values: {
+        min: 10,
+        med: 15,
+        avg: 18,
+        p90: null,
+        p95: null,
+        max: null,
+      },
+      status: 'none',
+      thresholdSummary: null,
+    });
+  });
+
+  test('Edge cases: preserva {uuid} en rutas de endpoints, clampea duración negativa, evita div/0 y evalúa thresholds mixtos', () => {
+    const report = parseK6({
+      state: { testRunDurationMs: -250 },
+      metrics: {
+        http_reqs: { values: { count: 100, rate: 0 } },
+        'http_req_duration{endpoint:GET /api/shipments/track-and-trace/{uuid}/report}': {
+          type: 'trend',
+          contains: 'time',
+          values: { min: 100, med: 200, avg: 220, 'p(90)': 300, 'p(95)': 350, max: 500 },
+          thresholds: {
+            'p(95)<500': { ok: true },
+            'max<400': { ok: false },
+          },
+        },
+      },
+    });
+
+    expect(report.stats.duration).toBe(0);
+    expect(report.endpoints).toHaveLength(1);
+    expect(report.endpoints[0].path).toBe('/api/shipments/track-and-trace/{uuid}/report');
+    expect(report.endpoints[0].status).toBe('failed');
+    expect(report.endpoints[0].thresholdSummary).toBe('p(95)<500, max<400');
+  });
 });

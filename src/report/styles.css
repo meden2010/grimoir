@@ -616,6 +616,12 @@
       }
       .collapsible-content.animating {
         overflow: hidden;
+        will-change: height, opacity, transform;
+      }
+      .collapsible-header .toggle-icon {
+        transition:
+          transform 0.38s cubic-bezier(0.22, 1, 0.36, 1),
+          color 0.3s ease;
       }
 
       .tab-panel {
