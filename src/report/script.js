@@ -571,6 +571,7 @@
                 callbacks: {
                   label: (context) => {
                     const s = Number(context.raw);
+                    if (!Number.isFinite(s)) return "";
                     return ` ${context.label}: ${formatChartSeconds(s)} (${Math.round(s * 1000).toLocaleString()} ms)`;
                   },
                 },

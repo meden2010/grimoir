@@ -495,9 +495,9 @@ export function parseK6(rawJson: Record<string, unknown>): K6Report {
     }
     const innerTags = metricKey.slice('http_req_duration{'.length, -1);
     const tagMatch =
-      innerTags.match(/(?:^|,)\s*endpoint:([^,}]+)/) ??
-      innerTags.match(/(?:^|,)\s*name:([^,}]+)/) ??
-      innerTags.match(/(?:^|,)\s*url:([^,}]+)/);
+      innerTags.match(/(?:^|,)\s*endpoint:([^,]+)/) ??
+      innerTags.match(/(?:^|,)\s*name:([^,]+)/) ??
+      innerTags.match(/(?:^|,)\s*url:([^,]+)/);
     if (!tagMatch) {
       continue;
     }
@@ -711,10 +711,12 @@ export function parseK6(rawJson: Record<string, unknown>): K6Report {
     totalRequests > 0 && throughputRps !== null && throughputRps > 0
       ? Math.round((totalRequests / throughputRps) * 1000)
       : 0;
-  const rawDuration =
+  const rawDuration = Math.max(
+    0,
     toValidNumber(rawJson['duration']) ??
-    stateDurationMs ??
-    derivedDurationMs;
+      stateDurationMs ??
+      derivedDurationMs,
+  );
 
   const iterationsValues = extractValues(metricsObj['iterations']);
   const iterationsCount = toValidNumber(iterationsValues?.['count']) ?? 0;

@@ -499,4 +499,28 @@ describe('k6 Parser (v1 Scope: 3 Metrics + Thresholds + Warnings)', () => {
       thresholdSummary: null,
     });
   });
+
+  test('Edge cases: preserva {uuid} en rutas de endpoints, clampea duración negativa, evita div/0 y evalúa thresholds mixtos', () => {
+    const report = parseK6({
+      state: { testRunDurationMs: -250 },
+      metrics: {
+        http_reqs: { values: { count: 100, rate: 0 } },
+        'http_req_duration{endpoint:GET /api/shipments/track-and-trace/{uuid}/report}': {
+          type: 'trend',
+          contains: 'time',
+          values: { min: 100, med: 200, avg: 220, 'p(90)': 300, 'p(95)': 350, max: 500 },
+          thresholds: {
+            'p(95)<500': { ok: true },
+            'max<400': { ok: false },
+          },
+        },
+      },
+    });
+
+    expect(report.stats.duration).toBe(0);
+    expect(report.endpoints).toHaveLength(1);
+    expect(report.endpoints[0].path).toBe('/api/shipments/track-and-trace/{uuid}/report');
+    expect(report.endpoints[0].status).toBe('failed');
+    expect(report.endpoints[0].thresholdSummary).toBe('p(95)<500, max<400');
+  });
 });

@@ -902,7 +902,7 @@ export const generateHTML = (playwright: PlaywrightReport, k6: K6Report | null, 
       let typeBadge = '';
       switch (cm.type) {
         case 'trend':
-          typeBadge = `<span class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-primary/15 text-primary border border-primary/30 uppercase">TREND</span>`;
+          typeBadge = `<span class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-primary/15 text-primary-container border border-primary/30 uppercase">TREND</span>`;
           break;
         case 'rate':
           typeBadge = `<span class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-emerald-950/40 text-emerald-400 border border-emerald-500/30 uppercase">RATE</span>`;
@@ -939,7 +939,7 @@ export const generateHTML = (playwright: PlaywrightReport, k6: K6Report | null, 
         <tr class="border-b border-outline-variant/30 hover:bg-surface-container/30 transition-colors perf-metric-row">
           <td class="p-gutter font-mono text-xs text-on-surface font-semibold">${escapeHtml(cm.name)}</td>
           <td class="p-gutter">${typeBadge}</td>
-          <td class="p-gutter font-mono text-xs text-primary font-bold">${escapeHtml(primaryValue)}</td>
+          <td class="p-gutter font-mono text-xs text-primary-container font-bold">${escapeHtml(primaryValue)}</td>
           <td class="p-gutter font-mono text-xs text-on-surface-variant">${escapeHtml(breakdown)}</td>
         </tr>`;
     }).join('');

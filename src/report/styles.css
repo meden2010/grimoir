@@ -613,10 +613,10 @@
 
       .collapsible-content {
         overflow: visible;
-        will-change: height, opacity, transform;
       }
       .collapsible-content.animating {
         overflow: hidden;
+        will-change: height, opacity, transform;
       }
       .collapsible-header .toggle-icon {
         transition:
